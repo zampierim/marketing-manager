@@ -2848,6 +2848,17 @@ function createPostCard(post) {
   const dot = card.querySelector(".status-dot");
   dot.addEventListener("click", (e) => {
     e.stopPropagation();
+    if (sessionStorage.getItem("saam_unlocked") !== "true") {
+      requirePassword(() => {
+        let idx = statusCycle.indexOf(post.status);
+        let nextStatus = statusCycle[(idx + 1) % statusCycle.length];
+        post.status = nextStatus;
+        savePostsToStorage();
+        renderCalendar();
+        renderList();
+      });
+      return;
+    }
     let idx = statusCycle.indexOf(post.status);
     let nextStatus = statusCycle[(idx + 1) % statusCycle.length];
     post.status = nextStatus;
@@ -2993,6 +3004,10 @@ nextMonthBtn.addEventListener("click", () => {
 
 /* Modal Logic */
 function openModal(post = null, prefilledDate = "", prefilledIdeaId = "") {
+  if (sessionStorage.getItem("saam_unlocked") !== "true") {
+    requirePassword(() => openModal(post, prefilledDate, prefilledIdeaId));
+    return;
+  }
   form.reset();
   
   populateTopicSelect();
