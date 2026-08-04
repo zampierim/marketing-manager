@@ -2628,15 +2628,23 @@ async function loadPostsFromCloud() {
     
     if (docSnap.exists) {
       posts = docSnap.data().posts || [];
-      // AUTO-MIGRATION: Recover user's previous local posts if they exist and are richer than Firebase's empty init
+      // AUTO-MIGRATION: Recover user's previous custom local posts
       const saved = localStorage.getItem('saam_marketing_posts_v14');
       if (saved) {
         try {
           const localPosts = JSON.parse(saved);
-          if (localPosts.length > posts.length) {
-            posts = localPosts;
+          // Posts criados pelo usuário têm IDs gigantes gerados pelo Date.now()
+          const customLocalPosts = localPosts.filter(p => p.id > 1000000);
+          let changed = false;
+          customLocalPosts.forEach(cp => {
+            if (!posts.find(p => p.id === cp.id)) {
+              posts.push(cp);
+              changed = true;
+            }
+          });
+          if (changed) {
             await docRef.set({ posts: posts });
-            console.log("Migrated local posts to Firebase!");
+            console.log("Migrated custom local posts to Firebase!");
           }
         } catch(e) {}
       }
