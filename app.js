@@ -2628,6 +2628,18 @@ async function loadPostsFromCloud() {
     
     if (docSnap.exists) {
       posts = docSnap.data().posts || [];
+      // AUTO-MIGRATION: Recover user's previous local posts if they exist and are richer than Firebase's empty init
+      const saved = localStorage.getItem('saam_marketing_posts_v14');
+      if (saved) {
+        try {
+          const localPosts = JSON.parse(saved);
+          if (localPosts.length > posts.length) {
+            posts = localPosts;
+            await docRef.set({ posts: posts });
+            console.log("Migrated local posts to Firebase!");
+          }
+        } catch(e) {}
+      }
     } else {
       posts = [...defaultPosts];
       specialDates.forEach(sd => posts.push(sd));
