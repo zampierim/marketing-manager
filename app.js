@@ -3177,12 +3177,9 @@ function populateTopicSelect() {
   if(!select) return;
   
   let html = '<option value="">-- Selecione um tópico --</option>';
-  if (window.ideasData) {
-    const uniqueSeries = [...new Set(window.ideasData.map(i => i.series))].sort();
-    uniqueSeries.forEach(series => {
-      const audience = window.ideasData.find(i => i.series === series);
-      const badge = audience && audience.audience === 'Interno' ? ' (Interno)' : ' (Externo)';
-      html += `<option value="${series}">${series}${badge}</option>`;
+  if (typeof routines !== 'undefined') {
+    routines.forEach(r => {
+      html += `<option value="${r.area}">${r.area}</option>`;
     });
   }
   select.innerHTML = html;
@@ -3196,9 +3193,12 @@ if (postTopicEl) {
     if (!topic) return;
     const briefingEl = document.getElementById('post-briefing');
     if (briefingEl && !briefingEl.value.trim()) {
-      const idea = window.ideasData ? window.ideasData.find(i => i.series === topic) : null;
-      if (idea) {
-        briefingEl.value = generateMiniBriefing(idea.title);
+      if (typeof routines !== 'undefined') {
+        const area = routines.find(r => r.area === topic);
+        if (area && area.items && area.items.length > 0) {
+          const firstRoutine = area.items[0];
+          briefingEl.value = `Referência: ${firstRoutine.name}\n\nO que destacar:\n- ${firstRoutine.otimiza}`;
+        }
       }
     }
   });
