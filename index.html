@@ -2678,9 +2678,13 @@
         <label>Destino <span style="font-weight: 400; font-size: 11px; color: #94A3B8;">(selecione 1 ou mais — clique duplo = principal ⭐)</span></label>
         <input type="hidden" id="post-primary-destiny" value="">
         <div class="chip-group" id="destiny-group">
-          <label class="chip destiny-chip" data-destiny="instagram" title="Clique para marcar, duplo-clique para definir como principal">
-            <input type="checkbox" name="post_destiny" value="instagram">
-            <span>Instagram</span>
+          <label class="chip destiny-chip" data-destiny="insta-feed" title="Clique para marcar, duplo-clique para definir como principal">
+            <input type="checkbox" name="post_destiny" value="insta-feed">
+            <span>Insta Feed</span>
+          </label>
+          <label class="chip destiny-chip" data-destiny="insta-story" title="Clique para marcar, duplo-clique para definir como principal">
+            <input type="checkbox" name="post_destiny" value="insta-story">
+            <span>Insta Story</span>
           </label>
           <label class="chip destiny-chip" data-destiny="linkedin" title="Clique para marcar, duplo-clique para definir como principal">
             <input type="checkbox" name="post_destiny" value="linkedin">
@@ -2688,15 +2692,11 @@
           </label>
           <label class="chip destiny-chip" data-destiny="interno" title="Clique para marcar, duplo-clique para definir como principal">
             <input type="checkbox" name="post_destiny" value="interno">
-            <span>Interno</span>
+            <span>Interno / Cliente</span>
           </label>
           <label class="chip destiny-chip" data-destiny="blog" title="Clique para marcar, duplo-clique para definir como principal">
             <input type="checkbox" name="post_destiny" value="blog">
             <span>Blog</span>
-          </label>
-          <label class="chip destiny-chip" data-destiny="cliente" title="Clique para marcar, duplo-clique para definir como principal">
-            <input type="checkbox" name="post_destiny" value="cliente">
-            <span>Cliente</span>
           </label>
         </div>
       </div>
@@ -2764,7 +2764,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
-<script src="app.js?v=17"></script>
+<script src="app.js?v=18"></script>
 <div id="toast-container" class="toast-container"></div>
 
 

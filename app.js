@@ -2836,11 +2836,13 @@ function createPostCard(post) {
   const primaryDest = post.primaryDestiny || destinyArr[0] || destinyLabel || '';
 
   const destinyColors = {
-    'instagram': { bg: 'linear-gradient(135deg,#F56040,#C13584)', label: 'INSTAGRAM' },
+    'insta-feed': { bg: 'linear-gradient(135deg,#F56040,#C13584)', label: 'INSTA FEED' },
+    'insta-story': { bg: 'linear-gradient(135deg,#C13584,#833AB4)', label: 'INSTA STORY' },
+    'instagram': { bg: 'linear-gradient(135deg,#F56040,#C13584)', label: 'INSTA FEED' },
     'linkedin': { bg: '#0A66C2', label: 'LINKEDIN' },
-    'interno': { bg: '#26428B', label: 'INTERNO' },
+    'interno': { bg: '#26428B', label: 'INTERNO / CLIENTE' },
     'blog': { bg: '#F59E0B', label: 'BLOG' },
-    'cliente': { bg: '#10B981', label: 'CLIENTE' },
+    'cliente': { bg: '#26428B', label: 'INTERNO / CLIENTE' },
   };
 
   if (destinyArr.length > 0) {
