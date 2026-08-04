@@ -2613,7 +2613,7 @@ const specialTitles = [
 ];
 
 // Remove legacy corrupted special dates (by title or old IDs)
-posts = posts.filter(p => !specialTitles.includes(p.title) && p.id < 99000 && p.id !== 9001);
+posts = posts.filter(p => !specialTitles.includes(p.title) && !(p.id >= 99000 && p.id <= 99050) && p.id !== 9001);
 
 // Remove commemorative flag from regular posts (to stop them from becoming red)
 posts.forEach(p => { p.commemorative = false; });
