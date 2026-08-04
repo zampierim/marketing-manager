@@ -2898,16 +2898,16 @@ function renderList() {
     const day = d.getDate();
     
     if(m === 7 && y === 2026) { // AGOSTO
-      if(day >= 1 && day <= 9) return "Semana 1: O MUNDO MUDOU";
-      if(day >= 10 && day <= 16) return "Semana 2: O PROBLEMA";
-      if(day >= 17 && day <= 23) return "Semana 3: EXISTE UM NOVO JEITO";
-      if(day >= 24 && day <= 31) return "Semana 4: COMO A SAAM PENSA";
+      if(day >= 1 && day <= 9) return "Semana 1";
+      if(day >= 10 && day <= 16) return "Semana 2";
+      if(day >= 17 && day <= 23) return "Semana 3";
+      if(day >= 24 && day <= 31) return "Semana 4";
     }
     if(m === 8 && y === 2026) { // SETEMBRO
-      if(day >= 1 && day <= 6) return "Semana 1: DIAGNÓSTICO";
-      if(day >= 7 && day <= 13) return "Semana 2: PROCESSOS";
-      if(day >= 14 && day <= 20) return "Semana 3: PERFORMANCE";
-      if(day >= 21 && day <= 30) return "Semana 4: LIDERANÇA";
+      if(day >= 1 && day <= 6) return "Semana 1";
+      if(day >= 7 && day <= 13) return "Semana 2";
+      if(day >= 14 && day <= 20) return "Semana 3";
+      if(day >= 21 && day <= 30) return "Semana 4";
     }
     return "Outros";
   }
