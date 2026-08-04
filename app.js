@@ -36,26 +36,69 @@ btnTabCalendario.addEventListener("click", () => {
   renderList();
 });
 
+let pendingPasswordCallback = null;
+
 function requirePassword(callback) {
   if (sessionStorage.getItem("saam_unlocked") === "true") {
     callback();
     return;
   }
-  const pass = prompt("🔒 Área restrita.\nDigite a senha de acesso:");
-  if (pass === "marketing@saam") {
-    sessionStorage.setItem("saam_unlocked", "true");
-    if (typeof showToast === 'function') {
-      showToast('Acesso liberado!', 'success');
-    }
-    callback();
-  } else if (pass !== null) {
-    if (typeof showToast === 'function') {
-      showToast('Senha incorreta.', 'error');
-    } else {
-      alert("Senha incorreta.");
-    }
-  }
+  pendingPasswordCallback = callback;
+  const modal = document.getElementById("password-modal");
+  const input = document.getElementById("password-input");
+  input.value = "";
+  modal.style.display = "flex";
+  setTimeout(() => input.focus(), 50);
 }
+
+// Setup password modal listeners
+setTimeout(() => {
+  const pModal = document.getElementById("password-modal");
+  const pBtnCancel = document.getElementById("password-cancel");
+  const pBtnSubmit = document.getElementById("password-submit");
+  const pInput = document.getElementById("password-input");
+
+  if (pModal) {
+    function submitPassword() {
+      const pass = pInput.value;
+      if (pass === "marketing@saam") {
+        sessionStorage.setItem("saam_unlocked", "true");
+        if (typeof showToast === 'function') {
+          showToast('Acesso liberado!', 'success');
+        }
+        pModal.style.display = "none";
+        if (pendingPasswordCallback) {
+          pendingPasswordCallback();
+          pendingPasswordCallback = null;
+        }
+      } else {
+        if (typeof showToast === 'function') {
+          showToast('Senha incorreta.', 'error');
+        } else {
+          alert("Senha incorreta.");
+        }
+        pInput.value = "";
+        pInput.focus();
+      }
+    }
+
+    pBtnCancel.addEventListener("click", () => {
+      pModal.style.display = "none";
+      pendingPasswordCallback = null;
+    });
+
+    pBtnSubmit.addEventListener("click", submitPassword);
+
+    pInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        submitPassword();
+      } else if (e.key === "Escape") {
+        pModal.style.display = "none";
+        pendingPasswordCallback = null;
+      }
+    });
+  }
+}, 100);
 
 btnTabIdeias.addEventListener("click", () => {
   requirePassword(() => {
