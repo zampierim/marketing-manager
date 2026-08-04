@@ -2589,17 +2589,21 @@ const specialDates = [
   {"id": 99016, "date": "2026-08-31", "tag": "Data Comemorativa", "title": "Dia do Blog", "destiny": "interno", "destinies": ["interno", "blog"], "primaryDestiny": "interno", "status": "aprovado", "author": "Marketing", "format": "Lembrete", "commemorative": true}
 ];
 
+// Initialize Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyDgnrSTxs_wdffNrJobhv6gw4yDUh4j7Mw",
+  authDomain: "marketingmanager-d718d.firebaseapp.com",
+  projectId: "marketingmanager-d718d",
+  storageBucket: "marketingmanager-d718d.firebasestorage.app",
+  messagingSenderId: "728211183091",
+  appId: "1:728211183091:web:64aac4baae91ee64cb6e86",
+  measurementId: "G-7HZ11LSRZC"
+};
+const app = firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
 let posts = [];
-try {
-  const saved = localStorage.getItem('saam_marketing_posts_v14');
-  if (saved) {
-    posts = JSON.parse(saved);
-  } else {
-    posts = [...defaultPosts];
-  }
-} catch(e) {
-  posts = [...defaultPosts];
-}
+let isLoadingCloud = true;
 
 // FORCED RESET: Ensure exact special dates and purge duplicates
 const specialTitles = [
@@ -2612,30 +2616,57 @@ const specialTitles = [
   "Natal", "Ano Novo", "Dia do Blog"
 ];
 
-// Remove legacy corrupted special dates (by title or old IDs)
-posts = posts.filter(p => !specialTitles.includes(p.title) && !(p.id >= 99000 && p.id <= 99050) && p.id !== 9001);
+async function loadPostsFromCloud() {
+  try {
+    const calendarDaysEl = document.getElementById("calendar-days");
+    const postListEl = document.getElementById("post-list");
+    if(calendarDaysEl) calendarDaysEl.innerHTML = "<div style='width: 100%; text-align: center; padding: 40px; color: #64748B;'>Buscando calendário na nuvem... ☁️</div>";
+    if(postListEl) postListEl.innerHTML = "<div style='width: 100%; text-align: center; padding: 40px; color: #64748B;'>Buscando calendário na nuvem... ☁️</div>";
+    
+    const docRef = db.collection("marketing").doc("calendar");
+    const docSnap = await docRef.get();
+    
+    if (docSnap.exists) {
+      posts = docSnap.data().posts || [];
+    } else {
+      posts = [...defaultPosts];
+      specialDates.forEach(sd => posts.push(sd));
+      await docRef.set({ posts: posts });
+    }
+  } catch(e) {
+    console.error("Firebase load error", e);
+    const saved = localStorage.getItem('saam_marketing_posts_v14');
+    if (saved) posts = JSON.parse(saved);
+    else posts = [...defaultPosts];
+  }
 
-// Remove commemorative flag from regular posts (to stop them from becoming red)
-posts.forEach(p => { p.commemorative = false; });
+  posts = posts.filter(p => !specialTitles.includes(p.title) && !(p.id >= 99000 && p.id <= 99050) && p.id !== 9001);
+  posts.forEach(p => { p.commemorative = false; });
+  specialDates.forEach(sd => {
+    if (!posts.find(p => p.title === sd.title && p.date === sd.date)) {
+      posts.push(sd);
+    }
+  });
 
-// Inject fresh specialDates unconditionally
-specialDates.forEach(sd => {
-  posts.push(sd);
-});
+  isLoadingCloud = false;
+  renderCalendar();
+  renderList();
+}
 
-// Immediately save the cleaned DB
-localStorage.setItem('saam_marketing_posts_v14', JSON.stringify(posts));
-
-function savePostsToStorage() {
+async function savePostsToStorage() {
   try {
     localStorage.setItem('saam_marketing_posts_v14', JSON.stringify(posts));
-    return true;
-  } catch(e) {
-    console.error('Erro ao salvar posts no localStorage:', e);
+    
     if (typeof showToast === 'function') {
-      showToast('⚠️ Erro ao salvar: armazenamento cheio. Tente remover imagens grandes.', 'error');
+      showToast('Salvando na nuvem...', 'success');
     }
-    return false;
+    
+    await db.collection("marketing").doc("calendar").set({ posts: posts });
+  } catch(e) {
+    console.error('Erro ao salvar na nuvem:', e);
+    if (typeof showToast === 'function') {
+      showToast('⚠️ Erro ao salvar na nuvem. Verifique a conexão.', 'error');
+    }
   }
 }
 
@@ -4016,8 +4047,7 @@ document.querySelectorAll(".ias-slider").forEach(slider => {
 });
 
 // Inicializa a primeira página e renderiza
-renderCalendar();
-renderList();
+loadPostsFromCloud();
 // renderIdeasList removida daqui
 showPage(pageHome);
 
