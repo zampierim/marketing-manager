@@ -2616,61 +2616,77 @@ const specialTitles = [
   "Natal", "Ano Novo", "Dia do Blog"
 ];
 
-async function loadPostsFromCloud() {
-  try {
-    const calendarDaysEl = document.getElementById("calendar-days");
-    const postListEl = document.getElementById("post-list");
-    if(calendarDaysEl) calendarDaysEl.innerHTML = "<div style='width: 100%; text-align: center; padding: 40px; color: #64748B;'>Buscando calendário na nuvem... ☁️</div>";
-    if(postListEl) postListEl.innerHTML = "<div style='width: 100%; text-align: center; padding: 40px; color: #64748B;'>Buscando calendário na nuvem... ☁️</div>";
-    
-    const docRef = db.collection("marketing").doc("calendar");
-    const docSnap = await docRef.get();
-    
+// 1. FAST LOCAL LOAD (Optimistic UI)
+try {
+  const saved = localStorage.getItem('saam_marketing_posts_v14');
+  if (saved) {
+    posts = JSON.parse(saved);
+  } else {
+    posts = [...defaultPosts];
+  }
+} catch(e) {
+  posts = [...defaultPosts];
+}
+
+// Clean local posts
+posts = posts.filter(p => !specialTitles.includes(p.title) && !(p.id >= 99000 && p.id <= 99050) && p.id !== 9001);
+posts.forEach(p => { p.commemorative = false; });
+specialDates.forEach(sd => {
+  if (!posts.find(p => p.title === sd.title && p.date === sd.date)) {
+    posts.push(sd);
+  }
+});
+
+// 2. REAL-TIME CLOUD SYNC
+function initCloudSync() {
+  const docRef = db.collection("marketing").doc("calendar");
+  
+  docRef.onSnapshot(async (docSnap) => {
     if (docSnap.exists) {
-      posts = docSnap.data().posts || [];
-      // AUTO-MIGRATION: Recover user's previous custom local posts
+      const cloudPosts = docSnap.data().posts || [];
+      
+      // MIGRATION: Recover custom local posts
+      let changed = false;
       const saved = localStorage.getItem('saam_marketing_posts_v14');
       if (saved) {
         try {
           const localPosts = JSON.parse(saved);
-          // Posts criados pelo usuário têm IDs gigantes gerados pelo Date.now()
           const customLocalPosts = localPosts.filter(p => p.id > 1000000);
-          let changed = false;
           customLocalPosts.forEach(cp => {
-            if (!posts.find(p => p.id === cp.id)) {
-              posts.push(cp);
+            if (!cloudPosts.find(p => p.id === cp.id)) {
+              cloudPosts.push(cp);
               changed = true;
             }
           });
-          if (changed) {
-            await docRef.set({ posts: posts });
-            console.log("Migrated custom local posts to Firebase!");
-          }
         } catch(e) {}
       }
+      
+      posts = cloudPosts;
+      
+      posts = posts.filter(p => !specialTitles.includes(p.title) && !(p.id >= 99000 && p.id <= 99050) && p.id !== 9001);
+      posts.forEach(p => { p.commemorative = false; });
+      specialDates.forEach(sd => {
+        if (!posts.find(p => p.title === sd.title && p.date === sd.date)) {
+          posts.push(sd);
+        }
+      });
+      
+      localStorage.setItem('saam_marketing_posts_v14', JSON.stringify(posts));
+      
+      if (changed) {
+        await docRef.set({ posts: posts });
+      }
+      
+      renderCalendar();
+      renderList();
     } else {
       posts = [...defaultPosts];
       specialDates.forEach(sd => posts.push(sd));
       await docRef.set({ posts: posts });
     }
-  } catch(e) {
-    console.error("Firebase load error", e);
-    const saved = localStorage.getItem('saam_marketing_posts_v14');
-    if (saved) posts = JSON.parse(saved);
-    else posts = [...defaultPosts];
-  }
-
-  posts = posts.filter(p => !specialTitles.includes(p.title) && !(p.id >= 99000 && p.id <= 99050) && p.id !== 9001);
-  posts.forEach(p => { p.commemorative = false; });
-  specialDates.forEach(sd => {
-    if (!posts.find(p => p.title === sd.title && p.date === sd.date)) {
-      posts.push(sd);
-    }
+  }, (error) => {
+    console.error("Firebase sync error", error);
   });
-
-  isLoadingCloud = false;
-  renderCalendar();
-  renderList();
 }
 
 async function savePostsToStorage() {
@@ -4069,7 +4085,9 @@ document.querySelectorAll(".ias-slider").forEach(slider => {
 });
 
 // Inicializa a primeira página e renderiza
-loadPostsFromCloud();
+renderCalendar();
+renderList();
+initCloudSync();
 // renderIdeasList removida daqui
 showPage(pageHome);
 
