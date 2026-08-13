@@ -2645,22 +2645,6 @@ function initCloudSync() {
     if (docSnap.exists) {
       const cloudPosts = docSnap.data().posts || [];
       
-      // MIGRATION: Recover custom local posts
-      let changed = false;
-      const saved = localStorage.getItem('saam_marketing_posts_v14');
-      if (saved) {
-        try {
-          const localPosts = JSON.parse(saved);
-          const customLocalPosts = localPosts.filter(p => p.id > 1000000);
-          customLocalPosts.forEach(cp => {
-            if (!cloudPosts.find(p => p.id === cp.id)) {
-              cloudPosts.push(cp);
-              changed = true;
-            }
-          });
-        } catch(e) {}
-      }
-      
       posts = cloudPosts;
       
       posts = posts.filter(p => !specialTitles.includes(p.title) && !(p.id >= 99000 && p.id <= 99050) && p.id !== 9001);
@@ -2672,10 +2656,6 @@ function initCloudSync() {
       });
       
       localStorage.setItem('saam_marketing_posts_v14', JSON.stringify(posts));
-      
-      if (changed) {
-        await docRef.set({ posts: posts });
-      }
       
       renderCalendar();
       renderList();
