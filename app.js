@@ -2622,10 +2622,10 @@ try {
   if (saved) {
     posts = JSON.parse(saved);
   } else {
-    posts = [...defaultPosts];
+    posts = [];
   }
 } catch(e) {
-  posts = [...defaultPosts];
+  posts = [];
 }
 
 // Clean local posts
