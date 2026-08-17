@@ -2957,6 +2957,7 @@ function renderList() {
   }
   
   let currentWeekGroup = "";
+  let lastRenderedDate = "";
   
   function getWeekName(dateStr) {
     const d = new Date(dateStr + "T00:00:00");
@@ -3010,13 +3011,25 @@ function renderList() {
       iconSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>`;
     }
 
-    const item = document.createElement("div");
-    item.className = "list-item";
-    item.innerHTML = `
+    const isSameDate = post.date === lastRenderedDate;
+    lastRenderedDate = post.date;
+
+    const dateBlockHtml = isSameDate ? `
+      <div class="list-date-block" style="visibility: hidden;">
+        <span class="day">${dayStr}</span>
+        <span class="weekday">${weekDay}</span>
+      </div>
+    ` : `
       <div class="list-date-block">
         <span class="day">${dayStr}</span>
         <span class="weekday">${weekDay}</span>
       </div>
+    `;
+
+    const item = document.createElement("div");
+    item.className = "list-item";
+    item.innerHTML = `
+      ${dateBlockHtml}
       <img src="${imgUrl}" class="list-item-thumb">
       <div class="list-item-content">
         <h4 class="list-item-title" style="display: flex; align-items: center;">${iconSvg}${post.title || post.tag}</h4>
@@ -3109,17 +3122,28 @@ function renderInternalComms() {
       });
 
       if (commPosts.length > 0) {
+        let firstPostForDay = true;
         commPosts.forEach(post => {
           const imgUrl = post.image || "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&q=80";
           const iconSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>`;
           
-          const item = document.createElement("div");
-          item.className = "list-item";
-          item.innerHTML = `
+          const dateBlockHtml = firstPostForDay ? `
             <div class="list-date-block">
               <span class="day">${dayStr}</span>
               <span class="weekday">${weekDay}</span>
             </div>
+          ` : `
+            <div class="list-date-block" style="visibility: hidden;">
+              <span class="day">${dayStr}</span>
+              <span class="weekday">${weekDay}</span>
+            </div>
+          `;
+          firstPostForDay = false;
+
+          const item = document.createElement("div");
+          item.className = "list-item";
+          item.innerHTML = `
+            ${dateBlockHtml}
             <img src="${imgUrl}" class="list-item-thumb">
             <div class="list-item-content">
               <h4 class="list-item-title" style="display: flex; align-items: center;">${iconSvg}${post.title || post.tag}</h4>
