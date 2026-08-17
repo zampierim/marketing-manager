@@ -21,7 +21,21 @@
 
     <!-- Novo card claro: Comunicações internas -->
     <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px 32px; margin-bottom: 32px; box-shadow: var(--shadow-sm); width: 100%; box-sizing: border-box;">
-      <h2 style="margin: 0; font-size: 20px; font-weight: 800; color: #0F172A; font-family: 'Manrope', sans-serif;">Comunicações Internas</h2>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="margin: 0; font-size: 20px; font-weight: 800; color: #0F172A; font-family: 'Manrope', sans-serif;">Comunicações Internas</h2>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <button type="button" id="comms-prev-month" style="background: none; border: 1px solid #E2E8F0; border-radius: 6px; width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
+          <span id="comms-month-label" style="font-size: 15px; font-weight: 800; color: #0F172A; text-transform: uppercase;">Mês</span>
+          <button type="button" id="comms-next-month" style="background: none; border: 1px solid #E2E8F0; border-radius: 6px; width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+        </div>
+      </div>
+      <div id="comms-list" style="display: flex; flex-direction: column; gap: 12px;">
+        <!-- Lista de terças e quintas será injetada aqui -->
+      </div>
     </div>
 
     <div class="tabs" id="home-menu">

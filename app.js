@@ -3037,6 +3037,7 @@ function renderList() {
     item.addEventListener("click", () => openModal(post));
     postListEl.appendChild(item);
   });
+  renderInternalComms();
 }
 
 prevMonthBtn.addEventListener("click", () => {
@@ -3050,6 +3051,135 @@ nextMonthBtn.addEventListener("click", () => {
   renderCalendar();
   renderList();
 });
+
+const commsPrevBtn = document.getElementById("comms-prev-month");
+if(commsPrevBtn) {
+  commsPrevBtn.addEventListener("click", () => {
+    currentDate.setMonth(currentDate.getMonth() - 1);
+    renderCalendar();
+    renderList();
+  });
+}
+
+const commsNextBtn = document.getElementById("comms-next-month");
+if(commsNextBtn) {
+  commsNextBtn.addEventListener("click", () => {
+    currentDate.setMonth(currentDate.getMonth() + 1);
+    renderCalendar();
+    renderList();
+  });
+}
+
+function renderInternalComms() {
+  const commsListEl = document.getElementById("comms-list");
+  const monthLabelEl = document.getElementById("comms-month-label");
+  if (!commsListEl || !monthLabelEl) return;
+
+  const month = currentDate.getMonth();
+  const year = currentDate.getFullYear();
+  monthLabelEl.textContent = `${monthNames[month]} ${year}`;
+
+  commsListEl.innerHTML = "";
+
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const weekNamesShort = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SÁB"];
+
+  let hasSlots = false;
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateObj = new Date(year, month, d);
+    const dayOfWeek = dateObj.getDay();
+
+    if (dayOfWeek === 2 || dayOfWeek === 4) { // Terça (2) ou Quinta (4)
+      hasSlots = true;
+      const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      const dayStr = String(d).padStart(2, '0');
+      const weekDay = weekNamesShort[dayOfWeek];
+
+      const commPosts = posts.filter(p => {
+        if (p.date !== dateStr) return false;
+        return p.destiny === "interno" || (p.destinies && p.destinies.includes("interno")) || p.primaryDestiny === "interno";
+      });
+
+      if (commPosts.length > 0) {
+        commPosts.forEach(post => {
+          const imgUrl = post.image || "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&q=80";
+          const iconSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>`;
+          
+          const item = document.createElement("div");
+          item.className = "list-item";
+          item.innerHTML = `
+            <div class="list-date-block">
+              <span class="day">${dayStr}</span>
+              <span class="weekday">${weekDay}</span>
+            </div>
+            <img src="${imgUrl}" class="list-item-thumb">
+            <div class="list-item-content">
+              <h4 class="list-item-title" style="display: flex; align-items: center;">${iconSvg}${post.title || post.tag}</h4>
+              <p class="list-item-caption">${post.caption || "Sem legenda..."}</p>
+            </div>
+            <div class="list-item-actions">
+              <select class="list-status-select status-${post.status}">
+                <option value="rascunho" ${post.status==='rascunho'?'selected':''}>Rascunho</option>
+                <option value="analise" ${post.status==='analise'?'selected':''}>Em Análise</option>
+                <option value="aprovado" ${post.status==='aprovado'?'selected':''}>Aprovado</option>
+                <option value="agendado" ${post.status==='agendado'?'selected':''}>Agendado</option>
+                <option value="publicado" ${post.status==='publicado'?'selected':''}>Publicado</option>
+              </select>
+            </div>
+          `;
+
+          const selectBox = item.querySelector(".list-status-select");
+          selectBox.addEventListener("click", (e) => e.stopPropagation());
+          selectBox.addEventListener("change", (e) => {
+            post.status = e.target.value;
+            selectBox.className = `list-status-select status-${e.target.value}`;
+            savePostsToStorage();
+            renderCalendar();
+            renderList();
+          });
+
+          item.addEventListener("click", () => openModal(post));
+          commsListEl.appendChild(item);
+        });
+      } else {
+        const item = document.createElement("div");
+        item.className = "list-item";
+        item.style.opacity = "0.7";
+        item.style.borderStyle = "dashed";
+        item.innerHTML = `
+          <div class="list-date-block">
+            <span class="day">${dayStr}</span>
+            <span class="weekday">${weekDay}</span>
+          </div>
+          <div class="list-item-thumb" style="background: #F1F5F9; display: flex; align-items: center; justify-content: center;">
+            <svg width="24" height="24" fill="none" stroke="#94A3B8" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          </div>
+          <div class="list-item-content">
+            <h4 class="list-item-title" style="color: #64748B;">Espaço disponível</h4>
+            <p class="list-item-caption">Nenhuma comunicação interna programada.</p>
+          </div>
+          <div class="list-item-actions">
+            <span style="font-size: 12px; font-weight: 800; color: #26428B; text-transform: uppercase; padding: 6px 12px; background: rgba(38,66,139,0.1); border-radius: 6px;">Planejar</span>
+          </div>
+        `;
+        item.addEventListener("click", () => {
+          openModal({
+            date: dateStr,
+            destinies: ['interno'],
+            primaryDestiny: 'interno',
+            status: 'rascunho'
+          });
+        });
+        commsListEl.appendChild(item);
+      }
+    }
+  }
+
+  if (!hasSlots) {
+    commsListEl.innerHTML = "<p class='placeholder-text'>Nenhuma terça ou quinta neste período.</p>";
+  }
+}
 
 /* Modal Logic */
 function openModal(post = null, prefilledDate = "", prefilledIdeaId = "") {
