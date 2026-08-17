@@ -2708,8 +2708,14 @@ const searchInput = document.getElementById("search");
 const filterDestiny = document.getElementById("filter-destiny");
 const filterIdea = document.getElementById("filter-idea");
 
+function isEditorial(p) {
+  const dests = Array.isArray(p.destinies) && p.destinies.length > 0 ? p.destinies : (p.destiny ? [p.destiny] : []);
+  if (dests.length === 0) return true;
+  return !dests.every(d => d === "interno" || d === "cliente");
+}
+
 function getFilteredPosts() {
-  let filtered = [...posts];
+  let filtered = posts.filter(isEditorial);
   const term = searchInput ? searchInput.value.toLowerCase() : "";
   const destiny = filterDestiny ? filterDestiny.value : "";
   const idea = filterIdea ? filterIdea.value : "";
@@ -2764,7 +2770,8 @@ function renderCalendar() {
   }
   
   const today = new Date();
-  document.getElementById("menu-stat-criativos").textContent = `${posts.length} criativos`;
+  const editorialCount = posts.filter(isEditorial).length;
+  document.getElementById("menu-stat-criativos").textContent = `${editorialCount} criativos`;
   
   for (let day = 1; day <= daysInMonth; day++) {
     const dayCell = document.createElement("div");
