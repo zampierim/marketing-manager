@@ -878,6 +878,9 @@ function openModal(post = null, prefilledDate = "", prefilledIdeaId = "") {
     document.getElementById("field-briefing").style.display = isInternal ? "none" : "block";
     document.getElementById("field-destiny").style.display = isInternal ? "none" : "block";
     document.getElementById("field-author").style.display = isInternal ? "none" : "block";
+    document.getElementById("field-comments").style.display = isInternal ? "none" : "block";
+    const qaContainer = document.getElementById("field-approval-actions");
+    if(qaContainer) qaContainer.style.display = isInternal ? "none" : "flex";
 
   } else {
     document.getElementById("modal-title").textContent = "Novo Criativo";
@@ -903,6 +906,9 @@ function openModal(post = null, prefilledDate = "", prefilledIdeaId = "") {
     document.getElementById("field-briefing").style.display = "block";
     document.getElementById("field-destiny").style.display = "block";
     document.getElementById("field-author").style.display = "block";
+    document.getElementById("field-comments").style.display = "block";
+    const qaContainer = document.getElementById("field-approval-actions");
+    if(qaContainer) qaContainer.style.display = "flex";
   }
   modal.classList.remove("hidden");
 }
