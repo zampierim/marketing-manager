@@ -606,7 +606,7 @@ function renderList() {
           <span class="day">${dayStr}</span>
           <span class="weekday">${weekDay}</span>
         </div>
-        <div class="day-posts" style="flex: 1; display: flex; flex-direction: column; gap: 8px;"></div>
+        <div class="day-posts" style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px;"></div>
       `;
       postListEl.appendChild(window.currentDayGroupEl);
     }
@@ -716,7 +716,7 @@ function renderInternalComms() {
             <span class="day">${dayStr}</span>
             <span class="weekday">${weekDay}</span>
           </div>
-          <div class="day-posts" style="flex: 1; display: flex; flex-direction: column; gap: 8px;"></div>
+          <div class="day-posts" style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px;"></div>
         `;
         commsListEl.appendChild(dayGroupEl);
         const postsContainer = dayGroupEl.querySelector('.day-posts');
@@ -767,7 +767,7 @@ function renderInternalComms() {
             <span class="day">${dayStr}</span>
             <span class="weekday">${weekDay}</span>
           </div>
-          <div class="day-posts" style="flex: 1; display: flex; flex-direction: column; gap: 8px;"></div>
+          <div class="day-posts" style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px;"></div>
         `;
         commsListEl.appendChild(dayGroupEl);
         const postsContainer = dayGroupEl.querySelector('.day-posts');
