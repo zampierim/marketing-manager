@@ -209,11 +209,21 @@ try {
   posts = [];
 }
 
-// Clean local posts
-posts = posts.filter(p => !specialTitles.includes(p.title) && !(p.id >= 99000 && p.id <= 99050) && p.id !== 9001);
-posts.forEach(p => { p.commemorative = false; });
+// FIX CORRUPTED COMMEMORATIVE POSTS
+let corruptedFixed = false;
+posts.forEach(p => {
+  if (specialTitles.includes(p.title) && !p.commemorative) {
+    p.commemorative = true;
+    corruptedFixed = true;
+  }
+});
+if (corruptedFixed) {
+  localStorage.setItem('saam_marketing_posts_v14', JSON.stringify(posts));
+}
+
+// Add missing special dates without wiping existing ones
 specialDates.forEach(sd => {
-  if (!posts.find(p => p.title === sd.title && p.date === sd.date)) {
+  if (!posts.find(p => p.id === sd.id || (p.title === sd.title && p.date === sd.date))) {
     posts.push(sd);
   }
 });
@@ -228,10 +238,16 @@ function initCloudSync() {
       
       posts = cloudPosts;
       
-      posts = posts.filter(p => !specialTitles.includes(p.title) && !(p.id >= 99000 && p.id <= 99050) && p.id !== 9001);
-      posts.forEach(p => { p.commemorative = false; });
+      // FIX CORRUPTED COMMEMORATIVE POSTS
+      posts.forEach(p => {
+        if (specialTitles.includes(p.title) && !p.commemorative) {
+          p.commemorative = true;
+        }
+      });
+
+      // Add missing special dates without wiping existing ones
       specialDates.forEach(sd => {
-        if (!posts.find(p => p.title === sd.title && p.date === sd.date)) {
+        if (!posts.find(p => p.id === sd.id || (p.title === sd.title && p.date === sd.date))) {
           posts.push(sd);
         }
       });
@@ -1070,8 +1086,15 @@ form.addEventListener("submit", (e) => {
   
   const topicEl = document.getElementById("post-topic");
   const tagValue = document.getElementById("post-tag").value;
+  const idInt = idVal ? parseInt(idVal) : Date.now();
+  let originalPost = {};
+  if (idVal) {
+    originalPost = posts.find(p => p.id === idInt) || {};
+  }
+
   const newPost = {
-    id: idVal ? parseInt(idVal) : Date.now(),
+    ...originalPost,
+    id: idInt,
     date: document.getElementById("post-date").value,
     status: statusEl ? statusEl.value : "rascunho",
     tag: tagValue,
