@@ -42,19 +42,27 @@ document.addEventListener("DOMContentLoaded", () => {
   const processModal = document.getElementById("process-modal");
   
   document.getElementById("btn-add-project")?.addEventListener("click", () => {
-    document.getElementById("project-form").reset();
-    document.getElementById("project-id").value = "";
-    document.getElementById("project-modal-title").textContent = "Novo Projeto";
-    document.getElementById("btn-delete-project").style.display = "none";
-    projectModal.classList.remove("hidden");
+    if(window.requirePassword) {
+      window.requirePassword(() => {
+        document.getElementById("project-form").reset();
+        document.getElementById("project-id").value = "";
+        document.getElementById("project-modal-title").textContent = "Novo Projeto";
+        document.getElementById("btn-delete-project").style.display = "none";
+        projectModal.classList.remove("hidden");
+      });
+    }
   });
 
   document.getElementById("btn-add-process")?.addEventListener("click", () => {
-    document.getElementById("process-form").reset();
-    document.getElementById("process-id").value = "";
-    document.getElementById("process-modal-title").textContent = "Novo Processo";
-    document.getElementById("btn-delete-process").style.display = "none";
-    processModal.classList.remove("hidden");
+    if(window.requirePassword) {
+      window.requirePassword(() => {
+        document.getElementById("process-form").reset();
+        document.getElementById("process-id").value = "";
+        document.getElementById("process-modal-title").textContent = "Novo Processo";
+        document.getElementById("btn-delete-process").style.display = "none";
+        processModal.classList.remove("hidden");
+      });
+    }
   });
 
   document.querySelectorAll(".close-project-modal").forEach(btn => {
@@ -135,27 +143,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Rendering Functions
   window.editProject = function(id) {
-    const proj = projects.find(p => p.id === id);
-    if(proj) {
-      document.getElementById("project-id").value = proj.id;
-      document.getElementById("project-title").value = proj.title;
-      document.getElementById("project-description").value = proj.description || "";
-      document.getElementById("project-status").value = proj.status;
-      document.getElementById("project-modal-title").textContent = "Editar Projeto";
-      document.getElementById("btn-delete-project").style.display = "block";
-      projectModal.classList.remove("hidden");
+    if(window.requirePassword) {
+      window.requirePassword(() => {
+        const proj = projects.find(p => p.id === id);
+        if(proj) {
+          document.getElementById("project-id").value = proj.id;
+          document.getElementById("project-title").value = proj.title;
+          document.getElementById("project-description").value = proj.description || "";
+          document.getElementById("project-status").value = proj.status;
+          document.getElementById("project-modal-title").textContent = "Editar Projeto";
+          document.getElementById("btn-delete-project").style.display = "block";
+          projectModal.classList.remove("hidden");
+        }
+      });
     }
   };
 
   window.editProcess = function(id) {
-    const proc = processes.find(p => p.id === id);
-    if(proc) {
-      document.getElementById("process-id").value = proc.id;
-      document.getElementById("process-title").value = proc.title;
-      document.getElementById("process-frequency").value = proc.frequency || "Diário";
-      document.getElementById("process-modal-title").textContent = "Editar Processo";
-      document.getElementById("btn-delete-process").style.display = "block";
-      processModal.classList.remove("hidden");
+    if(window.requirePassword) {
+      window.requirePassword(() => {
+        const proc = processes.find(p => p.id === id);
+        if(proc) {
+          document.getElementById("process-id").value = proc.id;
+          document.getElementById("process-title").value = proc.title;
+          document.getElementById("process-frequency").value = proc.frequency || "Diário";
+          document.getElementById("process-modal-title").textContent = "Editar Processo";
+          document.getElementById("btn-delete-process").style.display = "block";
+          processModal.classList.remove("hidden");
+        }
+      });
     }
   };
 

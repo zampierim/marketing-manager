@@ -31,9 +31,11 @@ function showPage(pageEl) {
 }
 
 btnTabCalendario.addEventListener("click", () => {
-  showPage(pageCalendario);
-  renderCalendar();
-  renderList();
+  requirePassword(() => {
+    showPage(pageCalendario);
+    renderCalendar();
+    renderList();
+  });
 });
 
 let pendingPasswordCallback = null;
@@ -50,6 +52,7 @@ function requirePassword(callback) {
   modal.style.display = "flex";
   setTimeout(() => input.focus(), 50);
 }
+window.requirePassword = requirePassword;
 
 // Setup password modal listeners
 setTimeout(() => {
@@ -116,8 +119,10 @@ if (btnTabCampanhas) {
 
 if (btnTabRotinas) {
   btnTabRotinas.addEventListener("click", () => {
-    showPage(pageRotinas);
-    renderRoutinesList();
+    requirePassword(() => {
+      showPage(pageRotinas);
+      renderRoutinesList();
+    });
   });
 }
 
