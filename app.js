@@ -826,7 +826,8 @@ function openModal(post = null, prefilledDate = "", prefilledIdeaId = "") {
     document.getElementById("post-image-file").value = "";
     document.getElementById("post-briefing").value = post.briefing || generateMiniBriefing(post.tag);
     document.getElementById("post-caption").value = post.caption || "";
-    document.getElementById("post-author").value = post.author;
+    document.getElementById("post-author").value = post.author || "";
+    document.getElementById("post-comments").value = post.comments || "";
     
     // Set topic
     const topicEl = document.getElementById("post-topic");
@@ -855,6 +856,13 @@ function openModal(post = null, prefilledDate = "", prefilledIdeaId = "") {
     const btnDelete = document.getElementById("btn-delete");
     if(btnDelete) btnDelete.style.display = "block";
 
+    // Toggle fields based on Internal Comms
+    const isInternal = destArr.includes('interno');
+    document.getElementById("field-topic").style.display = isInternal ? "none" : "block";
+    document.getElementById("field-briefing").style.display = isInternal ? "none" : "block";
+    document.getElementById("field-destiny").style.display = isInternal ? "none" : "block";
+    document.getElementById("field-author").style.display = isInternal ? "none" : "block";
+
   } else {
     document.getElementById("modal-title").textContent = "Novo Criativo";
     document.getElementById("post-id").value = "";
@@ -874,6 +882,11 @@ function openModal(post = null, prefilledDate = "", prefilledIdeaId = "") {
     
     const btnDelete = document.getElementById("btn-delete");
     if(btnDelete) btnDelete.style.display = "none";
+
+    document.getElementById("field-topic").style.display = "block";
+    document.getElementById("field-briefing").style.display = "block";
+    document.getElementById("field-destiny").style.display = "block";
+    document.getElementById("field-author").style.display = "block";
   }
   modal.classList.remove("hidden");
 }
@@ -1071,6 +1084,7 @@ form.addEventListener("submit", (e) => {
     destinies: checkedDestinies, // all selected platforms
     primaryDestiny: primaryDestiny, // explicit primary
     author: document.getElementById("post-author").value,
+    comments: document.getElementById("post-comments").value,
     ideaId: document.getElementById("post-idea-link").value || null,
     routineId: document.getElementById("post-routine-link").value || null,
   };
@@ -1095,6 +1109,34 @@ form.addEventListener("submit", (e) => {
     showToast('✅ Criativo salvo com sucesso!', 'success');
   }
 });
+
+const btnApprove = document.getElementById("btn-quick-approve");
+if(btnApprove) {
+  btnApprove.addEventListener("click", () => {
+    const statusRadio = form.querySelector(`input[name="post_status"][value="aprovado"]`);
+    if(statusRadio) statusRadio.checked = true;
+    
+    // Highlight the status chips correctly
+    form.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+    if(statusRadio) statusRadio.parentElement.classList.add('selected');
+
+    form.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+  });
+}
+
+const btnReject = document.getElementById("btn-quick-reject");
+if(btnReject) {
+  btnReject.addEventListener("click", () => {
+    const statusRadio = form.querySelector(`input[name="post_status"][value="rascunho"]`);
+    if(statusRadio) statusRadio.checked = true;
+    
+    // Highlight the status chips correctly
+    form.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+    if(statusRadio) statusRadio.parentElement.classList.add('selected');
+
+    form.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+  });
+}
 
 document.getElementById("post-image-file").addEventListener("change", function(e) {
   const file = e.target.files[0];
