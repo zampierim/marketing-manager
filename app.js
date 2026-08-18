@@ -133,6 +133,21 @@ if (btnTabColaboracao) {
   });
 }
 
+const btnAddInternalComm = document.getElementById("btn-add-internal-comm");
+if (btnAddInternalComm) {
+  btnAddInternalComm.addEventListener("click", () => {
+    const today = new Date();
+    // Format YYYY-MM-DD local time
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const dateStr = `${yyyy}-${mm}-${dd}`;
+    
+    // openModal(post, prefilledDate, prefilledIdeaId, prefilledType)
+    openModal(null, dateStr, "", "Interno");
+  });
+}
+
 if (btnTabExcelencia) {
   btnTabExcelencia.addEventListener("click", () => {
     requirePassword(() => {
@@ -846,9 +861,9 @@ function renderInternalComms() {
 }
 
 /* Modal Logic */
-function openModal(post = null, prefilledDate = "", prefilledIdeaId = "") {
+function openModal(post = null, prefilledDate = "", prefilledIdeaId = "", prefilledType = "") {
   if (sessionStorage.getItem("saam_unlocked") !== "true") {
-    requirePassword(() => openModal(post, prefilledDate, prefilledIdeaId));
+    requirePassword(() => openModal(post, prefilledDate, prefilledIdeaId, prefilledType));
     return;
   }
   form.reset();
@@ -935,6 +950,14 @@ function openModal(post = null, prefilledDate = "", prefilledIdeaId = "") {
     if(qaContainer) qaContainer.style.display = "flex";
     
     document.getElementById("post-author").required = true;
+    
+    if (prefilledType) {
+      document.getElementById("post-type").value = prefilledType;
+      document.getElementById("post-type").dispatchEvent(new Event('change'));
+    } else {
+      document.getElementById("post-type").value = "Editorial";
+      document.getElementById("post-type").dispatchEvent(new Event('change'));
+    }
   }
   modal.classList.remove("hidden");
 }
