@@ -230,56 +230,73 @@ specialDates.forEach(sd => {
 
 // 2. REAL-TIME CLOUD SYNC
 function initCloudSync() {
-  const docRef = db.collection("marketing").doc("calendar");
+  const postsRef = db.collection("marketing_posts");
   
-  docRef.onSnapshot(async (docSnap) => {
+  // Migration logic (run once)
+  const oldDocRef = db.collection("marketing").doc("calendar");
+  oldDocRef.get().then(docSnap => {
     if (docSnap.exists) {
-      const cloudPosts = docSnap.data().posts || [];
-      
-      posts = cloudPosts;
-      
-      // FIX CORRUPTED COMMEMORATIVE POSTS
-      posts.forEach(p => {
-        if (specialTitles.includes(p.title) && !p.commemorative) {
-          p.commemorative = true;
-        }
+      const oldPosts = docSnap.data().posts || [];
+      const batch = db.batch();
+      oldPosts.forEach(p => {
+        batch.set(postsRef.doc(p.id.toString()), p);
       });
-
-      // Add missing special dates without wiping existing ones
-      specialDates.forEach(sd => {
-        if (!posts.find(p => p.id === sd.id || (p.title === sd.title && p.date === sd.date))) {
-          posts.push(sd);
-        }
+      batch.commit().then(() => {
+        oldDocRef.delete();
       });
-      
-      localStorage.setItem('saam_marketing_posts_v14', JSON.stringify(posts));
-      
-      renderCalendar();
-      renderList();
-    } else {
-      posts = [...defaultPosts];
-      specialDates.forEach(sd => posts.push(sd));
-      await docRef.set({ posts: posts });
     }
+  });
+
+  postsRef.onSnapshot((snapshot) => {
+    const cloudPosts = [];
+    snapshot.forEach(doc => cloudPosts.push(doc.data()));
+    
+    posts = cloudPosts;
+    
+    // FIX CORRUPTED COMMEMORATIVE POSTS
+    posts.forEach(p => {
+      if (specialTitles.includes(p.title) && !p.commemorative) {
+        p.commemorative = true;
+      }
+    });
+
+    specialDates.forEach(sd => {
+      if (!posts.find(p => p.id === sd.id || (p.title === sd.title && p.date === sd.date))) {
+        posts.push(sd);
+        postsRef.doc(sd.id.toString()).set(sd);
+      }
+    });
+    
+    localStorage.setItem('saam_marketing_posts_v14', JSON.stringify(posts));
+    
+    renderCalendar();
+    renderList();
   }, (error) => {
     console.error("Firebase sync error", error);
   });
 }
 
-async function savePostsToStorage() {
+async function savePostToCloud(post) {
   try {
     localStorage.setItem('saam_marketing_posts_v14', JSON.stringify(posts));
-    
     if (typeof showToast === 'function') {
-      showToast('Salvando na nuvem...', 'success');
+      showToast('Salvando...', 'success');
     }
-    
-    await db.collection("marketing").doc("calendar").set({ posts: posts });
+    await db.collection("marketing_posts").doc(post.id.toString()).set(post);
   } catch(e) {
-    console.error('Erro ao salvar na nuvem:', e);
+    console.error('Erro ao salvar post na nuvem:', e);
     if (typeof showToast === 'function') {
-      showToast('⚠️ Erro ao salvar na nuvem. Verifique a conexão.', 'error');
+      showToast('Erro ao salvar na nuvem.', 'error');
     }
+  }
+}
+
+async function deletePostFromCloud(id) {
+  try {
+    localStorage.setItem('saam_marketing_posts_v14', JSON.stringify(posts));
+    await db.collection("marketing_posts").doc(id.toString()).delete();
+  } catch(e) {
+    console.error('Erro ao excluir post na nuvem:', e);
   }
 }
 
@@ -507,7 +524,7 @@ function createPostCard(post) {
         let idx = statusCycle.indexOf(post.status);
         let nextStatus = statusCycle[(idx + 1) % statusCycle.length];
         post.status = nextStatus;
-        savePostsToStorage();
+        savePostToCloud(post);
         renderCalendar();
         renderList();
       });
@@ -516,7 +533,7 @@ function createPostCard(post) {
     let idx = statusCycle.indexOf(post.status);
     let nextStatus = statusCycle[(idx + 1) % statusCycle.length];
     post.status = nextStatus;
-    savePostsToStorage();
+    savePostToCloud(post);
     renderCalendar();
     renderList();
   });
@@ -766,7 +783,7 @@ function renderInternalComms() {
           selectBox.addEventListener("change", (e) => {
             post.status = e.target.value;
             selectBox.className = `list-status-select status-${e.target.value}`;
-            savePostsToStorage();
+            savePostToCloud(post);
             renderCalendar();
             renderList();
           });
@@ -1070,7 +1087,7 @@ if(btnDelete) {
       if(confirm("Tem certeza que deseja excluir esta publicação?")) {
         const idInt = parseInt(idVal);
         posts = posts.filter(p => p.id !== idInt);
-        savePostsToStorage();
+        deletePostFromCloud(idInt);
         closeModal();
         renderCalendar();
         renderList();
@@ -1126,7 +1143,7 @@ form.addEventListener("submit", (e) => {
   } else {
     posts.push(newPost);
   }
-  const saveOk = savePostsToStorage();
+  savePostToCloud(newPost);
   
   closeModal();
   renderCalendar();

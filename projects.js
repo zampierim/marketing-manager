@@ -72,6 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const newProject = {
       id: idVal ? parseInt(idVal) : Date.now(),
       title: document.getElementById("project-title").value,
+      description: document.getElementById("project-description").value,
       status: document.getElementById("project-status").value
     };
 
@@ -94,7 +95,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const idVal = document.getElementById("process-id").value;
     const newProcess = {
       id: idVal ? parseInt(idVal) : Date.now(),
-      title: document.getElementById("process-title").value
+      title: document.getElementById("process-title").value,
+      frequency: document.getElementById("process-frequency").value
     };
 
     if (idVal) {
@@ -137,6 +139,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if(proj) {
       document.getElementById("project-id").value = proj.id;
       document.getElementById("project-title").value = proj.title;
+      document.getElementById("project-description").value = proj.description || "";
       document.getElementById("project-status").value = proj.status;
       document.getElementById("project-modal-title").textContent = "Editar Projeto";
       document.getElementById("btn-delete-project").style.display = "block";
@@ -149,6 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if(proc) {
       document.getElementById("process-id").value = proc.id;
       document.getElementById("process-title").value = proc.title;
+      document.getElementById("process-frequency").value = proc.frequency || "Diário";
       document.getElementById("process-modal-title").textContent = "Editar Processo";
       document.getElementById("btn-delete-process").style.display = "block";
       processModal.classList.remove("hidden");
@@ -170,8 +174,15 @@ document.addEventListener("DOMContentLoaded", () => {
       const el = document.createElement("div");
       el.className = "project-card";
       el.style = "background: #F8FAFC; border: 1px solid #E2E8F0; padding: 12px 16px; border-radius: 8px; cursor: pointer; transition: all 0.2s;";
+      
+      let descHtml = "";
+      if (p.description) {
+        descHtml = `<div style="font-size: 12px; color: #64748B; margin-top: 6px; white-space: pre-wrap; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">${p.description}</div>`;
+      }
+      
       el.innerHTML = `
         <div style="font-size: 14px; font-weight: 700; color: #0F172A;">${p.title}</div>
+        ${descHtml}
       `;
       el.onmouseover = () => { el.style.background = "#F1F5F9"; el.style.borderColor = "#CBD5E1"; };
       el.onmouseout = () => { el.style.background = "#F8FAFC"; el.style.borderColor = "#E2E8F0"; };
@@ -208,9 +219,17 @@ document.addEventListener("DOMContentLoaded", () => {
     processes.forEach(p => {
       const el = document.createElement("div");
       el.style = "background: #F8FAFC; border: 1px solid #E2E8F0; padding: 12px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all 0.2s;";
+      
+      let freqColor = "#64748B";
+      let freqBg = "#F1F5F9";
+      if (p.frequency === "Diário") { freqColor = "#059669"; freqBg = "#D1FAE5"; }
+      else if (p.frequency === "Semanal") { freqColor = "#2563EB"; freqBg = "#DBEAFE"; }
+      else if (p.frequency === "Mensal") { freqColor = "#D97706"; freqBg = "#FEF3C7"; }
+
       el.innerHTML = `
         <div style="color: #64748B;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-9.21l-3.32 3.32"/></svg></div>
-        <div style="font-size: 14px; font-weight: 700; color: #0F172A;">${p.title}</div>
+        <div style="font-size: 14px; font-weight: 700; color: #0F172A; flex: 1;">${p.title}</div>
+        <div style="font-size: 11px; font-weight: 700; color: ${freqColor}; background: ${freqBg}; padding: 4px 8px; border-radius: 4px;">${p.frequency || "Diário"}</div>
       `;
       el.onmouseover = () => { el.style.background = "#F1F5F9"; el.style.borderColor = "#CBD5E1"; };
       el.onmouseout = () => { el.style.background = "#F8FAFC"; el.style.borderColor = "#E2E8F0"; };

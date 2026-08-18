@@ -186,9 +186,9 @@
           </button>
         </div>
 
-        <div style="display: flex; flex-direction: column; gap: 24px;">
+        <div style="display: flex; flex-direction: row; gap: 16px; align-items: flex-start; overflow-x: auto; padding-bottom: 8px;">
           <!-- Em andamento -->
-          <div>
+          <div style="flex: 1; min-width: 250px; background: #F8FAFC; padding: 12px; border-radius: 12px; border: 1px solid #E2E8F0;">
             <h4 style="margin: 0 0 12px 0; font-size: 13px; font-weight: 700; color: #3B82F6; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
               <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #3B82F6;"></span> Em andamento
             </h4>
@@ -196,7 +196,7 @@
           </div>
 
           <!-- Não Iniciado -->
-          <div>
+          <div style="flex: 1; min-width: 250px; background: #F8FAFC; padding: 12px; border-radius: 12px; border: 1px solid #E2E8F0;">
             <h4 style="margin: 0 0 12px 0; font-size: 13px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
               <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #94A3B8;"></span> Backlog
             </h4>
@@ -204,7 +204,7 @@
           </div>
 
           <!-- Finalizado -->
-          <div>
+          <div style="flex: 1; min-width: 250px; background: #F8FAFC; padding: 12px; border-radius: 12px; border: 1px solid #E2E8F0;">
             <h4 style="margin: 0 0 12px 0; font-size: 13px; font-weight: 700; color: #10B981; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
               <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #10B981;"></span> Finalizados
             </h4>
@@ -2891,6 +2891,10 @@
           <input type="text" id="project-title" required placeholder="Ex: Plataforma do marketing">
         </div>
         <div class="field">
+          <label>Descrição</label>
+          <textarea id="project-description" placeholder="Descreva do que se trata este projeto..." style="min-height: 80px; width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--hairline);"></textarea>
+        </div>
+        <div class="field">
           <label>Status</label>
           <select id="project-status" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--hairline);">
             <option value="backlog">Backlog (A iniciar)</option>
@@ -2923,6 +2927,14 @@
         <div class="field">
           <label>Nome da Rotina / Processo</label>
           <input type="text" id="process-title" required placeholder="Ex: Enviar informativo de terça">
+        </div>
+        <div class="field">
+          <label>Frequência</label>
+          <select id="process-frequency" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--hairline);">
+            <option value="Diário">Diário</option>
+            <option value="Semanal">Semanal</option>
+            <option value="Mensal">Mensal</option>
+          </select>
         </div>
         <div class="modal-actions" style="display: flex; justify-content: space-between; margin-top: 24px;">
           <button type="button" class="btn-cancel" id="btn-delete-process" style="color: #e03131; border-color: #ffe3e3; background: #fff0f0; display: none;">Excluir</button>
