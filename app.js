@@ -3014,22 +3014,25 @@ function renderList() {
     const isSameDate = post.date === lastRenderedDate;
     lastRenderedDate = post.date;
 
-    const dateBlockHtml = isSameDate ? `
-      <div class="list-date-block" style="visibility: hidden;">
-        <span class="day">${dayStr}</span>
-        <span class="weekday">${weekDay}</span>
-      </div>
-    ` : `
-      <div class="list-date-block">
-        <span class="day">${dayStr}</span>
-        <span class="weekday">${weekDay}</span>
-      </div>
-    `;
+    if (!isSameDate || !window.currentDayGroupEl) {
+      window.currentDayGroupEl = document.createElement("div");
+      window.currentDayGroupEl.className = "day-group";
+      window.currentDayGroupEl.style = "display: flex; align-items: stretch; margin-bottom: 12px;";
+      
+      window.currentDayGroupEl.innerHTML = `
+        <div class="list-date-block" style="padding-top: 16px; margin-right: 12px; border: none; padding-right: 0;">
+          <span class="day">${dayStr}</span>
+          <span class="weekday">${weekDay}</span>
+        </div>
+        <div class="day-posts" style="flex: 1; display: flex; flex-direction: column; gap: 8px;"></div>
+      `;
+      postListEl.appendChild(window.currentDayGroupEl);
+    }
 
     const item = document.createElement("div");
     item.className = "list-item";
+    item.style.marginBottom = "0"; // Override margin
     item.innerHTML = `
-      ${dateBlockHtml}
       <img src="${imgUrl}" class="list-item-thumb">
       <div class="list-item-content">
         <h4 class="list-item-title" style="display: flex; align-items: center;">${iconSvg}${post.title || post.tag}</h4>
@@ -3055,7 +3058,7 @@ function renderList() {
     });
 
     item.addEventListener("click", () => openModal(post));
-    postListEl.appendChild(item);
+    window.currentDayGroupEl.querySelector('.day-posts').appendChild(item);
   });
   renderInternalComms();
 }
@@ -3122,28 +3125,27 @@ function renderInternalComms() {
       });
 
       if (commPosts.length > 0) {
-        let firstPostForDay = true;
+        const dayGroupEl = document.createElement("div");
+        dayGroupEl.className = "day-group";
+        dayGroupEl.style = "display: flex; align-items: stretch; margin-bottom: 12px;";
+        dayGroupEl.innerHTML = `
+          <div class="list-date-block" style="padding-top: 16px; margin-right: 12px; border: none; padding-right: 0;">
+            <span class="day">${dayStr}</span>
+            <span class="weekday">${weekDay}</span>
+          </div>
+          <div class="day-posts" style="flex: 1; display: flex; flex-direction: column; gap: 8px;"></div>
+        `;
+        commsListEl.appendChild(dayGroupEl);
+        const postsContainer = dayGroupEl.querySelector('.day-posts');
+
         commPosts.forEach(post => {
           const imgUrl = post.image || "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&q=80";
           const iconSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>`;
           
-          const dateBlockHtml = firstPostForDay ? `
-            <div class="list-date-block">
-              <span class="day">${dayStr}</span>
-              <span class="weekday">${weekDay}</span>
-            </div>
-          ` : `
-            <div class="list-date-block" style="visibility: hidden;">
-              <span class="day">${dayStr}</span>
-              <span class="weekday">${weekDay}</span>
-            </div>
-          `;
-          firstPostForDay = false;
-
           const item = document.createElement("div");
           item.className = "list-item";
+          item.style.marginBottom = "0";
           item.innerHTML = `
-            ${dateBlockHtml}
             <img src="${imgUrl}" class="list-item-thumb">
             <div class="list-item-content">
               <h4 class="list-item-title" style="display: flex; align-items: center;">${iconSvg}${post.title || post.tag}</h4>
@@ -3171,18 +3173,28 @@ function renderInternalComms() {
           });
 
           item.addEventListener("click", () => openModal(post));
-          commsListEl.appendChild(item);
+          postsContainer.appendChild(item);
         });
       } else {
-        const item = document.createElement("div");
-        item.className = "list-item";
-        item.style.opacity = "0.7";
-        item.style.borderStyle = "dashed";
-        item.innerHTML = `
-          <div class="list-date-block">
+        const dayGroupEl = document.createElement("div");
+        dayGroupEl.className = "day-group";
+        dayGroupEl.style = "display: flex; align-items: stretch; margin-bottom: 12px;";
+        dayGroupEl.innerHTML = `
+          <div class="list-date-block" style="padding-top: 16px; margin-right: 12px; border: none; padding-right: 0;">
             <span class="day">${dayStr}</span>
             <span class="weekday">${weekDay}</span>
           </div>
+          <div class="day-posts" style="flex: 1; display: flex; flex-direction: column; gap: 8px;"></div>
+        `;
+        commsListEl.appendChild(dayGroupEl);
+        const postsContainer = dayGroupEl.querySelector('.day-posts');
+
+        const item = document.createElement("div");
+        item.className = "list-item";
+        item.style.marginBottom = "0";
+        item.style.opacity = "0.7";
+        item.style.borderStyle = "dashed";
+        item.innerHTML = `
           <div class="list-item-thumb" style="background: #F1F5F9; display: flex; align-items: center; justify-content: center;">
             <svg width="24" height="24" fill="none" stroke="#94A3B8" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
           </div>
@@ -3202,7 +3214,7 @@ function renderInternalComms() {
             status: 'rascunho'
           });
         });
-        commsListEl.appendChild(item);
+        postsContainer.appendChild(item);
       }
     }
   }
