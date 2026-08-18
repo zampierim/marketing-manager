@@ -1154,8 +1154,7 @@ form.addEventListener("submit", (e) => {
   renderList();
   renderIdeasList(); // Re-render to update usage badges
   
-  // Visual feedback for the user
-  if (saveOk && typeof showToast === 'function') {
+  if (typeof showToast === 'function') {
     showToast('✅ Criativo salvo com sucesso!', 'success');
   }
 });
