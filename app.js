@@ -471,7 +471,7 @@ function createPostCard(post) {
   }
 
   let cardHTML = ``;
-  if (post.commemorative) {
+  if (post.commemorative && !post.image) {
     cardHTML = `
       <div class="post-card-image" style="background: linear-gradient(135deg, #E11D48 0%, #9F1239 100%); display: flex; align-items: center; justify-content: center; height: 100%; border: 2px solid #FCD34D; box-shadow: inset 0 0 0 2px #E11D48, 0 0 10px rgba(245, 158, 11, 0.4); box-sizing: border-box;">
         <h4 style="color: #FFF; font-size: 14px; font-weight: 800; text-align: center; margin: 0 10px; z-index: 1;">📅 ${post.title}</h4>
