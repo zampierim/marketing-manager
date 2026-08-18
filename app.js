@@ -2709,6 +2709,7 @@ const filterDestiny = document.getElementById("filter-destiny");
 const filterIdea = document.getElementById("filter-idea");
 
 function isEditorial(p) {
+  if (p.commemorative) return true;
   const dests = Array.isArray(p.destinies) && p.destinies.length > 0 ? p.destinies : (p.destiny ? [p.destiny] : []);
   if (dests.length === 0) return true;
   return !dests.every(d => d === "interno" || d === "cliente");
@@ -3121,6 +3122,7 @@ function renderInternalComms() {
 
       const commPosts = posts.filter(p => {
         if (p.date !== dateStr) return false;
+        if (p.commemorative) return false;
         return p.destiny === "interno" || (p.destinies && p.destinies.includes("interno")) || p.primaryDestiny === "interno";
       });
 
