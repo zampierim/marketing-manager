@@ -941,23 +941,27 @@ function openModal(post = null, prefilledDate = "", prefilledIdeaId = "", prefil
     const btnDelete = document.getElementById("btn-delete");
     if(btnDelete) btnDelete.style.display = "none";
 
-    document.getElementById("field-topic").style.display = "block";
-    document.getElementById("field-briefing").style.display = "block";
-    document.getElementById("field-destiny").style.display = "block";
-    document.getElementById("field-author").style.display = "block";
-    document.getElementById("field-comments").style.display = "block";
-    const qaContainer = document.getElementById("field-approval-actions");
-    if(qaContainer) qaContainer.style.display = "flex";
+    const isInternal = prefilledType === 'Interno';
     
-    document.getElementById("post-author").required = true;
-    
-    if (prefilledType) {
-      document.getElementById("post-type").value = prefilledType;
-      document.getElementById("post-type").dispatchEvent(new Event('change'));
-    } else {
-      document.getElementById("post-type").value = "Editorial";
-      document.getElementById("post-type").dispatchEvent(new Event('change'));
+    const allDestinyCheckboxes = form.querySelectorAll('input[name="post_destiny"]');
+    allDestinyCheckboxes.forEach(cb => cb.checked = false);
+    if (isInternal) {
+      const cb = form.querySelector('input[name="post_destiny"][value="interno"]');
+      if (cb) cb.checked = true;
+      const primaryDestEl = document.getElementById("post-primary-destiny");
+      if (primaryDestEl) primaryDestEl.value = 'interno';
     }
+    if (typeof updateDestinyChipVisuals === 'function') updateDestinyChipVisuals();
+
+    document.getElementById("field-topic").style.display = isInternal ? "none" : "block";
+    document.getElementById("field-briefing").style.display = isInternal ? "none" : "block";
+    document.getElementById("field-destiny").style.display = isInternal ? "none" : "block";
+    document.getElementById("field-author").style.display = isInternal ? "none" : "block";
+    document.getElementById("field-comments").style.display = isInternal ? "none" : "block";
+    const qaContainer = document.getElementById("field-approval-actions");
+    if(qaContainer) qaContainer.style.display = isInternal ? "none" : "flex";
+    
+    document.getElementById("post-author").required = !isInternal;
   }
   modal.classList.remove("hidden");
 }
