@@ -1208,6 +1208,7 @@ form.addEventListener("submit", (e) => {
     }
   } else {
     posts.push(newPost);
+  }
   savePostToCloud(newPost);
   
   if (idVal) {
