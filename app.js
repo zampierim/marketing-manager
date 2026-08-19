@@ -298,11 +298,16 @@ function initCloudSync() {
 
 async function savePostToCloud(post) {
   try {
-    localStorage.setItem('saam_marketing_posts_v14', JSON.stringify(posts));
     if (typeof showToast === 'function') {
       showToast('Salvando...', 'success');
     }
     await db.collection("marketing_posts").doc(post.id.toString()).set(post);
+    
+    try {
+      localStorage.setItem('saam_marketing_posts_v14', JSON.stringify(posts));
+    } catch(lsError) {
+      console.warn("Local storage full, relying on Firebase");
+    }
   } catch(e) {
     console.error('Erro ao salvar post na nuvem:', e);
     if (typeof showToast === 'function') {
@@ -313,8 +318,12 @@ async function savePostToCloud(post) {
 
 async function deletePostFromCloud(id) {
   try {
-    localStorage.setItem('saam_marketing_posts_v14', JSON.stringify(posts));
     await db.collection("marketing_posts").doc(id.toString()).delete();
+    try {
+      localStorage.setItem('saam_marketing_posts_v14', JSON.stringify(posts));
+    } catch(lsError) {
+      console.warn("Local storage full, relying on Firebase");
+    }
   } catch(e) {
     console.error('Erro ao excluir post na nuvem:', e);
   }
