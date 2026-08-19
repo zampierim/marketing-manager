@@ -1286,3 +1286,25 @@ select.list-status-select.status-publicado { background: var(--c-publicado); }
 .post-card-info span {
   font-family: 'Roboto', sans-serif !important;
 }
+
+
+/* Status Badge in Lists (Read-Only) */
+.list-status-badge {
+  font-weight: 700;
+  color: #FFFFFF;
+  border-radius: 20px;
+  padding: 7px 16px;
+  min-width: 110px;
+  text-align: center;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  box-shadow: 0 1px 3px rgba(10,28,45,0.08);
+}
+.list-status-badge.status-rascunho { background: var(--c-rascunho); }
+.list-status-badge.status-analise { background: var(--c-analise); }
+.list-status-badge.status-aprovado { background: var(--c-aprovado); }
+.list-status-badge.status-agendado { background: var(--c-agendado); }
+.list-status-badge.status-publicado { background: var(--c-publicado); }
