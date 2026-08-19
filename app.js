@@ -2725,13 +2725,17 @@ const specialTitles = [
 // 1. FAST LOCAL LOAD (Optimistic UI)
 try {
   const saved = localStorage.getItem('saam_marketing_posts_v14');
-  if (saved) {
-    posts = JSON.parse(saved);
+  if (saved && JSON.parse(saved).length > 10) {
+    const localPosts = JSON.parse(saved);
+    const postMap = new Map();
+    [...defaultPosts, ...specialDates].forEach(p => postMap.set(p.id, p));
+    localPosts.forEach(p => postMap.set(p.id, p));
+    posts = Array.from(postMap.values());
   } else {
-    posts = [];
+    posts = [...defaultPosts, ...specialDates];
   }
 } catch(e) {
-  posts = [];
+  posts = [...defaultPosts, ...specialDates];
 }
 
 // FIX CORRUPTED COMMEMORATIVE POSTS
@@ -2743,10 +2747,10 @@ posts.forEach(p => {
   }
 });
 if (corruptedFixed) {
-  localStorage.setItem('saam_marketing_posts_v14', JSON.stringify(posts));
+  try {
+    localStorage.setItem('saam_marketing_posts_v14', JSON.stringify(posts));
+  } catch(e) {}
 }
-
-
 
 // Preload images from IDB into memory cache and posts for fast startup
 (async function preloadImagesFromIdb() {
@@ -2781,27 +2785,16 @@ if (corruptedFixed) {
 // 2. REAL-TIME CLOUD SYNC
 function initCloudSync() {
   const postsRef = db.collection("marketing_posts");
-  
-  // Migration logic (run once)
-  const oldDocRef = db.collection("marketing").doc("calendar");
-  oldDocRef.get().then(docSnap => {
-    if (docSnap.exists) {
-      const oldPosts = docSnap.data().posts || [];
-      const batch = db.batch();
-      oldPosts.forEach(p => {
-        batch.set(postsRef.doc(p.id.toString()), p);
-      });
-      batch.commit().then(() => {
-        oldDocRef.delete();
-      });
-    }
-  });
 
   postsRef.onSnapshot(async (snapshot) => {
     const cloudPosts = [];
     snapshot.forEach(doc => cloudPosts.push(doc.data()));
     
-    posts = cloudPosts;
+    // Merge cloud posts with all default posts (cloud posts take precedence by ID)
+    const postMap = new Map();
+    [...defaultPosts, ...specialDates].forEach(p => postMap.set(p.id, p));
+    cloudPosts.forEach(p => postMap.set(p.id, p));
+    posts = Array.from(postMap.values());
     
     // FIX CORRUPTED COMMEMORATIVE POSTS
     posts.forEach(p => {
