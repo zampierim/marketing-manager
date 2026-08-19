@@ -53,6 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
       window.requirePassword(() => {
         document.getElementById("project-form").reset();
         document.getElementById("project-id").value = "";
+        document.getElementById("project-link").value = "";
         document.getElementById("project-modal-title").textContent = "Novo Projeto";
         document.getElementById("btn-delete-project").style.display = "none";
         projectModal.classList.remove("hidden");
@@ -102,6 +103,7 @@ document.addEventListener("DOMContentLoaded", () => {
       id: idVal ? parseInt(idVal) : Date.now(),
       title: document.getElementById("project-title").value,
       description: document.getElementById("project-description").value,
+      link: document.getElementById("project-link").value.trim(),
       status: document.getElementById("project-status").value
     };
 
@@ -226,6 +228,7 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("project-id").value = proj.id;
       document.getElementById("project-title").value = proj.title;
       document.getElementById("project-description").value = proj.description || "";
+      document.getElementById("project-link").value = proj.link || "";
       document.getElementById("project-status").value = proj.status;
       document.getElementById("project-modal-title").textContent = "Editar Projeto";
       document.getElementById("btn-delete-project").style.display = "block";
@@ -351,6 +354,18 @@ document.addEventListener("DOMContentLoaded", () => {
       if (p.description) {
         descHtml = `<div style="font-size: 12px; color: #64748B; margin-top: 6px; white-space: pre-wrap; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">${p.description}</div>`;
       }
+
+      let linkHtml = "";
+      if (p.link) {
+        linkHtml = `
+          <div style="margin-top: 8px;">
+            <a href="${p.link}" target="_blank" onclick="event.stopPropagation();" style="display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 700; color: #2563EB; background: #EFF6FF; border: 1px solid #BFDBFE; padding: 4px 10px; border-radius: 6px; text-decoration: none; transition: background 0.2s;" onmouseover="this.style.background='#DBEAFE'" onmouseout="this.style.background='#EFF6FF'" title="Abrir link do projeto: ${p.link}">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              Acessar Link
+            </a>
+          </div>
+        `;
+      }
       
       el.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
@@ -358,6 +373,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2" style="cursor: grab; flex-shrink: 0; margin-top: 2px;"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
         </div>
         ${descHtml}
+        ${linkHtml}
       `;
 
       // Drag Events

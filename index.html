@@ -2919,6 +2919,10 @@
           <textarea id="project-description" placeholder="Descreva do que se trata este projeto..." style="min-height: 80px; width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--hairline);"></textarea>
         </div>
         <div class="field">
+          <label>Link / URL Útil <span style="font-weight: 400; font-size: 11px; color: #94A3B8;">(Drive, Docs, Figma, Trello, etc.)</span></label>
+          <input type="url" id="project-link" placeholder="https://drive.google.com/... ou https://docs.google.com/..." style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--hairline); background: #fff;">
+        </div>
+        <div class="field">
           <label>Status</label>
           <select id="project-status" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--hairline);">
             <option value="backlog">Backlog (A iniciar)</option>
@@ -2994,8 +2998,8 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 
-<script src="app.js?v=35"></script>
-<script src="projects.js?v=2"></script>
+<script src="app.js?v=36"></script>
+<script src="projects.js?v=3"></script>
 <div id="toast-container" class="toast-container"></div>
 
 

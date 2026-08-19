@@ -298,8 +298,16 @@ const specialTitles = [
   "Dia do Contador", "Outubro Rosa", "Outubro Rosa - Prevenção ao Câncer de Mama",
   "Dia do Vendedor", "Novembro Azul", "Novembro Azul - Prevenção ao Câncer de Prostata",
   "Dezembro Laranja", "Dezembro Laranja - Prevenção ao Câncer de Pele", 
-  "Natal", "Ano Novo", "Dia do Blog"
+  "Natal", "Ano Novo"
 ];
+
+function isKeepPost(p) {
+  if (!p) return false;
+  if (p.id === 99016 || p.title === "Dia do Blog" || p.tag === "Dia do Blog") return false;
+  if (p.commemorative === true || (p.id >= 99000 && p.id <= 99999)) return true;
+  if (p.id >= 100000000000) return true; // user-created timestamp IDs
+  return false;
+}
 
 // 1. FAST LOCAL LOAD (Optimistic UI)
 try {
