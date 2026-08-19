@@ -241,12 +241,7 @@ if (corruptedFixed) {
   localStorage.setItem('saam_marketing_posts_v14', JSON.stringify(posts));
 }
 
-// Add missing special dates without wiping existing ones
-specialDates.forEach(sd => {
-  if (!posts.find(p => p.id === sd.id || (p.title === sd.title && p.date === sd.date))) {
-    posts.push(sd);
-  }
-});
+
 
 // 2. REAL-TIME CLOUD SYNC
 function initCloudSync() {
@@ -280,12 +275,7 @@ function initCloudSync() {
       }
     });
 
-    specialDates.forEach(sd => {
-      if (!posts.find(p => p.id === sd.id || (p.title === sd.title && p.date === sd.date))) {
-        posts.push(sd);
-        postsRef.doc(sd.id.toString()).set(sd);
-      }
-    });
+
     
     localStorage.setItem('saam_marketing_posts_v14', JSON.stringify(posts));
     
