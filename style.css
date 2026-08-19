@@ -1177,11 +1177,14 @@ select.list-status-select.status-publicado { background: var(--c-publicado); }
   }
   
   /* Modals — 100% Mobile Safe */
-  .overlay {
+  .overlay:not(.hidden) {
     padding: 10px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+  }
+  .hidden {
+    display: none !important;
   }
   .modal {
     width: 100% !important;
