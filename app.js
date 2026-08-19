@@ -1035,6 +1035,11 @@ function openModal(post = null, prefilledDate = "", prefilledIdeaId = "", prefil
     document.getElementById("post-image-data").value = postImg;
     document.getElementById("post-image-file").value = "";
     
+    const inputImageUrl = document.getElementById("post-image-url");
+    if (inputImageUrl) {
+      inputImageUrl.value = (postImg && postImg.startsWith('http')) ? postImg : '';
+    }
+    
     const uploadPreview = document.getElementById("upload-preview");
     const uploadPlaceholder = document.getElementById("upload-placeholder");
     const btnDownload = document.getElementById("btn-download-image");
@@ -1102,6 +1107,8 @@ function openModal(post = null, prefilledDate = "", prefilledIdeaId = "", prefil
     document.getElementById("post-id").value = "";
     document.getElementById("post-image-data").value = "";
     document.getElementById("post-image-file").value = "";
+    const inputImageUrl = document.getElementById("post-image-url");
+    if (inputImageUrl) inputImageUrl.value = "";
     document.getElementById("upload-preview").src = "";
     document.getElementById("upload-preview").classList.add("hidden");
     document.getElementById("upload-placeholder").classList.remove("hidden");
@@ -1492,10 +1499,80 @@ document.getElementById("post-image-file").addEventListener("change", async func
     preview.src = "";
     preview.classList.add("hidden");
     placeholder.innerHTML = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Clique para adicionar imagem</span>`;
-    placeholder.classList.remove("hidden");
     if (btnDownload) btnDownload.classList.add("hidden");
   }
 });
+
+// ─── Google Drive & Web Image URL Resolver ────────────────────────────────────
+function convertGoogleDriveUrl(url) {
+  if (!url || typeof url !== 'string') return '';
+  url = url.trim();
+  
+  // Convert Google Drive links to direct viewable image URLs
+  if (url.includes('drive.google.com') || url.includes('docs.google.com')) {
+    let fileId = '';
+    const match1 = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (match1 && match1[1]) {
+      fileId = match1[1];
+    } else {
+      const match2 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+      if (match2 && match2[1]) {
+        fileId = match2[1];
+      }
+    }
+    if (fileId) {
+      return `https://lh3.googleusercontent.com/d/${fileId}`;
+    }
+  }
+  return url;
+}
+
+const btnApplyImageUrl = document.getElementById("btn-apply-image-url");
+const inputImageUrl = document.getElementById("post-image-url");
+
+if (btnApplyImageUrl && inputImageUrl) {
+  const applyUrl = () => {
+    const rawUrl = inputImageUrl.value.trim();
+    if (!rawUrl) return;
+    const finalUrl = convertGoogleDriveUrl(rawUrl);
+    
+    document.getElementById("post-image-data").value = finalUrl;
+    const preview = document.getElementById("upload-preview");
+    const placeholder = document.getElementById("upload-placeholder");
+    const btnDownload = document.getElementById("btn-download-image");
+    
+    preview.src = finalUrl;
+    preview.classList.remove("hidden");
+    placeholder.classList.add("hidden");
+    
+    if (btnDownload) {
+      btnDownload.href = finalUrl;
+      btnDownload.classList.remove("hidden");
+    }
+    
+    const currentId = document.getElementById("post-id").value;
+    if (currentId) {
+      cacheImage(currentId, finalUrl);
+      saveImageToIdb(currentId, finalUrl);
+    }
+    
+    if (typeof showToast === 'function') {
+      showToast(rawUrl.includes('drive.google.com') ? '✅ Imagem do Google Drive carregada!' : '✅ Link da imagem carregado!', 'success');
+    }
+  };
+
+  btnApplyImageUrl.addEventListener("click", applyUrl);
+  inputImageUrl.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      applyUrl();
+    }
+  });
+  inputImageUrl.addEventListener("paste", () => {
+    setTimeout(applyUrl, 100);
+  });
+}
+// ──────────────────────────────────────────────────────────────────────────────
 
 let ideas = [
   {
