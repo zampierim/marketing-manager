@@ -747,18 +747,18 @@ function renderInternalComms() {
   for (let d = 1; d <= daysInMonth; d++) {
     const dateObj = new Date(year, month, d);
     const dayOfWeek = dateObj.getDay();
+    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
 
-    if (dayOfWeek === 2 || dayOfWeek === 4) { // Terça (2) ou Quinta (4)
+    const commPosts = posts.filter(p => {
+      if (p.date !== dateStr) return false;
+      if (p.commemorative) return false;
+      return p.destiny === "interno" || (p.destinies && p.destinies.includes("interno")) || p.primaryDestiny === "interno";
+    });
+
+    if (dayOfWeek === 2 || dayOfWeek === 4 || commPosts.length > 0) {
       hasSlots = true;
-      const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
       const dayStr = String(d).padStart(2, '0');
       const weekDay = weekNamesShort[dayOfWeek];
-
-      const commPosts = posts.filter(p => {
-        if (p.date !== dateStr) return false;
-        if (p.commemorative) return false;
-        return p.destiny === "interno" || (p.destinies && p.destinies.includes("interno")) || p.primaryDestiny === "interno";
-      });
 
       if (commPosts.length > 0) {
         const dayGroupEl = document.createElement("div");
