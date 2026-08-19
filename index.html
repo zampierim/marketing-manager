@@ -2249,13 +2249,27 @@
       </div>
       
       <!-- Lista de Ideias (Mural) -->
-      <div>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-          <h3 style="margin: 0; font-size: 20px; color: #0F172A;">Mural de Colaborações Executadas</h3>
-          <span style="font-size: 13px; font-weight: 600; color: #64748B; background: #E2E8F0; padding: 4px 10px; border-radius: 12px;" id="sugestoes-count">0 contribuições</span>
+      <div style="display: flex; flex-direction: column; gap: 32px;">
+        <!-- Mural Pendentes -->
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="margin: 0; font-size: 20px; color: #0F172A;">Mural de Colaborações</h3>
+            <span style="font-size: 13px; font-weight: 600; color: #64748B; background: #E2E8F0; padding: 4px 10px; border-radius: 12px;" id="sugestoes-count">0 contribuições</span>
+          </div>
+          <div id="sugestoes-list" style="display: flex; flex-direction: column; gap: 16px;">
+            <!-- Populated by JS -->
+          </div>
         </div>
-        <div id="sugestoes-list" style="display: flex; flex-direction: column; gap: 16px;">
-          <!-- Populated by JS -->
+
+        <!-- Mural Executadas -->
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="margin: 0; font-size: 20px; color: #0F172A;">Colaborações Executadas</h3>
+            <span style="font-size: 13px; font-weight: 600; color: #64748B; background: #E2E8F0; padding: 4px 10px; border-radius: 12px;" id="sugestoes-executadas-count">0 contribuições</span>
+          </div>
+          <div id="sugestoes-executadas-list" style="display: flex; flex-direction: column; gap: 16px;">
+            <!-- Populated by JS -->
+          </div>
         </div>
       </div>
     </div>
@@ -2938,6 +2952,9 @@
           <select id="process-frequency" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--hairline);">
             <option value="Diário">Diário</option>
             <option value="Semanal">Semanal</option>
+            <option value="2x na Semana">2x na Semana</option>
+            <option value="3x na Semana">3x na Semana</option>
+            <option value="Quinzenal">Quinzenal</option>
             <option value="Mensal">Mensal</option>
           </select>
         </div>

@@ -7906,49 +7906,80 @@ function saveSugestoes() {
 function renderSugestoes() {
   const listEl = document.getElementById("sugestoes-list");
   const countEl = document.getElementById("sugestoes-count");
+  const listExecEl = document.getElementById("sugestoes-executadas-list");
+  const countExecEl = document.getElementById("sugestoes-executadas-count");
   if (!listEl) return;
   
-  if (sugestoes.length === 0) {
-    listEl.innerHTML = `<div style="text-align: center; padding: 40px; color: #64748B; font-size: 14px; background: #F8FAFC; border-radius: 12px; border: 1px dashed #CBD5E1;">Ainda não há nenhuma ideia ou feedback por aqui. Seja o primeiro!</div>`;
-    if(countEl) countEl.textContent = `0 contribuições`;
-    return;
-  }
+  const pendentes = sugestoes.filter(s => !s.executada);
+  const executadas = sugestoes.filter(s => s.executada);
   
-  // Sort by newest first
-  const sorted = [...sugestoes].sort((a,b) => b.id - a.id);
-  
-  listEl.innerHTML = sorted.map(s => {
-    const dateStr = new Date(s.id).toLocaleDateString('pt-BR', {day: '2-digit', month: 'short', hour: '2-digit', minute:'2-digit'});
-    let typeColor = '#3B82F6';
-    let typeBg = '#EFF6FF';
-    if(s.tipo === 'Ideia de Post') { typeColor = '#8B5CF6'; typeBg = '#F5F3FF'; }
-    if(s.tipo === 'Feedback Geral') { typeColor = '#F59E0B'; typeBg = '#FFFBEB'; }
+  const renderList = (arr, container, countContainer, emptyMsg) => {
+    if (arr.length === 0) {
+      container.innerHTML = `<div style="text-align: center; padding: 40px; color: #64748B; font-size: 14px; background: #F8FAFC; border-radius: 12px; border: 1px dashed #CBD5E1;">${emptyMsg}</div>`;
+      if(countContainer) countContainer.textContent = `0 contribuições`;
+      return;
+    }
     
-    return `
-      <div style="background: #FFF; border: 1px solid var(--hairline); border-radius: 12px; padding: 16px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 12px;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-          <div>
-            <span style="display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; color: ${typeColor}; background: ${typeBg}; margin-bottom: 8px;">${s.tipo}</span>
-            <h4 style="margin: 0; font-size: 16px; color: #0F172A;">${s.titulo}</h4>
+    // Sort by newest first
+    const sorted = [...arr].sort((a,b) => b.id - a.id);
+    
+    container.innerHTML = sorted.map(s => {
+      const dateStr = new Date(s.id).toLocaleDateString('pt-BR', {day: '2-digit', month: 'short', hour: '2-digit', minute:'2-digit'});
+      let typeColor = '#3B82F6';
+      let typeBg = '#EFF6FF';
+      if(s.tipo === 'Ideia de Post') { typeColor = '#8B5CF6'; typeBg = '#F5F3FF'; }
+      if(s.tipo === 'Feedback Geral') { typeColor = '#F59E0B'; typeBg = '#FFFBEB'; }
+      
+      const toggleAction = s.executada 
+        ? `<span style="margin-left: auto; cursor: pointer; color: #64748B; background: #F1F5F9; padding: 4px 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600;" onclick="toggleExecutarSugestao(${s.id})" title="Desfazer">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Voltar
+           </span>`
+        : `<span style="margin-left: auto; cursor: pointer; color: #059669; background: #D1FAE5; padding: 4px 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600;" onclick="toggleExecutarSugestao(${s.id})" title="Marcar como Executada">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Executar
+           </span>`;
+
+      return `
+        <div style="background: #FFF; border: 1px solid var(--hairline); border-radius: 12px; padding: 16px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 12px; ${s.executada ? 'opacity: 0.6;' : ''}">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+              <span style="display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; color: ${typeColor}; background: ${typeBg}; margin-bottom: 8px;">${s.tipo}</span>
+              <h4 style="margin: 0; font-size: 16px; color: #0F172A;">${s.titulo}</h4>
+            </div>
+            <span style="font-size: 12px; color: #94A3B8;">${dateStr}</span>
           </div>
-          <span style="font-size: 12px; color: #94A3B8;">${dateStr}</span>
+          <p style="margin: 0; font-size: 14px; color: #475569; line-height: 1.5; white-space: pre-wrap;">${s.desc}</p>
+          <div style="border-top: 1px solid #F1F5F9; padding-top: 12px; font-size: 13px; color: #64748B; display: flex; align-items: center; gap: 6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Por <strong style="color:#0F172A;">${s.nome}</strong>
+            
+            ${toggleAction}
+            
+            <span style="${s.executada ? 'margin-left: 8px;' : ''} cursor: pointer; color: #EF4444; background: #FEF2F2; padding: 4px 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600;" onclick="deleteSugestao(${s.id})" title="Deletar sugestão">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              Excluir
+            </span>
+          </div>
         </div>
-        <p style="margin: 0; font-size: 14px; color: #475569; line-height: 1.5; white-space: pre-wrap;">${s.desc}</p>
-        <div style="border-top: 1px solid #F1F5F9; padding-top: 12px; font-size: 13px; color: #64748B; display: flex; align-items: center; gap: 6px;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          Por <strong style="color:#0F172A;">${s.nome}</strong>
-          
-          <span style="margin-left: auto; cursor: pointer; color: #EF4444; background: #FEF2F2; padding: 4px 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600;" onclick="deleteSugestao(${s.id})" title="Deletar sugestão">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-            Excluir
-          </span>
-        </div>
-      </div>
-    `;
-  }).join('');
-  
-  if(countEl) countEl.textContent = `${sugestoes.length} contribuiç${sugestoes.length === 1 ? 'ão' : 'ões'}`;
+      `;
+    }).join('');
+    
+    if(countContainer) countContainer.textContent = `${arr.length} contribuiç${arr.length === 1 ? 'ão' : 'ões'}`;
+  };
+
+  renderList(pendentes, listEl, countEl, "Ainda não há nenhuma ideia ou feedback pendente por aqui. Seja o primeiro!");
+  if (listExecEl) {
+    renderList(executadas, listExecEl, countExecEl, "Nenhuma colaboração foi executada ainda.");
+  }
 }
+
+window.toggleExecutarSugestao = function(id) {
+  const sug = sugestoes.find(s => s.id === id);
+  if (sug) {
+    sug.executada = !sug.executada;
+    saveSugestoes();
+    renderSugestoes();
+  }
+};
 
 window.deleteSugestao = function(id) {
   if(confirm("Deseja realmente remover esta contribuição?")) {
