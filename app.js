@@ -751,7 +751,6 @@ function renderInternalComms() {
 
     const commPosts = posts.filter(p => {
       if (p.date !== dateStr) return false;
-      if (p.commemorative) return false;
       return p.destiny === "interno" || (p.destinies && p.destinies.includes("interno")) || p.primaryDestiny === "interno";
     });
 
