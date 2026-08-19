@@ -1,4 +1,4 @@
-// projects.js
+// projects.js - Real-time Firestore Cloud Sync for Projects & Processes
 
 document.addEventListener("DOMContentLoaded", () => {
   const pageProjetos = document.getElementById("page-projetos");
@@ -24,8 +24,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // State Management
-  let projects = JSON.parse(localStorage.getItem("saam_projects")) || [
+  // Default seed projects
+  const defaultProjects = [
     { id: 101, title: "Reestruturação instagram", description: "Destaques, biografia...", status: "backlog" },
     { id: 102, title: "Estruturação Linkedin", description: "", status: "backlog" },
     { id: 103, title: "Vídeo demonstrativo - Site", description: "vídeo para o site novo", status: "backlog" },
@@ -34,14 +34,97 @@ document.addEventListener("DOMContentLoaded", () => {
     { id: 106, title: "Plataforma Marketing", description: "", status: "in_progress" },
     { id: 107, title: "Squad - Boletim Informativo (PO)", description: "", status: "done" }
   ];
+
+  // State Management (Local + Cloud)
+  let projects = JSON.parse(localStorage.getItem("saam_projects")) || defaultProjects;
   let processes = JSON.parse(localStorage.getItem("saam_processes")) || [];
 
-  function saveProjects() {
-    localStorage.setItem("saam_projects", JSON.stringify(projects));
+  function saveLocal() {
+    try {
+      localStorage.setItem("saam_projects", JSON.stringify(projects));
+      localStorage.setItem("saam_processes", JSON.stringify(processes));
+    } catch(e) {}
   }
 
-  function saveProcesses() {
-    localStorage.setItem("saam_processes", JSON.stringify(processes));
+  // Firestore Real-Time Sync
+  function initFirestoreProjectsSync() {
+    if (typeof firebase === 'undefined' || !firebase.apps.length) {
+      setTimeout(initFirestoreProjectsSync, 200);
+      return;
+    }
+    const firestore = firebase.firestore();
+
+    // 1. Sync Projects
+    firestore.collection("marketing_projects").onSnapshot((snapshot) => {
+      if (!snapshot.empty) {
+        const cloudProjects = [];
+        snapshot.forEach(doc => cloudProjects.push(doc.data()));
+        projects = cloudProjects;
+        saveLocal();
+        renderProjects();
+      } else {
+        // Seed initial projects to cloud once
+        const batch = firestore.batch();
+        defaultProjects.forEach(p => {
+          batch.set(firestore.collection("marketing_projects").doc(p.id.toString()), p);
+        });
+        batch.commit().catch(e => console.warn("Seed projects error:", e));
+      }
+    }, err => console.warn("Projects sync note:", err));
+
+    // 2. Sync Processes / Routines
+    firestore.collection("marketing_processes").onSnapshot((snapshot) => {
+      const cloudProcesses = [];
+      snapshot.forEach(doc => cloudProcesses.push(doc.data()));
+      processes = cloudProcesses;
+      saveLocal();
+      renderProcesses();
+    }, err => console.warn("Processes sync note:", err));
+  }
+
+  initFirestoreProjectsSync();
+
+  // Cloud Persistence Helpers
+  async function saveProjectToCloud(proj) {
+    saveLocal();
+    renderProjects();
+    try {
+      if (typeof firebase !== 'undefined' && firebase.apps.length) {
+        await firebase.firestore().collection("marketing_projects").doc(proj.id.toString()).set(proj);
+      }
+    } catch(e) { console.error("Error saving project to cloud:", e); }
+  }
+
+  async function deleteProjectFromCloud(id) {
+    projects = projects.filter(p => p.id !== parseInt(id));
+    saveLocal();
+    renderProjects();
+    try {
+      if (typeof firebase !== 'undefined' && firebase.apps.length) {
+        await firebase.firestore().collection("marketing_projects").doc(id.toString()).delete();
+      }
+    } catch(e) { console.error("Error deleting project from cloud:", e); }
+  }
+
+  async function saveProcessToCloud(proc) {
+    saveLocal();
+    renderProcesses();
+    try {
+      if (typeof firebase !== 'undefined' && firebase.apps.length) {
+        await firebase.firestore().collection("marketing_processes").doc(proc.id.toString()).set(proc);
+      }
+    } catch(e) { console.error("Error saving process to cloud:", e); }
+  }
+
+  async function deleteProcessFromCloud(id) {
+    processes = processes.filter(p => p.id !== parseInt(id));
+    saveLocal();
+    renderProcesses();
+    try {
+      if (typeof firebase !== 'undefined' && firebase.apps.length) {
+        await firebase.firestore().collection("marketing_processes").doc(id.toString()).delete();
+      }
+    } catch(e) { console.error("Error deleting process from cloud:", e); }
   }
 
   // Modals functionality
@@ -103,7 +186,7 @@ document.addEventListener("DOMContentLoaded", () => {
       id: idVal ? parseInt(idVal) : Date.now(),
       title: document.getElementById("project-title").value,
       description: document.getElementById("project-description").value,
-      link: document.getElementById("project-link").value.trim(),
+      link: document.getElementById("project-link") ? document.getElementById("project-link").value.trim() : "",
       status: document.getElementById("project-status").value
     };
 
@@ -114,10 +197,9 @@ document.addEventListener("DOMContentLoaded", () => {
       projects.push(newProject);
     }
     
-    saveProjects();
+    saveProjectToCloud(newProject);
     projectModal.classList.add("hidden");
-    renderProjects();
-    if(typeof showToast === 'function') showToast('✅ Projeto salvo', 'success');
+    if(typeof showToast === 'function') showToast('✅ Projeto salvo na nuvem!', 'success');
   });
 
   // Dynamic UI toggling for Process Frequency
@@ -178,10 +260,9 @@ document.addEventListener("DOMContentLoaded", () => {
       processes.push(newProcess);
     }
     
-    saveProcesses();
+    saveProcessToCloud(newProcess);
     processModal.classList.add("hidden");
-    renderProcesses();
-    if(typeof showToast === 'function') showToast('✅ Processo salvo', 'success');
+    if(typeof showToast === 'function') showToast('✅ Processo salvo na nuvem!', 'success');
   });
 
   // Delete Buttons
@@ -196,10 +277,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if(confirm("Excluir este projeto?")) {
       const idVal = document.getElementById("project-id").value;
-      projects = projects.filter(p => p.id !== parseInt(idVal));
-      saveProjects();
+      deleteProjectFromCloud(idVal);
       projectModal.classList.add("hidden");
-      renderProjects();
+      if(typeof showToast === 'function') showToast('Projeto excluído.', 'success');
     }
   });
 
@@ -214,10 +294,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if(confirm("Excluir este processo?")) {
       const idVal = document.getElementById("process-id").value;
-      processes = processes.filter(p => p.id !== parseInt(idVal));
-      saveProcesses();
+      deleteProcessFromCloud(idVal);
       processModal.classList.add("hidden");
-      renderProcesses();
+      if(typeof showToast === 'function') showToast('Processo excluído.', 'success');
     }
   });
 
@@ -228,7 +307,9 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("project-id").value = proj.id;
       document.getElementById("project-title").value = proj.title;
       document.getElementById("project-description").value = proj.description || "";
-      document.getElementById("project-link").value = proj.link || "";
+      if (document.getElementById("project-link")) {
+        document.getElementById("project-link").value = proj.link || "";
+      }
       document.getElementById("project-status").value = proj.status;
       document.getElementById("project-modal-title").textContent = "Editar Projeto";
       document.getElementById("btn-delete-project").style.display = "block";
@@ -278,8 +359,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const proj = projects.find(p => p.id === projectId);
       if (proj && proj.status !== targetStatus) {
         proj.status = targetStatus;
-        saveProjects();
-        renderProjects();
+        saveProjectToCloud(proj);
         if (typeof showToast === 'function') {
           const statusLabels = { 'backlog': 'Backlog', 'in_progress': 'Em Andamento', 'done': 'Finalizado' };
           showToast(`✅ Movido para ${statusLabels[targetStatus] || targetStatus}!`, 'success');
@@ -428,8 +508,8 @@ document.addEventListener("DOMContentLoaded", () => {
       let freqColor = "#64748B";
       let freqBg = "#F1F5F9";
       if (p.frequency === "Diário") { freqColor = "#059669"; freqBg = "#D1FAE5"; }
-      else if (p.frequency === "Semanal") { freqColor = "#2563EB"; freqBg = "#DBEAFE"; }
-      else if (p.frequency === "Mensal") { freqColor = "#D97706"; freqBg = "#FEF3C7"; }
+      else if (p.frequency && p.frequency.startsWith("Semanal")) { freqColor = "#2563EB"; freqBg = "#DBEAFE"; }
+      else if (p.frequency && p.frequency.startsWith("Mensal")) { freqColor = "#D97706"; freqBg = "#FEF3C7"; }
 
       el.innerHTML = `
         <div style="color: #64748B;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-9.21l-3.32 3.32"/></svg></div>
@@ -444,10 +524,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Initial render on boot if already visible
-  if (pageProjetos && !pageProjetos.classList.contains("hidden")) {
-    renderProjects();
-    renderProcesses();
-  }
+  // Initial render on boot
+  renderProjects();
+  renderProcesses();
 });
-
