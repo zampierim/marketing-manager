@@ -418,8 +418,6 @@ function renderCalendar() {
     
     const dayDateString = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
     const filteredPosts = getFilteredPosts();
-    const dayPosts = filteredPosts.filter(p => p.date === dayDateString);
-    
     if (dayPosts.length > 0) {
       dayCell.classList.add("has-post");
       const tag = dayPosts[0].tag;
@@ -431,24 +429,33 @@ function renderCalendar() {
       else if (tag === "Por Dentro do SAAM") dayCell.classList.add("bg-por-dentro");
       else dayCell.classList.add("bg-posicionamento"); // Fallback
     }
-    
+
     const dayNumber = document.createElement("div");
     dayNumber.className = "day-number";
     dayNumber.textContent = day;
     dayCell.appendChild(dayNumber);
-    
+
     if (dayPosts.length > 0) {
       // Sort so commemorative posts come first
       dayPosts.sort((a, b) => (b.commemorative ? 1 : 0) - (a.commemorative ? 1 : 0));
       
-      const post = dayPosts[0];
-      const card = createPostCard(post);
-      dayCell.appendChild(card);
+      // Make cell scrollable if multiple posts
+      if (dayPosts.length > 1) {
+        dayCell.style.overflowY = "auto";
+        dayCell.style.display = "flex";
+        dayCell.style.flexDirection = "column";
+        dayCell.style.gap = "4px";
+      }
+
+      dayPosts.forEach((post) => {
+        const card = createPostCard(post);
+        dayCell.appendChild(card);
+      });
     }
-    
+
     dayCell.addEventListener("click", (e) => {
-      // Se clicou na bolinha de status, não abre o modal
-      if (e.target.classList.contains("status-dot") || e.target.closest(".quick-status-menu")) return;
+      // Se clicou na bolinha de status ou em um card específico, o clique no card já gerencia a abertura
+      if (e.target.classList.contains("status-dot") || e.target.closest(".quick-status-menu") || e.target.closest(".post-card")) return;
       
       if (dayPosts.length > 0) openModal(dayPosts[0]);
       else openModal(null, dayDateString);
