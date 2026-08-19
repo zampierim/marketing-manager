@@ -1278,16 +1278,7 @@ form.addEventListener("submit", (e) => {
     posts.push(newPost);
   }
   savePostToCloud(newPost);
-  
-  if (idVal) {
-    // If we were editing an existing post, just close the modal
-    closeModal();
-  } else {
-    // If it was a new post, clear the form but keep the same date/destiny for continuous input
-    const savedDate = newPost.date;
-    const isInternal = newPost.destiny === 'interno';
-    openModal(null, savedDate, "", isInternal ? "Interno" : "");
-  }
+  closeModal();
   
   renderCalendar();
   renderList();
