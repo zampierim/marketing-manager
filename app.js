@@ -132,11 +132,9 @@ function showPage(pageEl) {
 }
 
 btnTabCalendario.addEventListener("click", () => {
-  requirePassword(() => {
-    showPage(pageCalendario);
-    renderCalendar();
-    renderList();
-  });
+  showPage(pageCalendario);
+  renderCalendar();
+  renderList();
 });
 
 let pendingPasswordCallback = null;
@@ -1030,10 +1028,6 @@ function renderInternalComms() {
 
 /* Modal Logic */
 function openModal(post = null, prefilledDate = "", prefilledIdeaId = "", prefilledType = "") {
-  if (sessionStorage.getItem("saam_unlocked") !== "true") {
-    requirePassword(() => openModal(post, prefilledDate, prefilledIdeaId, prefilledType));
-    return;
-  }
   form.reset();
   
   populateTopicSelect();
@@ -1333,6 +1327,13 @@ if(btnDelete) {
 
 form.addEventListener("submit", (e) => {
   e.preventDefault();
+
+  if (sessionStorage.getItem("saam_unlocked") !== "true") {
+    requirePassword(() => {
+      form.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+    });
+    return;
+  }
   
   const idVal = document.getElementById("post-id").value;
   const statusEl = form.querySelector('input[name="post_status"]:checked');
