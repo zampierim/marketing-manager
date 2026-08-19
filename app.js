@@ -1,4 +1,74 @@
 
+function setModalLockState(isLocked) {
+  const isUnlockedSession = sessionStorage.getItem("saam_unlocked") === "true";
+  const lock = isLocked && !isUnlockedSession;
+
+  const titleEl = document.getElementById("modal-title");
+  const btnEdit = document.getElementById("btn-enable-edit");
+  const btnSave = document.getElementById("btn-save");
+  const btnDel = document.getElementById("btn-delete");
+  const postId = document.getElementById("post-id").value;
+
+  const editableInputs = [
+    "post-date", "post-tag", "post-caption", "post-briefing", 
+    "post-author", "post-comments", "post-topic", "post-image-url", "post-image-file"
+  ];
+
+  editableInputs.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      if (lock) {
+        el.setAttribute("readonly", "true");
+        el.style.backgroundColor = "#F8FAFC";
+        el.style.borderColor = "#E2E8F0";
+        el.style.cursor = "default";
+      } else {
+        el.removeAttribute("readonly");
+        el.style.backgroundColor = "";
+        el.style.borderColor = "";
+        el.style.cursor = "";
+      }
+    }
+  });
+
+  const uploadBox = document.querySelector(".image-upload-box");
+  const uploadInput = document.getElementById("post-image-file");
+  const urlInputWrap = document.getElementById("post-image-url")?.parentElement;
+
+  if (uploadBox && uploadInput) {
+    if (lock) {
+      uploadInput.disabled = true;
+      uploadBox.style.cursor = "default";
+      if (urlInputWrap) urlInputWrap.style.display = "none";
+    } else {
+      uploadInput.disabled = false;
+      uploadBox.style.cursor = "pointer";
+      if (urlInputWrap) urlInputWrap.style.display = "flex";
+    }
+  }
+
+  // Status Chips
+  const statusGroup = document.getElementById("status-group");
+  if (statusGroup) {
+    statusGroup.style.pointerEvents = lock ? "none" : "auto";
+  }
+
+  // Action Buttons
+  if (btnEdit) btnEdit.style.display = lock ? "block" : "none";
+  if (btnSave) btnSave.style.display = lock ? "none" : "block";
+  if (btnDel) btnDel.style.display = (lock || !postId) ? "none" : "block";
+
+  if (titleEl) {
+    if (lock) {
+      titleEl.textContent = "Visualizar Publicação";
+    } else {
+      titleEl.textContent = postId ? "Editar Criativo" : "Novo Criativo";
+    }
+  }
+}
+window.setModalLockState = setModalLockState;
+
+
 window.openLightbox = function(src) {
   if (!src) return;
   const lb = document.getElementById("image-lightbox");
@@ -320,7 +390,7 @@ const specialTitles = [
 
 function isKeepPost(p) {
   if (!p) return false;
-  if (p.id === 99016 || p.title === "Dia do Blog" || p.tag === "Dia do Blog") return false;
+  if (p.id === 99016 || p.title === "Dia do Blog" || p.tag === "Dia do Blog" || (p.title && p.title.toLowerCase().includes("dia do blog"))) return false;
   if (p.commemorative === true || (p.id >= 99000 && p.id <= 99999)) return true;
   if (p.id >= 100000000000) return true; // user-created timestamp IDs
   return false;
@@ -1111,6 +1181,7 @@ function openModal(post = null, prefilledDate = "", prefilledIdeaId = "", prefil
 
   } else {
     document.getElementById("modal-title").textContent = "Novo Criativo";
+    setModalLockState(false);
     document.getElementById("post-id").value = "";
     document.getElementById("post-image-data").value = "";
     document.getElementById("post-image-file").value = "";
