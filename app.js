@@ -366,8 +366,7 @@ const specialDates = [
   {"id": 99012, "date": "2026-11-01", "tag": "Data Comemorativa", "title": "Novembro Azul - Prevenção ao Câncer de Prostata", "destiny": "interno", "destinies": ["interno", "instagram"], "primaryDestiny": "interno", "status": "aprovado", "author": "Marketing", "format": "Lembrete", "commemorative": true},
   {"id": 99013, "date": "2026-12-01", "tag": "Data Comemorativa", "title": "Dezembro Laranja - Prevenção ao Câncer de Pele", "destiny": "interno", "destinies": ["interno", "instagram"], "primaryDestiny": "interno", "status": "aprovado", "author": "Marketing", "format": "Lembrete", "commemorative": true},
   {"id": 99014, "date": "2026-12-25", "tag": "Data Comemorativa", "title": "Natal", "destiny": "interno", "destinies": ["interno", "instagram", "cliente"], "primaryDestiny": "interno", "status": "aprovado", "author": "Marketing", "format": "Lembrete", "commemorative": true},
-  {"id": 99015, "date": "2026-12-31", "tag": "Data Comemorativa", "title": "Ano Novo", "destiny": "interno", "destinies": ["interno", "instagram", "cliente"], "primaryDestiny": "interno", "status": "aprovado", "author": "Marketing", "format": "Lembrete", "commemorative": true},
-  {"id": 99016, "date": "2026-08-31", "tag": "Data Comemorativa", "title": "Dia do Blog", "destiny": "interno", "destinies": ["interno", "blog"], "primaryDestiny": "interno", "status": "aprovado", "author": "Marketing", "format": "Lembrete", "commemorative": true}
+  {"id": 99015, "date": "2026-12-31", "tag": "Data Comemorativa", "title": "Ano Novo", "destiny": "interno", "destinies": ["interno", "instagram", "cliente"], "primaryDestiny": "interno", "status": "aprovado", "author": "Marketing", "format": "Lembrete", "commemorative": true}
 ];
 
 // Initialize Firebase
@@ -472,6 +471,18 @@ function initCloudSync() {
   const postsRef = db.collection("marketing_posts");
 
   postsRef.onSnapshot(async (snapshot) => {
+    const deleteBatch = db.batch();
+    let hasDeletes = false;
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      if (!isKeepPost(data) || doc.id === "99016") {
+        deleteBatch.delete(postsRef.doc(doc.id));
+        hasDeletes = true;
+      }
+    });
+    if (hasDeletes) {
+      deleteBatch.commit().catch(e => console.warn("Purged rejected docs:", e));
+    }
     const cloudPosts = [];
     snapshot.forEach(doc => cloudPosts.push(doc.data()));
     
