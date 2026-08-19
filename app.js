@@ -50,6 +50,38 @@ async function deleteImageFromIdb(postId) {
 }
 // ──────────────────────────────────────────────────────────────────────────────
 
+// ─── In-memory image cache ────────────────────────────────────────────────────
+// This is the SINGLE source of truth for images at runtime.
+// It never gets cleared by Firestore's onSnapshot events.
+// IDB is used only to persist across page loads.
+const imageCache = {}; // { postId: dataUrl }
+
+function cacheImage(postId, dataUrl) {
+  if (dataUrl && typeof dataUrl === 'string' && dataUrl.startsWith('data:')) {
+    imageCache[String(postId)] = dataUrl;
+  }
+}
+
+function getCachedImage(postId) {
+  return imageCache[String(postId)] || null;
+}
+
+function getPostImage(post) {
+  if (!post) return '';
+  // If post already has a valid data URL or HTTP URL, use it and cache it
+  if (post.image && post.image !== '__idb__' && (post.image.startsWith('data:') || post.image.startsWith('http'))) {
+    cacheImage(post.id, post.image);
+    return post.image;
+  }
+  // Check memory cache
+  const cached = getCachedImage(post.id);
+  if (cached) {
+    post.image = cached;
+    return cached;
+  }
+  return '';
+}
+// ──────────────────────────────────────────────────────────────────────────────
 
 // Navigation logic
 const pageHome = document.getElementById("page-home");
@@ -295,6 +327,36 @@ if (corruptedFixed) {
 
 
 
+// Preload images from IDB into memory cache and posts for fast startup
+(async function preloadImagesFromIdb() {
+  try {
+    if (Array.isArray(posts) && posts.length > 0) {
+      let updated = false;
+      for (const p of posts) {
+        const cached = getCachedImage(p.id);
+        if (cached) {
+          p.image = cached;
+          updated = true;
+        } else {
+          const dataUrl = await getImageFromIdb(p.id);
+          if (dataUrl) {
+            cacheImage(p.id, dataUrl);
+            p.image = dataUrl;
+            updated = true;
+          }
+        }
+      }
+      if (updated) {
+        renderCalendar();
+        renderList();
+        if (typeof renderInternalComms === 'function') renderInternalComms();
+      }
+    }
+  } catch(e) {
+    console.warn("Preload IDB error:", e);
+  }
+})();
+
 // 2. REAL-TIME CLOUD SYNC
 function initCloudSync() {
   const postsRef = db.collection("marketing_posts");
@@ -327,15 +389,25 @@ function initCloudSync() {
       }
     });
 
-    // Restore images from IndexedDB for posts that have '__idb__' sentinel
-    const imageFetches = posts
-      .filter(p => p.image === '__idb__')
-      .map(async p => {
+    // Restore images: check memory cache FIRST, then IndexedDB
+    await Promise.all(posts.map(async p => {
+      const cached = getCachedImage(p.id);
+      if (cached) {
+        p.image = cached;
+        return;
+      }
+      if (p.image === '__idb__' || !p.image) {
         const dataUrl = await getImageFromIdb(p.id);
-        if (dataUrl) p.image = dataUrl;
-        else p.image = ''; // image not found in IDB (different device/browser)
-      });
-    await Promise.all(imageFetches);
+        if (dataUrl) {
+          cacheImage(p.id, dataUrl);
+          p.image = dataUrl;
+        } else {
+          p.image = '';
+        }
+      } else if (p.image && p.image.startsWith('data:')) {
+        cacheImage(p.id, p.image);
+      }
+    }));
     
     try {
       localStorage.setItem('saam_marketing_posts_v14', JSON.stringify(posts));
@@ -343,6 +415,7 @@ function initCloudSync() {
     
     renderCalendar();
     renderList();
+    if (typeof renderInternalComms === 'function') renderInternalComms();
   }, (error) => {
     console.error("Firebase sync error", error);
   });
@@ -353,11 +426,14 @@ async function savePostToCloud(post) {
     if (typeof showToast === 'function') {
       showToast('Salvando...', 'success');
     }
-    // Save image to IndexedDB (unlimited local browser storage) and strip from Firestore doc
+    // Save image to IndexedDB (unlimited local browser storage) and memory cache
     const postToSave = { ...post };
-    if (postToSave.image && postToSave.image.startsWith('data:')) {
-      await saveImageToIdb(postToSave.id, postToSave.image);
-      postToSave.image = '__idb__'; // sentinel: image lives in IndexedDB
+    const imageToPersist = post.image || getCachedImage(post.id);
+    if (imageToPersist && imageToPersist.startsWith('data:')) {
+      cacheImage(postToSave.id, imageToPersist);
+      await saveImageToIdb(postToSave.id, imageToPersist);
+      postToSave.image = '__idb__'; // sentinel: image lives in IndexedDB/cache
+      post.image = imageToPersist; // keep full image in current RAM post
     }
     await db.collection("marketing_posts").doc(postToSave.id.toString()).set(postToSave);
     
@@ -376,6 +452,8 @@ async function savePostToCloud(post) {
 
 async function deletePostFromCloud(id) {
   try {
+    await deleteImageFromIdb(id);
+    delete imageCache[String(id)];
     await db.collection("marketing_posts").doc(id.toString()).delete();
     try {
       localStorage.setItem('saam_marketing_posts_v14', JSON.stringify(posts));
@@ -537,7 +615,7 @@ function createPostCard(post) {
   const card = document.createElement("div");
   card.className = "post-card";
   
-  const imgUrl = post.image || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' style='background:%23F8FAFC;'><rect width='400' height='400' fill='%23F8FAFC'/><path d='M150 250l30-40 40 50 60-80 50 100H100z' fill='%23E2E8F0'/><circle cx='160' cy='160' r='20' fill='%23E2E8F0'/></svg>";
+  const imgUrl = getPostImage(post) || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' style='background:%23F8FAFC;'><rect width='400' height='400' fill='%23F8FAFC'/><path d='M150 250l30-40 40 50 60-80 50 100H100z' fill='%23E2E8F0'/><circle cx='160' cy='160' r='20' fill='%23E2E8F0'/></svg>";
 
   let iconSvg = '';
   if(post.destiny === 'WhatsApp') {
@@ -583,7 +661,7 @@ function createPostCard(post) {
   }
 
   let cardHTML = ``;
-  if (post.commemorative && !post.image) {
+  if (post.commemorative && !getPostImage(post)) {
     cardHTML = `
       <div class="post-card-image" style="background: linear-gradient(135deg, #E11D48 0%, #9F1239 100%); display: flex; align-items: center; justify-content: center; height: 100%; border: 2px solid #FCD34D; box-shadow: inset 0 0 0 2px #E11D48, 0 0 10px rgba(245, 158, 11, 0.4); box-sizing: border-box;">
         <h4 style="color: #FFF; font-size: 14px; font-weight: 800; text-align: center; margin: 0 10px; z-index: 1;">📅 ${post.title}</h4>
@@ -707,7 +785,7 @@ function renderList() {
       postListEl.appendChild(header);
     }
     
-    const imgUrl = post.image || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' style='background:%23F8FAFC;'><rect width='400' height='400' fill='%23F8FAFC'/><path d='M150 250l30-40 40 50 60-80 50 100H100z' fill='%23E2E8F0'/><circle cx='160' cy='160' r='20' fill='%23E2E8F0'/></svg>";
+    const imgUrl = getPostImage(post) || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' style='background:%23F8FAFC;'><rect width='400' height='400' fill='%23F8FAFC'/><path d='M150 250l30-40 40 50 60-80 50 100H100z' fill='%23E2E8F0'/><circle cx='160' cy='160' r='20' fill='%23E2E8F0'/></svg>";
     const dayStr = String(d.getDate()).padStart(2,"0");
     const weekDay = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"][d.getDay()];
 
@@ -850,7 +928,7 @@ function renderInternalComms() {
         const postsContainer = dayGroupEl.querySelector('.day-posts');
 
         commPosts.forEach(post => {
-          const imgUrl = post.image || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' style='background:%23F8FAFC;'><rect width='400' height='400' fill='%23F8FAFC'/><path d='M150 250l30-40 40 50 60-80 50 100H100z' fill='%23E2E8F0'/><circle cx='160' cy='160' r='20' fill='%23E2E8F0'/></svg>";
+          const imgUrl = getPostImage(post) || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' style='background:%23F8FAFC;'><rect width='400' height='400' fill='%23F8FAFC'/><path d='M150 250l30-40 40 50 60-80 50 100H100z' fill='%23E2E8F0'/><circle cx='160' cy='160' r='20' fill='%23E2E8F0'/></svg>";
           const iconSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>`;
           
           const item = document.createElement("div");
@@ -947,23 +1025,25 @@ function openModal(post = null, prefilledDate = "", prefilledIdeaId = "", prefil
   
   populateTopicSelect();
 
-  if (post) {
+  if (post && post.id) {
     document.getElementById("modal-title").textContent = "Editar Criativo";
     document.getElementById("post-id").value = post.id;
-    document.getElementById("post-date").value = post.date;
+    document.getElementById("post-date").value = post.date || "";
     document.getElementById("post-tag").value = post.tag || "";
-    document.getElementById("post-image-data").value = post.image || "";
+    
+    const postImg = getPostImage(post);
+    document.getElementById("post-image-data").value = postImg;
     document.getElementById("post-image-file").value = "";
     
     const uploadPreview = document.getElementById("upload-preview");
     const uploadPlaceholder = document.getElementById("upload-placeholder");
     const btnDownload = document.getElementById("btn-download-image");
-    if (post.image) {
-      uploadPreview.src = post.image;
+    if (postImg) {
+      uploadPreview.src = postImg;
       uploadPreview.classList.remove("hidden");
       uploadPlaceholder.classList.add("hidden");
       if (btnDownload) {
-        btnDownload.href = post.image;
+        btnDownload.href = postImg;
         btnDownload.classList.remove("hidden");
       }
     } else {
@@ -1269,6 +1349,12 @@ form.addEventListener("submit", (e) => {
     routineId: document.getElementById("post-routine-link").value || null,
   };
   
+  const imgVal = document.getElementById("post-image-data").value;
+  if (imgVal && imgVal.startsWith('data:')) {
+    cacheImage(idInt, imgVal);
+    saveImageToIdb(idInt, imgVal);
+  }
+
   if (idVal) {
     const index = posts.findIndex(p => p.id === newPost.id);
     if (index > -1) {
