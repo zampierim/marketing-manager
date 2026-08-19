@@ -819,14 +819,7 @@ function renderInternalComms() {
           postsContainer.appendChild(item);
         });
 
-        // Add explicit "Adicionar outro" button for UX
-        const addMoreBtn = document.createElement("div");
-        addMoreBtn.style = "margin-top: 8px; cursor: pointer; color: #26428B; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 4px; padding: 6px 10px; border-radius: 6px; background: rgba(38,66,139,0.05); width: fit-content; border: 1px dashed rgba(38,66,139,0.2);";
-        addMoreBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Planejar mais uma comunicação aqui`;
-        addMoreBtn.addEventListener("click", () => {
-          openModal(null, dateStr, "", "Interno");
-        });
-        postsContainer.appendChild(addMoreBtn);
+
       } else {
         const dayGroupEl = document.createElement("div");
         dayGroupEl.className = "day-group";
