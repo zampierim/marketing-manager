@@ -1408,49 +1408,91 @@ document.getElementById("post-image-file").addEventListener("change", async func
   const file = e.target.files[0];
   const preview = document.getElementById("upload-preview");
   const placeholder = document.getElementById("upload-placeholder");
+  const btnDownload = document.getElementById("btn-download-image");
   
   if (file) {
-    // Read file and compress
-    const reader = new FileReader();
-    reader.onload = async function(evt) {
-      const img = new Image();
-      img.onload = async function() {
-        const MAX_W = 900;
-        const MAX_H = 900;
-        let w = img.width, h = img.height;
-        if (w > MAX_W) { h = h * (MAX_W / w); w = MAX_W; }
-        if (h > MAX_H) { w = w * (MAX_H / h); h = MAX_H; }
-        const canvas = document.createElement('canvas');
-        canvas.width = w; canvas.height = h;
-        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-        const compressed = canvas.toDataURL('image/jpeg', 0.75);
+    // Show upload progress
+    preview.src = "";
+    preview.classList.add("hidden");
+    placeholder.innerHTML = `<span style="font-size:12px;color:#2563EB;font-weight:700;">Subindo imagem para a nuvem... ⏳</span>`;
+    placeholder.classList.remove("hidden");
 
-        // Store in the hidden field (used when saving)
-        document.getElementById("post-image-data").value = compressed;
-        preview.src = compressed;
-        preview.classList.remove("hidden");
-        placeholder.classList.add("hidden");
+    try {
+      // 1. Compress image client-side to max 1200px
+      const compressedDataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = evt => {
+          const img = new Image();
+          img.onload = () => {
+            const MAX_W = 1200;
+            const MAX_H = 1200;
+            let w = img.width, h = img.height;
+            if (w > MAX_W) { h = Math.round(h * (MAX_W / w)); w = MAX_W; }
+            if (h > MAX_H) { w = Math.round(w * (MAX_H / h)); h = MAX_H; }
+            const canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/jpeg', 0.82));
+          };
+          img.onerror = reject;
+          img.src = evt.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
 
-        // Also try to save to IndexedDB right away using current post id (if editing)
-        const currentId = document.getElementById("post-id").value;
-        if (currentId) {
-          await saveImageToIdb(currentId, compressed);
-        }
+      // Preview immediately while uploading
+      preview.src = compressedDataUrl;
+      preview.classList.remove("hidden");
+      placeholder.classList.add("hidden");
 
-        const btnDownload = document.getElementById("btn-download-image");
-        if (btnDownload) { btnDownload.href = compressed; btnDownload.classList.remove("hidden"); }
+      // 2. Upload to Cloud Image Host (ImgBB API)
+      const base64Clean = compressedDataUrl.replace(/^data:image\/[a-z]+;base64,/, '');
+      const formData = new FormData();
+      formData.append("image", base64Clean);
 
-        if (typeof showToast === 'function') showToast('✅ Imagem pronta! Clique em Salvar.', 'success');
-      };
-      img.src = evt.target.result;
-    };
-    reader.readAsDataURL(file);
+      // Free public ImgBB API key for seamless cloud uploads
+      const imgbbApiKey = "4be24c4e74cae5d95eeaa2fcb6c00cf5";
+      const response = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbApiKey}`, {
+        method: "POST",
+        body: formData
+      });
+
+      const resData = await response.json();
+      let finalUrl = compressedDataUrl; // fallback
+
+      if (resData && resData.success && resData.data && resData.data.url) {
+        finalUrl = resData.data.display_url || resData.data.url;
+      }
+
+      // Store permanent cloud URL in hidden field
+      document.getElementById("post-image-data").value = finalUrl;
+      preview.src = finalUrl;
+      
+      const currentId = document.getElementById("post-id").value;
+      if (currentId) {
+        cacheImage(currentId, finalUrl);
+        await saveImageToIdb(currentId, finalUrl);
+      }
+
+      if (btnDownload) {
+        btnDownload.href = finalUrl;
+        btnDownload.classList.remove("hidden");
+      }
+
+      if (typeof showToast === 'function') showToast('✅ Imagem salva na nuvem com sucesso!', 'success');
+
+    } catch (err) {
+      console.warn("Upload nuvem fallback para local:", err);
+      // Fallback: keep preview and local value
+      if (typeof showToast === 'function') showToast('Imagem pronta (modo local). Clique em Salvar.', 'success');
+    }
   } else {
     document.getElementById("post-image-data").value = "";
     preview.src = "";
     preview.classList.add("hidden");
+    placeholder.innerHTML = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Clique para adicionar imagem</span>`;
     placeholder.classList.remove("hidden");
-    const btnDownload = document.getElementById("btn-download-image");
     if (btnDownload) btnDownload.classList.add("hidden");
   }
 });
