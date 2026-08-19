@@ -202,6 +202,7 @@ const firebaseConfig = {
 };
 const app = firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+const storage = firebase.storage();
 
 let posts = [];
 let isLoadingCloud = true;
@@ -291,7 +292,13 @@ async function savePostToCloud(post) {
     if (typeof showToast === 'function') {
       showToast('Salvando...', 'success');
     }
-    await db.collection("marketing_posts").doc(post.id.toString()).set(post);
+    // Safety: never save base64 strings to Firestore (exceeds 1MB limit).
+    // Images must be URLs (from Firebase Storage). Strip any legacy base64.
+    const postToSave = { ...post };
+    if (postToSave.image && postToSave.image.startsWith('data:')) {
+      postToSave.image = ''; // Remove base64, will be re-uploaded by user
+    }
+    await db.collection("marketing_posts").doc(postToSave.id.toString()).set(postToSave);
     
     try {
       localStorage.setItem('saam_marketing_posts_v14', JSON.stringify(posts));
@@ -1259,42 +1266,47 @@ if(btnReject) {
   });
 }
 
-document.getElementById("post-image-file").addEventListener("change", function(e) {
+document.getElementById("post-image-file").addEventListener("change", async function(e) {
   const file = e.target.files[0];
   const preview = document.getElementById("upload-preview");
   const placeholder = document.getElementById("upload-placeholder");
   
   if (file) {
-    const reader = new FileReader();
-    reader.onload = function(evt) {
-      // Compress image via canvas to keep localStorage under quota
-      const img = new Image();
-      img.onload = function() {
-        const MAX_W = 600;
-        const MAX_H = 600;
-        let w = img.width;
-        let h = img.height;
-        if (w > MAX_W) { h = h * (MAX_W / w); w = MAX_W; }
-        if (h > MAX_H) { w = w * (MAX_H / h); h = MAX_H; }
-        const canvas = document.createElement('canvas');
-        canvas.width = w;
-        canvas.height = h;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, w, h);
-        const compressed = canvas.toDataURL('image/jpeg', 0.65);
-        document.getElementById("post-image-data").value = compressed;
-        preview.src = compressed;
-        preview.classList.remove("hidden");
-        placeholder.classList.add("hidden");
-        const btnDownload = document.getElementById("btn-download-image");
-        if (btnDownload) {
-          btnDownload.href = compressed;
-          btnDownload.classList.remove("hidden");
-        }
-      };
-      img.src = evt.target.result;
-    };
-    reader.readAsDataURL(file);
+    // Show a loading state while uploading
+    preview.src = "";
+    preview.classList.add("hidden");
+    placeholder.innerHTML = `<span style="font-size:12px;color:#64748B;">Enviando imagem... ⏳</span>`;
+    placeholder.classList.remove("hidden");
+
+    try {
+      // Upload directly to Firebase Storage
+      const filename = `post_images/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
+      const storageRef = storage.ref(filename);
+      const snapshot = await storageRef.put(file);
+      const downloadURL = await snapshot.ref.getDownloadURL();
+
+      // Store the URL (not base64) in the hidden input
+      document.getElementById("post-image-data").value = downloadURL;
+      preview.src = downloadURL;
+      preview.classList.remove("hidden");
+      placeholder.classList.add("hidden");
+
+      // Restore placeholder text
+      placeholder.innerHTML = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Clique para adicionar imagem</span>`;
+
+      const btnDownload = document.getElementById("btn-download-image");
+      if (btnDownload) {
+        btnDownload.href = downloadURL;
+        btnDownload.classList.remove("hidden");
+      }
+
+      if (typeof showToast === 'function') showToast('✅ Imagem enviada para a nuvem!', 'success');
+
+    } catch (err) {
+      console.error("Erro ao enviar imagem:", err);
+      placeholder.innerHTML = `<span style="font-size:12px;color:#ef4444;">Erro ao enviar. Tente novamente.</span>`;
+      if (typeof showToast === 'function') showToast('Erro ao enviar imagem. Tente de novo.', 'error');
+    }
   } else {
     document.getElementById("post-image-data").value = "";
     preview.src = "";
