@@ -1,5 +1,56 @@
 const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 
+// ─── IndexedDB Image Store ─────────────────────────────────────────────────
+// Uses the browser's built-in large-file database (hundreds of MB).
+// Images are saved by postId so they survive page refreshes forever.
+const IMG_DB_NAME = 'saam_images';
+const IMG_STORE   = 'images';
+let imgDb = null;
+
+function openImageDb() {
+  return new Promise((resolve, reject) => {
+    if (imgDb) { resolve(imgDb); return; }
+    const req = indexedDB.open(IMG_DB_NAME, 1);
+    req.onupgradeneeded = e => {
+      e.target.result.createObjectStore(IMG_STORE, { keyPath: 'postId' });
+    };
+    req.onsuccess = e => { imgDb = e.target.result; resolve(imgDb); };
+    req.onerror   = () => reject(req.error);
+  });
+}
+
+async function saveImageToIdb(postId, dataUrl) {
+  const db = await openImageDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IMG_STORE, 'readwrite');
+    tx.objectStore(IMG_STORE).put({ postId: String(postId), dataUrl });
+    tx.oncomplete = resolve;
+    tx.onerror    = () => reject(tx.error);
+  });
+}
+
+async function getImageFromIdb(postId) {
+  const db = await openImageDb();
+  return new Promise((resolve) => {
+    const tx  = db.transaction(IMG_STORE, 'readonly');
+    const req = tx.objectStore(IMG_STORE).get(String(postId));
+    req.onsuccess = () => resolve(req.result ? req.result.dataUrl : null);
+    req.onerror   = () => resolve(null);
+  });
+}
+
+async function deleteImageFromIdb(postId) {
+  const db = await openImageDb();
+  return new Promise((resolve) => {
+    const tx = db.transaction(IMG_STORE, 'readwrite');
+    tx.objectStore(IMG_STORE).delete(String(postId));
+    tx.oncomplete = resolve;
+    tx.onerror    = resolve; // non-fatal
+  });
+}
+// ──────────────────────────────────────────────────────────────────────────────
+
+
 // Navigation logic
 const pageHome = document.getElementById("page-home");
 const pageCalendario = document.getElementById("page-calendario");
@@ -263,7 +314,7 @@ function initCloudSync() {
     }
   });
 
-  postsRef.onSnapshot((snapshot) => {
+  postsRef.onSnapshot(async (snapshot) => {
     const cloudPosts = [];
     snapshot.forEach(doc => cloudPosts.push(doc.data()));
     
@@ -276,9 +327,19 @@ function initCloudSync() {
       }
     });
 
-
+    // Restore images from IndexedDB for posts that have '__idb__' sentinel
+    const imageFetches = posts
+      .filter(p => p.image === '__idb__')
+      .map(async p => {
+        const dataUrl = await getImageFromIdb(p.id);
+        if (dataUrl) p.image = dataUrl;
+        else p.image = ''; // image not found in IDB (different device/browser)
+      });
+    await Promise.all(imageFetches);
     
-    localStorage.setItem('saam_marketing_posts_v14', JSON.stringify(posts));
+    try {
+      localStorage.setItem('saam_marketing_posts_v14', JSON.stringify(posts));
+    } catch(e) { /* ignore quota */ }
     
     renderCalendar();
     renderList();
@@ -292,11 +353,11 @@ async function savePostToCloud(post) {
     if (typeof showToast === 'function') {
       showToast('Salvando...', 'success');
     }
-    // Safety: never save base64 strings to Firestore (exceeds 1MB limit).
-    // Images must be URLs (from Firebase Storage). Strip any legacy base64.
+    // Save image to IndexedDB (unlimited local browser storage) and strip from Firestore doc
     const postToSave = { ...post };
     if (postToSave.image && postToSave.image.startsWith('data:')) {
-      postToSave.image = ''; // Remove base64, will be re-uploaded by user
+      await saveImageToIdb(postToSave.id, postToSave.image);
+      postToSave.image = '__idb__'; // sentinel: image lives in IndexedDB
     }
     await db.collection("marketing_posts").doc(postToSave.id.toString()).set(postToSave);
     
@@ -1272,41 +1333,41 @@ document.getElementById("post-image-file").addEventListener("change", async func
   const placeholder = document.getElementById("upload-placeholder");
   
   if (file) {
-    // Show a loading state while uploading
-    preview.src = "";
-    preview.classList.add("hidden");
-    placeholder.innerHTML = `<span style="font-size:12px;color:#64748B;">Enviando imagem... ⏳</span>`;
-    placeholder.classList.remove("hidden");
+    // Read file and compress
+    const reader = new FileReader();
+    reader.onload = async function(evt) {
+      const img = new Image();
+      img.onload = async function() {
+        const MAX_W = 900;
+        const MAX_H = 900;
+        let w = img.width, h = img.height;
+        if (w > MAX_W) { h = h * (MAX_W / w); w = MAX_W; }
+        if (h > MAX_H) { w = w * (MAX_H / h); h = MAX_H; }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        const compressed = canvas.toDataURL('image/jpeg', 0.75);
 
-    try {
-      // Upload directly to Firebase Storage
-      const filename = `post_images/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
-      const storageRef = storage.ref(filename);
-      const snapshot = await storageRef.put(file);
-      const downloadURL = await snapshot.ref.getDownloadURL();
+        // Store in the hidden field (used when saving)
+        document.getElementById("post-image-data").value = compressed;
+        preview.src = compressed;
+        preview.classList.remove("hidden");
+        placeholder.classList.add("hidden");
 
-      // Store the URL (not base64) in the hidden input
-      document.getElementById("post-image-data").value = downloadURL;
-      preview.src = downloadURL;
-      preview.classList.remove("hidden");
-      placeholder.classList.add("hidden");
+        // Also try to save to IndexedDB right away using current post id (if editing)
+        const currentId = document.getElementById("post-id").value;
+        if (currentId) {
+          await saveImageToIdb(currentId, compressed);
+        }
 
-      // Restore placeholder text
-      placeholder.innerHTML = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Clique para adicionar imagem</span>`;
+        const btnDownload = document.getElementById("btn-download-image");
+        if (btnDownload) { btnDownload.href = compressed; btnDownload.classList.remove("hidden"); }
 
-      const btnDownload = document.getElementById("btn-download-image");
-      if (btnDownload) {
-        btnDownload.href = downloadURL;
-        btnDownload.classList.remove("hidden");
-      }
-
-      if (typeof showToast === 'function') showToast('✅ Imagem enviada para a nuvem!', 'success');
-
-    } catch (err) {
-      console.error("Erro ao enviar imagem:", err);
-      placeholder.innerHTML = `<span style="font-size:12px;color:#ef4444;">Erro ao enviar. Tente novamente.</span>`;
-      if (typeof showToast === 'function') showToast('Erro ao enviar imagem. Tente de novo.', 'error');
-    }
+        if (typeof showToast === 'function') showToast('✅ Imagem pronta! Clique em Salvar.', 'success');
+      };
+      img.src = evt.target.result;
+    };
+    reader.readAsDataURL(file);
   } else {
     document.getElementById("post-image-data").value = "";
     preview.src = "";
