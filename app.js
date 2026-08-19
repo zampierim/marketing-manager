@@ -1,7 +1,6 @@
 
 function setModalLockState(isLocked) {
-  const isUnlockedSession = sessionStorage.getItem("saam_unlocked") === "true";
-  const lock = isLocked && !isUnlockedSession;
+  const lock = isLocked === true;
 
   const titleEl = document.getElementById("modal-title");
   const btnEdit = document.getElementById("btn-enable-edit");
@@ -11,7 +10,8 @@ function setModalLockState(isLocked) {
 
   const editableInputs = [
     "post-date", "post-tag", "post-caption", "post-briefing", 
-    "post-author", "post-comments", "post-topic", "post-image-url", "post-image-file"
+    "post-author", "post-comments", "post-topic", "post-image-url", "post-image-file",
+    "post-primary-destiny", "post-idea-link", "post-routine-link"
   ];
 
   editableInputs.forEach(id => {
@@ -19,14 +19,18 @@ function setModalLockState(isLocked) {
     if (el) {
       if (lock) {
         el.setAttribute("readonly", "true");
+        el.setAttribute("disabled", "true");
         el.style.backgroundColor = "#F8FAFC";
         el.style.borderColor = "#E2E8F0";
         el.style.cursor = "default";
+        el.style.color = "#0F172A";
       } else {
         el.removeAttribute("readonly");
+        el.removeAttribute("disabled");
         el.style.backgroundColor = "";
         el.style.borderColor = "";
         el.style.cursor = "";
+        el.style.color = "";
       }
     }
   });
@@ -47,10 +51,17 @@ function setModalLockState(isLocked) {
     }
   }
 
-  // Status Chips
+  // Status Chips & Radios
   const statusGroup = document.getElementById("status-group");
   if (statusGroup) {
     statusGroup.style.pointerEvents = lock ? "none" : "auto";
+    statusGroup.querySelectorAll('input[name="post_status"]').forEach(r => r.disabled = lock);
+  }
+
+  const destinyGroup = document.getElementById("field-destiny");
+  if (destinyGroup) {
+    destinyGroup.style.pointerEvents = lock ? "none" : "auto";
+    destinyGroup.querySelectorAll('input[name="post_destiny"]').forEach(r => r.disabled = lock);
   }
 
   // Action Buttons
@@ -60,7 +71,7 @@ function setModalLockState(isLocked) {
 
   if (titleEl) {
     if (lock) {
-      titleEl.textContent = "Visualizar Publicação";
+      titleEl.textContent = "Visualizar Comunicação";
     } else {
       titleEl.textContent = postId ? "Editar Criativo" : "Novo Criativo";
     }
