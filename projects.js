@@ -8,7 +8,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // Navigation
   if (btnOpenProjetos) {
     btnOpenProjetos.addEventListener("click", () => {
-      // Hide all pages (generic approach based on existing code)
       document.querySelectorAll(".app > div[id^='page-']").forEach(p => p.classList.add("hidden"));
       if (pageProjetos) pageProjetos.classList.remove("hidden");
       renderProjects();
@@ -26,7 +25,15 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // State Management
-  let projects = JSON.parse(localStorage.getItem("saam_projects")) || [];
+  let projects = JSON.parse(localStorage.getItem("saam_projects")) || [
+    { id: 101, title: "Reestruturação instagram", description: "Destaques, biografia...", status: "backlog" },
+    { id: 102, title: "Estruturação Linkedin", description: "", status: "backlog" },
+    { id: 103, title: "Vídeo demonstrativo - Site", description: "vídeo para o site novo", status: "backlog" },
+    { id: 104, title: "Mapeamento de Eventos", description: "Grupos empresariais, distribuidores, ERPs, atacadistas, pós-graduação (auditores)", status: "backlog" },
+    { id: 105, title: "Lead Magnet (Ímã de Leads)", description: "Conteúdo de valor -> Formulário -> Captura do lead -> Nutrição -> Conversão", status: "backlog" },
+    { id: 106, title: "Plataforma Marketing", description: "", status: "in_progress" },
+    { id: 107, title: "Squad - Boletim Informativo (PO)", description: "", status: "done" }
+  ];
   let processes = JSON.parse(localStorage.getItem("saam_processes")) || [];
 
   function saveProjects() {
@@ -59,7 +66,6 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("process-form").reset();
         document.getElementById("process-id").value = "";
         
-        // Trigger change to hide dynamic inputs for the default "Diário" option
         const freqSelect = document.getElementById("process-frequency");
         if(freqSelect) freqSelect.dispatchEvent(new Event("change"));
 
@@ -81,6 +87,16 @@ document.addEventListener("DOMContentLoaded", () => {
   // Project Form Submit
   document.getElementById("project-form")?.addEventListener("submit", (e) => {
     e.preventDefault();
+
+    if (sessionStorage.getItem("saam_unlocked") !== "true") {
+      if (window.requirePassword) {
+        window.requirePassword(() => {
+          document.getElementById("project-form").dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+        });
+      }
+      return;
+    }
+
     const idVal = document.getElementById("project-id").value;
     const newProject = {
       id: idVal ? parseInt(idVal) : Date.now(),
@@ -123,8 +139,17 @@ document.addEventListener("DOMContentLoaded", () => {
   // Process Form Submit
   document.getElementById("process-form")?.addEventListener("submit", (e) => {
     e.preventDefault();
+
+    if (sessionStorage.getItem("saam_unlocked") !== "true") {
+      if (window.requirePassword) {
+        window.requirePassword(() => {
+          document.getElementById("process-form").dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+        });
+      }
+      return;
+    }
+
     const idVal = document.getElementById("process-id").value;
-    
     let freqValue = document.getElementById("process-frequency").value;
     if (freqValue === "Semanal") {
       const checkedDays = Array.from(document.querySelectorAll('input[name="week_days"]:checked')).map(cb => cb.value);
@@ -159,6 +184,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Delete Buttons
   document.getElementById("btn-delete-project")?.addEventListener("click", () => {
+    if (sessionStorage.getItem("saam_unlocked") !== "true") {
+      if (window.requirePassword) {
+        window.requirePassword(() => {
+          document.getElementById("btn-delete-project").click();
+        });
+      }
+      return;
+    }
     if(confirm("Excluir este projeto?")) {
       const idVal = document.getElementById("project-id").value;
       projects = projects.filter(p => p.id !== parseInt(idVal));
@@ -169,6 +202,14 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.getElementById("btn-delete-process")?.addEventListener("click", () => {
+    if (sessionStorage.getItem("saam_unlocked") !== "true") {
+      if (window.requirePassword) {
+        window.requirePassword(() => {
+          document.getElementById("btn-delete-process").click();
+        });
+      }
+      return;
+    }
     if(confirm("Excluir este processo?")) {
       const idVal = document.getElementById("process-id").value;
       processes = processes.filter(p => p.id !== parseInt(idVal));
@@ -180,72 +221,109 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Rendering Functions
   window.editProject = function(id) {
-    if(window.requirePassword) {
-      window.requirePassword(() => {
-        const proj = projects.find(p => p.id === id);
-        if(proj) {
-          document.getElementById("project-id").value = proj.id;
-          document.getElementById("project-title").value = proj.title;
-          document.getElementById("project-description").value = proj.description || "";
-          document.getElementById("project-status").value = proj.status;
-          document.getElementById("project-modal-title").textContent = "Editar Projeto";
-          document.getElementById("btn-delete-project").style.display = "block";
-          projectModal.classList.remove("hidden");
-        }
-      });
+    const proj = projects.find(p => p.id === id);
+    if(proj) {
+      document.getElementById("project-id").value = proj.id;
+      document.getElementById("project-title").value = proj.title;
+      document.getElementById("project-description").value = proj.description || "";
+      document.getElementById("project-status").value = proj.status;
+      document.getElementById("project-modal-title").textContent = "Editar Projeto";
+      document.getElementById("btn-delete-project").style.display = "block";
+      projectModal.classList.remove("hidden");
     }
   };
 
   window.editProcess = function(id) {
-    if(window.requirePassword) {
-      window.requirePassword(() => {
-        const proc = processes.find(p => p.id === id);
-        if(proc) {
-          document.getElementById("process-id").value = proc.id;
-          document.getElementById("process-title").value = proc.title;
-          
-          const freqSelect = document.getElementById("process-frequency");
-          const monthDaysInput = document.getElementById("process-month-days");
-          const weekCheckboxes = document.querySelectorAll('input[name="week_days"]');
-          
-          // Reset fields
-          weekCheckboxes.forEach(cb => cb.checked = false);
-          monthDaysInput.value = "";
-          
-          const freq = proc.frequency || "Diário";
-          if (freq.startsWith("Semanal:")) {
-            freqSelect.value = "Semanal";
-            const daysStr = freq.replace("Semanal:", "").trim();
-            const daysArr = daysStr.split(",").map(s => s.trim());
-            weekCheckboxes.forEach(cb => {
-              if (daysArr.includes(cb.value)) cb.checked = true;
-            });
-          } else if (freq.startsWith("Mensal:")) {
-            freqSelect.value = "Mensal";
-            monthDaysInput.value = freq.replace("Mensal:", "").trim();
-          } else {
-            // Handle legacy "2x na Semana", "Diário", etc.
-            // If the option doesn't exist anymore, it will default or show empty.
-            // We kept Diário.
-            let optExists = Array.from(freqSelect.options).some(opt => opt.value === freq);
-            if(optExists) {
-              freqSelect.value = freq;
-            } else {
-              // fallback
-              freqSelect.value = "Diário";
-            }
-          }
-          
-          // Trigger the change event to toggle the correct UI section
-          freqSelect.dispatchEvent(new Event('change'));
-
-          document.getElementById("process-modal-title").textContent = "Editar Processo";
-          document.getElementById("btn-delete-process").style.display = "block";
-          document.getElementById("process-modal").classList.remove("hidden");
-        }
-      });
+    const proc = processes.find(p => p.id === id);
+    if(proc) {
+      document.getElementById("process-id").value = proc.id;
+      document.getElementById("process-title").value = proc.title;
+      
+      const freqSelect = document.getElementById("process-frequency");
+      const monthDaysInput = document.getElementById("process-month-days");
+      const weekCheckboxes = document.querySelectorAll('input[name="week_days"]');
+      
+      weekCheckboxes.forEach(cb => cb.checked = false);
+      monthDaysInput.value = "";
+      
+      const freq = proc.frequency || "Diário";
+      if (freq.startsWith("Semanal:")) {
+        freqSelect.value = "Semanal";
+        const daysStr = freq.replace("Semanal:", "").trim();
+        const daysArr = daysStr.split(",").map(s => s.trim());
+        weekCheckboxes.forEach(cb => {
+          if (daysArr.includes(cb.value)) cb.checked = true;
+        });
+      } else if (freq.startsWith("Mensal:")) {
+        freqSelect.value = "Mensal";
+        monthDaysInput.value = freq.replace("Mensal:", "").trim();
+      } else {
+        let optExists = Array.from(freqSelect.options).some(opt => opt.value === freq);
+        freqSelect.value = optExists ? freq : "Diário";
+      }
+      
+      freqSelect.dispatchEvent(new Event('change'));
+      document.getElementById("process-modal-title").textContent = "Editar Processo";
+      document.getElementById("btn-delete-process").style.display = "block";
+      document.getElementById("process-modal").classList.remove("hidden");
     }
   };
+
+  // Move project status with password protection
+  function moveProjectToStatus(projectId, targetStatus) {
+    const applyMove = () => {
+      const proj = projects.find(p => p.id === projectId);
+      if (proj && proj.status !== targetStatus) {
+        proj.status = targetStatus;
+        saveProjects();
+        renderProjects();
+        if (typeof showToast === 'function') {
+          const statusLabels = { 'backlog': 'Backlog', 'in_progress': 'Em Andamento', 'done': 'Finalizado' };
+          showToast(`✅ Movido para ${statusLabels[targetStatus] || targetStatus}!`, 'success');
+        }
+      }
+    };
+
+    if (sessionStorage.getItem("saam_unlocked") === "true") {
+      applyMove();
+    } else {
+      if (window.requirePassword) {
+        window.requirePassword(applyMove);
+      }
+    }
+  }
+
+  // Setup Drag and Drop on Kanban Columns
+  function setupKanbanDropZone(container, targetStatus) {
+    if (!container) return;
+
+    container.ondragover = (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      container.style.background = "rgba(37, 99, 235, 0.06)";
+      container.style.border = "2px dashed #3B82F6";
+      container.style.borderRadius = "8px";
+    };
+
+    container.ondragleave = (e) => {
+      container.style.background = "";
+      container.style.border = "";
+      container.style.borderRadius = "";
+    };
+
+    container.ondrop = (e) => {
+      e.preventDefault();
+      container.style.background = "";
+      container.style.border = "";
+      container.style.borderRadius = "";
+
+      const rawId = e.dataTransfer.getData("text/plain");
+      if (rawId) {
+        const projId = parseInt(rawId);
+        moveProjectToStatus(projId, targetStatus);
+      }
+    };
+  }
 
   function renderProjects() {
     const containerInProgress = document.getElementById("projects-in-progress");
@@ -258,10 +336,16 @@ document.addEventListener("DOMContentLoaded", () => {
     containerBacklog.innerHTML = "";
     containerDone.innerHTML = "";
 
+    // Setup drop zones for each column
+    setupKanbanDropZone(containerBacklog, "backlog");
+    setupKanbanDropZone(containerInProgress, "in_progress");
+    setupKanbanDropZone(containerDone, "done");
+
     projects.forEach(p => {
       const el = document.createElement("div");
       el.className = "project-card";
-      el.style = "background: #F8FAFC; border: 1px solid #E2E8F0; padding: 12px 16px; border-radius: 8px; cursor: pointer; transition: all 0.2s;";
+      el.draggable = true;
+      el.style = "background: #F8FAFC; border: 1px solid #E2E8F0; padding: 12px 16px; border-radius: 8px; cursor: grab; transition: all 0.2s; user-select: none; position: relative;";
       
       let descHtml = "";
       if (p.description) {
@@ -269,11 +353,28 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       
       el.innerHTML = `
-        <div style="font-size: 14px; font-weight: 700; color: #0F172A;">${p.title}</div>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+          <div style="font-size: 14px; font-weight: 700; color: #0F172A; flex: 1;">${p.title}</div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2" style="cursor: grab; flex-shrink: 0; margin-top: 2px;"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+        </div>
         ${descHtml}
       `;
-      el.onmouseover = () => { el.style.background = "#F1F5F9"; el.style.borderColor = "#CBD5E1"; };
-      el.onmouseout = () => { el.style.background = "#F8FAFC"; el.style.borderColor = "#E2E8F0"; };
+
+      // Drag Events
+      el.ondragstart = (e) => {
+        e.dataTransfer.setData("text/plain", p.id);
+        e.dataTransfer.effectAllowed = "move";
+        el.style.opacity = "0.4";
+        el.style.cursor = "grabbing";
+      };
+
+      el.ondragend = () => {
+        el.style.opacity = "1";
+        el.style.cursor = "grab";
+      };
+
+      el.onmouseover = () => { el.style.background = "#F1F5F9"; el.style.borderColor = "#CBD5E1"; el.style.boxShadow = "0 2px 8px rgba(0,0,0,0.06)"; };
+      el.onmouseout = () => { el.style.background = "#F8FAFC"; el.style.borderColor = "#E2E8F0"; el.style.boxShadow = ""; };
       el.onclick = () => editProject(p.id);
 
       if(p.status === "in_progress") {
@@ -288,9 +389,9 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    if(containerInProgress.children.length === 0) containerInProgress.innerHTML = '<div style="color: #94A3B8; font-size: 13px; font-style: italic;">Nenhum projeto em andamento.</div>';
-    if(containerBacklog.children.length === 0) containerBacklog.innerHTML = '<div style="color: #94A3B8; font-size: 13px; font-style: italic;">Nenhum projeto no backlog.</div>';
-    if(containerDone.children.length === 0) containerDone.innerHTML = '<div style="color: #94A3B8; font-size: 13px; font-style: italic;">Nenhum projeto finalizado.</div>';
+    if(containerInProgress.children.length === 0) containerInProgress.innerHTML = '<div style="color: #94A3B8; font-size: 13px; font-style: italic; padding: 12px; border: 1px dashed #CBD5E1; border-radius: 8px; text-align: center;">Arraste um card para cá.</div>';
+    if(containerBacklog.children.length === 0) containerBacklog.innerHTML = '<div style="color: #94A3B8; font-size: 13px; font-style: italic; padding: 12px; border: 1px dashed #CBD5E1; border-radius: 8px; text-align: center;">Arraste um card para cá.</div>';
+    if(containerDone.children.length === 0) containerDone.innerHTML = '<div style="color: #94A3B8; font-size: 13px; font-style: italic; padding: 12px; border: 1px dashed #CBD5E1; border-radius: 8px; text-align: center;">Arraste um card para cá.</div>';
   }
 
   function renderProcesses() {
@@ -327,4 +428,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Initial render on boot if already visible
+  if (pageProjetos && !pageProjetos.classList.contains("hidden")) {
+    renderProjects();
+    renderProcesses();
+  }
 });
+
