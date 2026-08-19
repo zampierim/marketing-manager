@@ -58,6 +58,11 @@ document.addEventListener("DOMContentLoaded", () => {
       window.requirePassword(() => {
         document.getElementById("process-form").reset();
         document.getElementById("process-id").value = "";
+        
+        // Trigger change to hide dynamic inputs for the default "Diário" option
+        const freqSelect = document.getElementById("process-frequency");
+        if(freqSelect) freqSelect.dispatchEvent(new Event("change"));
+
         document.getElementById("process-modal-title").textContent = "Novo Processo";
         document.getElementById("btn-delete-process").style.display = "none";
         processModal.classList.remove("hidden");
@@ -97,14 +102,46 @@ document.addEventListener("DOMContentLoaded", () => {
     if(typeof showToast === 'function') showToast('✅ Projeto salvo', 'success');
   });
 
+  // Dynamic UI toggling for Process Frequency
+  const freqSelect = document.getElementById("process-frequency");
+  const weeklyDays = document.getElementById("weekly-days-selector");
+  const monthlyDays = document.getElementById("monthly-days-selector");
+
+  freqSelect?.addEventListener("change", (e) => {
+    if (e.target.value === "Semanal") {
+      weeklyDays.style.display = "block";
+      monthlyDays.style.display = "none";
+    } else if (e.target.value === "Mensal") {
+      weeklyDays.style.display = "none";
+      monthlyDays.style.display = "block";
+    } else {
+      weeklyDays.style.display = "none";
+      monthlyDays.style.display = "none";
+    }
+  });
+
   // Process Form Submit
   document.getElementById("process-form")?.addEventListener("submit", (e) => {
     e.preventDefault();
     const idVal = document.getElementById("process-id").value;
+    
+    let freqValue = document.getElementById("process-frequency").value;
+    if (freqValue === "Semanal") {
+      const checkedDays = Array.from(document.querySelectorAll('input[name="week_days"]:checked')).map(cb => cb.value);
+      if (checkedDays.length > 0) {
+        freqValue = `Semanal: ${checkedDays.join(", ")}`;
+      }
+    } else if (freqValue === "Mensal") {
+      const monthInput = document.getElementById("process-month-days").value;
+      if (monthInput.trim() !== "") {
+        freqValue = `Mensal: ${monthInput.trim()}`;
+      }
+    }
+
     const newProcess = {
       id: idVal ? parseInt(idVal) : Date.now(),
       title: document.getElementById("process-title").value,
-      frequency: document.getElementById("process-frequency").value
+      frequency: freqValue
     };
 
     if (idVal) {
@@ -166,10 +203,45 @@ document.addEventListener("DOMContentLoaded", () => {
         if(proc) {
           document.getElementById("process-id").value = proc.id;
           document.getElementById("process-title").value = proc.title;
-          document.getElementById("process-frequency").value = proc.frequency || "Diário";
+          
+          const freqSelect = document.getElementById("process-frequency");
+          const monthDaysInput = document.getElementById("process-month-days");
+          const weekCheckboxes = document.querySelectorAll('input[name="week_days"]');
+          
+          // Reset fields
+          weekCheckboxes.forEach(cb => cb.checked = false);
+          monthDaysInput.value = "";
+          
+          const freq = proc.frequency || "Diário";
+          if (freq.startsWith("Semanal:")) {
+            freqSelect.value = "Semanal";
+            const daysStr = freq.replace("Semanal:", "").trim();
+            const daysArr = daysStr.split(",").map(s => s.trim());
+            weekCheckboxes.forEach(cb => {
+              if (daysArr.includes(cb.value)) cb.checked = true;
+            });
+          } else if (freq.startsWith("Mensal:")) {
+            freqSelect.value = "Mensal";
+            monthDaysInput.value = freq.replace("Mensal:", "").trim();
+          } else {
+            // Handle legacy "2x na Semana", "Diário", etc.
+            // If the option doesn't exist anymore, it will default or show empty.
+            // We kept Diário.
+            let optExists = Array.from(freqSelect.options).some(opt => opt.value === freq);
+            if(optExists) {
+              freqSelect.value = freq;
+            } else {
+              // fallback
+              freqSelect.value = "Diário";
+            }
+          }
+          
+          // Trigger the change event to toggle the correct UI section
+          freqSelect.dispatchEvent(new Event('change'));
+
           document.getElementById("process-modal-title").textContent = "Editar Processo";
           document.getElementById("btn-delete-process").style.display = "block";
-          processModal.classList.remove("hidden");
+          document.getElementById("process-modal").classList.remove("hidden");
         }
       });
     }

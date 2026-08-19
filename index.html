@@ -2948,15 +2948,30 @@
           <input type="text" id="process-title" required placeholder="Ex: Enviar informativo de terça">
         </div>
         <div class="field">
-          <label>Frequência</label>
-          <select id="process-frequency" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--hairline);">
+          <label>Frequência Base</label>
+          <select id="process-frequency" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--hairline); margin-bottom: 12px;">
             <option value="Diário">Diário</option>
-            <option value="Semanal">Semanal</option>
-            <option value="2x na Semana">2x na Semana</option>
-            <option value="3x na Semana">3x na Semana</option>
-            <option value="Quinzenal">Quinzenal</option>
-            <option value="Mensal">Mensal</option>
+            <option value="Semanal">Semanal (Escolher Dias)</option>
+            <option value="Mensal">Mensal (Escolher Dias)</option>
           </select>
+        </div>
+        
+        <div class="field" id="weekly-days-selector" style="display: none; background: #F8FAFC; padding: 12px; border-radius: 8px; border: 1px solid #E2E8F0; margin-bottom: 12px;">
+          <label style="margin-bottom: 8px; font-size: 11px; color: #475569;">Quais dias da semana?</label>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <label style="display: flex; align-items: center; gap: 4px; font-size: 12px;"><input type="checkbox" name="week_days" value="Seg"> Seg</label>
+            <label style="display: flex; align-items: center; gap: 4px; font-size: 12px;"><input type="checkbox" name="week_days" value="Ter"> Ter</label>
+            <label style="display: flex; align-items: center; gap: 4px; font-size: 12px;"><input type="checkbox" name="week_days" value="Qua"> Qua</label>
+            <label style="display: flex; align-items: center; gap: 4px; font-size: 12px;"><input type="checkbox" name="week_days" value="Qui"> Qui</label>
+            <label style="display: flex; align-items: center; gap: 4px; font-size: 12px;"><input type="checkbox" name="week_days" value="Sex"> Sex</label>
+            <label style="display: flex; align-items: center; gap: 4px; font-size: 12px;"><input type="checkbox" name="week_days" value="Sáb"> Sáb</label>
+            <label style="display: flex; align-items: center; gap: 4px; font-size: 12px;"><input type="checkbox" name="week_days" value="Dom"> Dom</label>
+          </div>
+        </div>
+
+        <div class="field" id="monthly-days-selector" style="display: none; background: #F8FAFC; padding: 12px; border-radius: 8px; border: 1px solid #E2E8F0; margin-bottom: 12px;">
+          <label style="margin-bottom: 8px; font-size: 11px; color: #475569;">Quais dias do mês?</label>
+          <input type="text" id="process-month-days" placeholder="Ex: 5, 20, ou 'Último dia útil'" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #CBD5E1; font-size: 13px;">
         </div>
         <div class="modal-actions" style="display: flex; justify-content: space-between; margin-top: 24px;">
           <button type="button" class="btn-cancel" id="btn-delete-process" style="color: #e03131; border-color: #ffe3e3; background: #fff0f0; display: none;">Excluir</button>
