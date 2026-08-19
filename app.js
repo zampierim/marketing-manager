@@ -462,7 +462,7 @@ function createPostCard(post) {
   const card = document.createElement("div");
   card.className = "post-card";
   
-  const imgUrl = post.image || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80";
+  const imgUrl = post.image || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' style='background:%23F8FAFC;'><rect width='400' height='400' fill='%23F8FAFC'/><path d='M150 250l30-40 40 50 60-80 50 100H100z' fill='%23E2E8F0'/><circle cx='160' cy='160' r='20' fill='%23E2E8F0'/></svg>";
 
   let iconSvg = '';
   if(post.destiny === 'WhatsApp') {
@@ -631,7 +631,7 @@ function renderList() {
       postListEl.appendChild(header);
     }
     
-    const imgUrl = post.image || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80";
+    const imgUrl = post.image || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' style='background:%23F8FAFC;'><rect width='400' height='400' fill='%23F8FAFC'/><path d='M150 250l30-40 40 50 60-80 50 100H100z' fill='%23E2E8F0'/><circle cx='160' cy='160' r='20' fill='%23E2E8F0'/></svg>";
     const dayStr = String(d.getDate()).padStart(2,"0");
     const weekDay = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"][d.getDay()];
 
@@ -775,7 +775,7 @@ function renderInternalComms() {
         const postsContainer = dayGroupEl.querySelector('.day-posts');
 
         commPosts.forEach(post => {
-          const imgUrl = post.image || "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&q=80";
+          const imgUrl = post.image || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' style='background:%23F8FAFC;'><rect width='400' height='400' fill='%23F8FAFC'/><path d='M150 250l30-40 40 50 60-80 50 100H100z' fill='%23E2E8F0'/><circle cx='160' cy='160' r='20' fill='%23E2E8F0'/></svg>";
           const iconSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>`;
           
           const item = document.createElement("div");
