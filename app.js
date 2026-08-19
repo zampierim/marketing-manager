@@ -419,22 +419,15 @@ async function savePostToCloud(post) {
     if (typeof showToast === 'function') {
       showToast('Salvando...', 'success');
     }
-    // Save image to IndexedDB (unlimited local browser storage) and memory cache
     const postToSave = { ...post };
-    const imageToPersist = post.image || getCachedImage(post.id);
-    if (imageToPersist && imageToPersist.startsWith('data:')) {
-      cacheImage(postToSave.id, imageToPersist);
-      await saveImageToIdb(postToSave.id, imageToPersist);
-      postToSave.image = '__idb__'; // sentinel: image lives in IndexedDB/cache
-      post.image = imageToPersist; // keep full image in current RAM post
+    if (postToSave.image) {
+      cacheImage(postToSave.id, postToSave.image);
     }
     await db.collection("marketing_posts").doc(postToSave.id.toString()).set(postToSave);
     
     try {
       localStorage.setItem('saam_marketing_posts_v14', JSON.stringify(posts));
-    } catch(lsError) {
-      console.warn("Local storage full, relying on Firebase");
-    }
+    } catch(lsError) {}
   } catch(e) {
     console.error('Erro ao salvar post na nuvem:', e);
     if (typeof showToast === 'function') {
@@ -1411,28 +1404,27 @@ document.getElementById("post-image-file").addEventListener("change", async func
   const btnDownload = document.getElementById("btn-download-image");
   
   if (file) {
-    // Show upload progress
     preview.src = "";
     preview.classList.add("hidden");
-    placeholder.innerHTML = `<span style="font-size:12px;color:#2563EB;font-weight:700;">Subindo imagem para a nuvem... ⏳</span>`;
+    placeholder.innerHTML = `<span style="font-size:12px;color:#2563EB;font-weight:700;">Processando imagem... ⏳</span>`;
     placeholder.classList.remove("hidden");
 
     try {
-      // 1. Compress image client-side to max 1200px
+      // Compress image to max 700px (clean resolution, ~35KB payload, 100% cloud & multi-tab safe)
       const compressedDataUrl = await new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = evt => {
           const img = new Image();
           img.onload = () => {
-            const MAX_W = 1200;
-            const MAX_H = 1200;
+            const MAX_W = 700;
+            const MAX_H = 700;
             let w = img.width, h = img.height;
             if (w > MAX_W) { h = Math.round(h * (MAX_W / w)); w = MAX_W; }
             if (h > MAX_H) { w = Math.round(w * (MAX_H / h)); h = MAX_H; }
             const canvas = document.createElement('canvas');
             canvas.width = w; canvas.height = h;
             canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-            resolve(canvas.toDataURL('image/jpeg', 0.82));
+            resolve(canvas.toDataURL('image/jpeg', 0.72));
           };
           img.onerror = reject;
           img.src = evt.target.result;
@@ -1441,51 +1433,29 @@ document.getElementById("post-image-file").addEventListener("change", async func
         reader.readAsDataURL(file);
       });
 
-      // Preview immediately while uploading
+      // Preview immediately
       preview.src = compressedDataUrl;
       preview.classList.remove("hidden");
       placeholder.classList.add("hidden");
 
-      // 2. Upload to Cloud Image Host (ImgBB API)
-      const base64Clean = compressedDataUrl.replace(/^data:image\/[a-z]+;base64,/, '');
-      const formData = new FormData();
-      formData.append("image", base64Clean);
-
-      // Free public ImgBB API key for seamless cloud uploads
-      const imgbbApiKey = "4be24c4e74cae5d95eeaa2fcb6c00cf5";
-      const response = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbApiKey}`, {
-        method: "POST",
-        body: formData
-      });
-
-      const resData = await response.json();
-      let finalUrl = compressedDataUrl; // fallback
-
-      if (resData && resData.success && resData.data && resData.data.url) {
-        finalUrl = resData.data.display_url || resData.data.url;
-      }
-
-      // Store permanent cloud URL in hidden field
-      document.getElementById("post-image-data").value = finalUrl;
-      preview.src = finalUrl;
+      // Store in hidden field
+      document.getElementById("post-image-data").value = compressedDataUrl;
       
       const currentId = document.getElementById("post-id").value;
       if (currentId) {
-        cacheImage(currentId, finalUrl);
-        await saveImageToIdb(currentId, finalUrl);
+        cacheImage(currentId, compressedDataUrl);
       }
 
       if (btnDownload) {
-        btnDownload.href = finalUrl;
+        btnDownload.href = compressedDataUrl;
         btnDownload.classList.remove("hidden");
       }
 
-      if (typeof showToast === 'function') showToast('✅ Imagem salva na nuvem com sucesso!', 'success');
+      if (typeof showToast === 'function') showToast('✅ Imagem pronta! Clique em Salvar.', 'success');
 
     } catch (err) {
-      console.warn("Upload nuvem fallback para local:", err);
-      // Fallback: keep preview and local value
-      if (typeof showToast === 'function') showToast('Imagem pronta (modo local). Clique em Salvar.', 'success');
+      console.warn("Erro ao processar imagem:", err);
+      if (typeof showToast === 'function') showToast('Erro ao processar imagem.', 'error');
     }
   } else {
     document.getElementById("post-image-data").value = "";
