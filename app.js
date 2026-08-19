@@ -418,6 +418,7 @@ function renderCalendar() {
     
     const dayDateString = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
     const filteredPosts = getFilteredPosts();
+    const dayPosts = filteredPosts.filter(p => p.date === dayDateString);
     if (dayPosts.length > 0) {
       dayCell.classList.add("has-post");
       const tag = dayPosts[0].tag;
