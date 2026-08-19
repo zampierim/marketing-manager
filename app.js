@@ -595,6 +595,7 @@ function renderList() {
   
   if (sortedPosts.length === 0) {
     postListEl.innerHTML = "<p class='placeholder-text'>Nenhum criativo cadastrado para este mês.</p>";
+    if(typeof renderInternalComms === 'function') renderInternalComms();
     return;
   }
   
