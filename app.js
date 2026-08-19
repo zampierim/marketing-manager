@@ -874,7 +874,7 @@ function openModal(post = null, prefilledDate = "", prefilledIdeaId = "", prefil
     document.getElementById("modal-title").textContent = "Editar Criativo";
     document.getElementById("post-id").value = post.id;
     document.getElementById("post-date").value = post.date;
-    document.getElementById("post-tag").value = post.tag;
+    document.getElementById("post-tag").value = post.tag || "";
     document.getElementById("post-image-data").value = post.image || "";
     document.getElementById("post-image-file").value = "";
     
