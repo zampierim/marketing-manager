@@ -1202,7 +1202,16 @@ form.addEventListener("submit", (e) => {
   }
   savePostToCloud(newPost);
   
-  closeModal();
+  const isSaveAndNew = e.submitter && e.submitter.id === "btn-save-new";
+  
+  if (isSaveAndNew) {
+    const savedDate = newPost.date;
+    const isInternal = newPost.destiny === 'interno';
+    openModal(null, savedDate, "", isInternal ? "Interno" : "");
+  } else {
+    closeModal();
+  }
+  
   renderCalendar();
   renderList();
   renderIdeasList(); // Re-render to update usage badges
