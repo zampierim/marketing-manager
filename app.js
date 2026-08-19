@@ -877,6 +877,25 @@ function openModal(post = null, prefilledDate = "", prefilledIdeaId = "", prefil
     document.getElementById("post-tag").value = post.tag;
     document.getElementById("post-image-data").value = post.image || "";
     document.getElementById("post-image-file").value = "";
+    
+    const uploadPreview = document.getElementById("upload-preview");
+    const uploadPlaceholder = document.getElementById("upload-placeholder");
+    const btnDownload = document.getElementById("btn-download-image");
+    if (post.image) {
+      uploadPreview.src = post.image;
+      uploadPreview.classList.remove("hidden");
+      uploadPlaceholder.classList.add("hidden");
+      if (btnDownload) {
+        btnDownload.href = post.image;
+        btnDownload.classList.remove("hidden");
+      }
+    } else {
+      uploadPreview.src = "";
+      uploadPreview.classList.add("hidden");
+      uploadPlaceholder.classList.remove("hidden");
+      if (btnDownload) btnDownload.classList.add("hidden");
+    }
+    
     document.getElementById("post-briefing").value = post.briefing || generateMiniBriefing(post.tag);
     document.getElementById("post-caption").value = post.caption || "";
     document.getElementById("post-author").value = post.author || "";
@@ -929,6 +948,8 @@ function openModal(post = null, prefilledDate = "", prefilledIdeaId = "", prefil
     document.getElementById("upload-preview").src = "";
     document.getElementById("upload-preview").classList.add("hidden");
     document.getElementById("upload-placeholder").classList.remove("hidden");
+    const btnDownload = document.getElementById("btn-download-image");
+    if (btnDownload) btnDownload.classList.add("hidden");
     populateIdeaSelect();
     populateRoutineSelect();
     document.getElementById("post-idea-link").value = prefilledIdeaId || "";
@@ -1246,6 +1267,11 @@ document.getElementById("post-image-file").addEventListener("change", function(e
         preview.src = compressed;
         preview.classList.remove("hidden");
         placeholder.classList.add("hidden");
+        const btnDownload = document.getElementById("btn-download-image");
+        if (btnDownload) {
+          btnDownload.href = compressed;
+          btnDownload.classList.remove("hidden");
+        }
       };
       img.src = evt.target.result;
     };
@@ -1255,6 +1281,8 @@ document.getElementById("post-image-file").addEventListener("change", function(e
     preview.src = "";
     preview.classList.add("hidden");
     placeholder.classList.remove("hidden");
+    const btnDownload = document.getElementById("btn-download-image");
+    if (btnDownload) btnDownload.classList.add("hidden");
   }
 });
 
