@@ -1208,14 +1208,17 @@ form.addEventListener("submit", (e) => {
     }
   } else {
     posts.push(newPost);
-  }
   savePostToCloud(newPost);
   
-  const savedDate = newPost.date;
-  const isInternal = newPost.destiny === 'interno';
-  
-  // Sempre limpa o form mantendo a mesma data (funcionalidade contínua)
-  openModal(null, savedDate, "", isInternal ? "Interno" : "");
+  if (idVal) {
+    // If we were editing an existing post, just close the modal
+    closeModal();
+  } else {
+    // If it was a new post, clear the form but keep the same date/destiny for continuous input
+    const savedDate = newPost.date;
+    const isInternal = newPost.destiny === 'interno';
+    openModal(null, savedDate, "", isInternal ? "Interno" : "");
+  }
   
   renderCalendar();
   renderList();
