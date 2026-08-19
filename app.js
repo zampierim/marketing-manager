@@ -1202,15 +1202,11 @@ form.addEventListener("submit", (e) => {
   }
   savePostToCloud(newPost);
   
-  const isSaveAndNew = e.submitter && e.submitter.id === "btn-save-new";
+  const savedDate = newPost.date;
+  const isInternal = newPost.destiny === 'interno';
   
-  if (isSaveAndNew) {
-    const savedDate = newPost.date;
-    const isInternal = newPost.destiny === 'interno';
-    openModal(null, savedDate, "", isInternal ? "Interno" : "");
-  } else {
-    closeModal();
-  }
+  // Sempre limpa o form mantendo a mesma data (funcionalidade contínua)
+  openModal(null, savedDate, "", isInternal ? "Interno" : "");
   
   renderCalendar();
   renderList();
