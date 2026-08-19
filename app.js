@@ -1,3 +1,21 @@
+
+window.openLightbox = function(src) {
+  if (!src) return;
+  const lb = document.getElementById("image-lightbox");
+  const img = document.getElementById("lightbox-img");
+  const dl = document.getElementById("lightbox-download");
+  if (lb && img) {
+    img.src = src;
+    if (dl) dl.href = src;
+    lb.classList.remove("hidden");
+  }
+};
+
+window.closeLightbox = function() {
+  const lb = document.getElementById("image-lightbox");
+  if (lb) lb.classList.add("hidden");
+};
+
 const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 
 // ─── IndexedDB Image Store ─────────────────────────────────────────────────
