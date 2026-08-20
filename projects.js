@@ -36,8 +36,21 @@ document.addEventListener("DOMContentLoaded", () => {
   ];
 
   // State Management (Local + Cloud)
-  let projects = JSON.parse(localStorage.getItem("saam_projects")) || defaultProjects;
-  let processes = JSON.parse(localStorage.getItem("saam_processes")) || [];
+  let projects = [];
+  try {
+    const savedProj = localStorage.getItem("saam_projects");
+    projects = savedProj ? JSON.parse(savedProj) : defaultProjects;
+  } catch(e) {
+    projects = defaultProjects;
+  }
+
+  let processes = [];
+  try {
+    const savedProc = localStorage.getItem("saam_processes");
+    processes = savedProc ? JSON.parse(savedProc) : [];
+  } catch(e) {
+    processes = [];
+  }
 
   function saveLocal() {
     try {
@@ -58,10 +71,15 @@ document.addEventListener("DOMContentLoaded", () => {
     firestore.collection("marketing_projects").onSnapshot((snapshot) => {
       if (!snapshot.empty) {
         const cloudProjects = [];
-        snapshot.forEach(doc => cloudProjects.push(doc.data()));
-        projects = cloudProjects;
-        saveLocal();
-        renderProjects();
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          if (data && data.id && data.title) cloudProjects.push(data);
+        });
+        if (cloudProjects.length > 0) {
+          projects = cloudProjects;
+          saveLocal();
+          renderProjects();
+        }
       } else {
         // Seed initial projects to cloud once
         const batch = firestore.batch();
@@ -70,22 +88,54 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         batch.commit().catch(e => console.warn("Seed projects error:", e));
       }
-    }, err => console.warn("Projects sync note:", err));
+    }, err => {
+      console.warn("Projects sync note:", err);
+      renderProjects();
+    });
 
     // 2. Sync Processes / Routines
     firestore.collection("marketing_processes").onSnapshot((snapshot) => {
-      const cloudProcesses = [];
-      snapshot.forEach(doc => cloudProcesses.push(doc.data()));
-      processes = cloudProcesses;
-      saveLocal();
+      if (!snapshot.empty) {
+        const cloudProcesses = [];
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          if (data && data.id && data.title) cloudProcesses.push(data);
+        });
+        processes = cloudProcesses;
+        saveLocal();
+        renderProcesses();
+      } else {
+        // Cloud is empty — check if local has processes to preserve
+        try {
+          const savedProc = localStorage.getItem("saam_processes");
+          if (savedProc) {
+            const local = JSON.parse(savedProc);
+            if (Array.isArray(local) && local.length > 0) {
+              processes = local;
+              local.forEach(p => {
+                firestore.collection("marketing_processes").doc(p.id.toString()).set(p).catch(() => {});
+              });
+            }
+          }
+        } catch(e) {}
+        renderProcesses();
+      }
+    }, err => {
+      console.warn("Processes sync note:", err);
       renderProcesses();
-    }, err => console.warn("Processes sync note:", err));
+    });
   }
 
   initFirestoreProjectsSync();
 
   // Cloud Persistence Helpers
   async function saveProjectToCloud(proj) {
+    const idx = projects.findIndex(p => p.id === proj.id);
+    if (idx > -1) {
+      projects[idx] = proj;
+    } else {
+      projects.push(proj);
+    }
     saveLocal();
     renderProjects();
     try {
@@ -96,7 +146,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function deleteProjectFromCloud(id) {
-    projects = projects.filter(p => p.id !== parseInt(id));
+    const idInt = parseInt(id);
+    projects = projects.filter(p => p.id !== idInt);
     saveLocal();
     renderProjects();
     try {
@@ -107,6 +158,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function saveProcessToCloud(proc) {
+    const idx = processes.findIndex(p => p.id === proc.id);
+    if (idx > -1) {
+      processes[idx] = proc;
+    } else {
+      processes.push(proc);
+    }
     saveLocal();
     renderProcesses();
     try {
@@ -117,7 +174,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function deleteProcessFromCloud(id) {
-    processes = processes.filter(p => p.id !== parseInt(id));
+    const idInt = parseInt(id);
+    processes = processes.filter(p => p.id !== idInt);
     saveLocal();
     renderProcesses();
     try {
@@ -136,7 +194,9 @@ document.addEventListener("DOMContentLoaded", () => {
       window.requirePassword(() => {
         document.getElementById("project-form").reset();
         document.getElementById("project-id").value = "";
-        document.getElementById("project-link").value = "";
+        if (document.getElementById("project-link")) {
+          document.getElementById("project-link").value = "";
+        }
         document.getElementById("project-modal-title").textContent = "Novo Projeto";
         document.getElementById("btn-delete-project").style.display = "none";
         projectModal.classList.remove("hidden");
@@ -190,13 +250,6 @@ document.addEventListener("DOMContentLoaded", () => {
       status: document.getElementById("project-status").value
     };
 
-    if (idVal) {
-      const idx = projects.findIndex(p => p.id === newProject.id);
-      if (idx > -1) projects[idx] = newProject;
-    } else {
-      projects.push(newProject);
-    }
-    
     saveProjectToCloud(newProject);
     projectModal.classList.add("hidden");
     if(typeof showToast === 'function') showToast('✅ Projeto salvo na nuvem!', 'success');
@@ -253,13 +306,6 @@ document.addEventListener("DOMContentLoaded", () => {
       frequency: freqValue
     };
 
-    if (idVal) {
-      const idx = processes.findIndex(p => p.id === newProcess.id);
-      if (idx > -1) processes[idx] = newProcess;
-    } else {
-      processes.push(newProcess);
-    }
-    
     saveProcessToCloud(newProcess);
     processModal.classList.add("hidden");
     if(typeof showToast === 'function') showToast('✅ Processo salvo na nuvem!', 'success');
@@ -470,7 +516,7 @@ document.addEventListener("DOMContentLoaded", () => {
       };
 
       el.onmouseover = () => { el.style.background = "#F1F5F9"; el.style.borderColor = "#CBD5E1"; el.style.boxShadow = "0 2px 8px rgba(0,0,0,0.06)"; };
-      el.onmouseout = () => { el.style.background = "#F8FAFC"; el.style.borderColor = "#E2E8F0"; el.style.boxShadow = ""; };
+      el.onmouseout = () => { el.style.background = "#F8FAFC"; el.style.borderColor = "#E2E8F0"; };
       el.onclick = () => editProject(p.id);
 
       if(p.status === "in_progress") {
@@ -496,7 +542,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     container.innerHTML = "";
     
-    if (processes.length === 0) {
+    if (!processes || processes.length === 0) {
       container.innerHTML = '<div style="color: #94A3B8; font-size: 13px; font-style: italic;">Nenhuma rotina cadastrada.</div>';
       return;
     }

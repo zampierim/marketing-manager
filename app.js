@@ -924,6 +924,15 @@ function renderList() {
     const item = document.createElement("div");
     item.className = "list-item";
     item.style.marginBottom = "0"; // Override margin
+    const statusLabels = {
+      'rascunho': 'Rascunho',
+      'analise': 'Em Análise',
+      'aprovado': 'Aprovado',
+      'agendado': 'Agendado',
+      'publicado': 'Publicado'
+    };
+    const currentLabel = statusLabels[post.status] || 'Publicado';
+
     item.innerHTML = `
       <img src="${imgUrl}" class="list-item-thumb">
       <div class="list-item-content">
@@ -931,23 +940,11 @@ function renderList() {
         <p class="list-item-caption">${post.caption || "Sem legenda..."}</p>
       </div>
       <div class="list-item-actions">
-        <select class="list-status-select status-${post.status}">
-          <option value="rascunho" ${post.status==='rascunho'?'selected':''}>Rascunho</option>
-          <option value="analise" ${post.status==='analise'?'selected':''}>Em Análise</option>
-          <option value="aprovado" ${post.status==='aprovado'?'selected':''}>Aprovado</option>
-          <option value="agendado" ${post.status==='agendado'?'selected':''}>Agendado</option>
-          <option value="publicado" ${post.status==='publicado'?'selected':''}>Publicado</option>
-        </select>
+        <div class="list-status-badge status-${post.status}">
+          ${currentLabel}
+        </div>
       </div>
     `;
-    
-    const selectBox = item.querySelector(".list-status-select");
-    selectBox.addEventListener("click", (e) => e.stopPropagation());
-    selectBox.addEventListener("change", (e) => {
-      post.status = e.target.value;
-      selectBox.className = `list-status-select status-${e.target.value}`;
-      renderCalendar();
-    });
 
     item.addEventListener("click", () => openModal(post));
     window.currentDayGroupEl.querySelector('.day-posts').appendChild(item);
@@ -1037,6 +1034,15 @@ function renderInternalComms() {
           const item = document.createElement("div");
           item.className = "list-item";
           item.style.marginBottom = "0";
+          const statusLabels = {
+            'rascunho': 'Rascunho',
+            'analise': 'Em Análise',
+            'aprovado': 'Aprovado',
+            'agendado': 'Agendado',
+            'publicado': 'Publicado'
+          };
+          const currentLabel = statusLabels[post.status] || 'Publicado';
+
           item.innerHTML = `
             <img src="${imgUrl}" class="list-item-thumb">
             <div class="list-item-content">
@@ -1044,25 +1050,11 @@ function renderInternalComms() {
               <p class="list-item-caption">${post.caption || "Sem legenda..."}</p>
             </div>
             <div class="list-item-actions">
-              <select class="list-status-select status-${post.status}">
-                <option value="rascunho" ${post.status==='rascunho'?'selected':''}>Rascunho</option>
-                <option value="analise" ${post.status==='analise'?'selected':''}>Em Análise</option>
-                <option value="aprovado" ${post.status==='aprovado'?'selected':''}>Aprovado</option>
-                <option value="agendado" ${post.status==='agendado'?'selected':''}>Agendado</option>
-                <option value="publicado" ${post.status==='publicado'?'selected':''}>Publicado</option>
-              </select>
+              <div class="list-status-badge status-${post.status}">
+                ${currentLabel}
+              </div>
             </div>
           `;
-
-          const selectBox = item.querySelector(".list-status-select");
-          selectBox.addEventListener("click", (e) => e.stopPropagation());
-          selectBox.addEventListener("change", (e) => {
-            post.status = e.target.value;
-            selectBox.className = `list-status-select status-${e.target.value}`;
-            savePostToCloud(post);
-            renderCalendar();
-            renderList();
-          });
 
           item.addEventListener("click", () => openModal(post));
           postsContainer.appendChild(item);
