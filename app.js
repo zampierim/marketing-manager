@@ -8378,3 +8378,44 @@ if (formSugestao) {
     }
   });
 }
+
+
+// Niche Filter & Search in Guia do SAAM
+let activeNicheCategory = 'all';
+
+window.setNicheFilter = function(category, btnEl) {
+  activeNicheCategory = category;
+  
+  document.querySelectorAll('#niche-filter-pills .niche-filter-btn').forEach(btn => {
+    btn.style.background = '#FFFFFF';
+    btn.style.borderColor = '#CBD5E1';
+    btn.style.color = '#475569';
+  });
+
+  if (btnEl) {
+    btnEl.style.background = '#26428B';
+    btnEl.style.borderColor = '#26428B';
+    btnEl.style.color = '#FFFFFF';
+  }
+
+  filterNiches();
+};
+
+window.filterNiches = function() {
+  const query = (document.getElementById('niche-search-input')?.value || '').toLowerCase().trim();
+  const cards = document.querySelectorAll('#niches-grid .niche-card');
+
+  cards.forEach(card => {
+    const category = card.getAttribute('data-category');
+    const text = card.textContent.toLowerCase();
+
+    const matchesCategory = activeNicheCategory === 'all' || category === activeNicheCategory;
+    const matchesQuery = query === '' || text.includes(query);
+
+    if (matchesCategory && matchesQuery) {
+      card.style.display = 'block';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+};
