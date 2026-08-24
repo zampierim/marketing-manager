@@ -591,10 +591,24 @@ const filterDestiny = document.getElementById("filter-destiny");
 const filterIdea = document.getElementById("filter-idea");
 
 function isEditorial(p) {
-  if (p.commemorative) return true;
+  if (!p) return false;
+  if (p.commemorative === true || p.primaryDestiny === "interno" || p.destiny === "interno" || p.destiny === "cliente") {
+    return false;
+  }
   const dests = Array.isArray(p.destinies) && p.destinies.length > 0 ? p.destinies : (p.destiny ? [p.destiny] : []);
-  if (dests.length === 0) return true;
-  return !dests.every(d => d === "interno" || d === "cliente");
+  if (dests.length > 0 && dests.every(d => d === "interno" || d === "cliente" || d === "informativo")) {
+    return false;
+  }
+  return true;
+}
+
+function isInternalComms(p) {
+  if (!p) return false;
+  if (p.commemorative === true || p.primaryDestiny === "interno" || p.destiny === "interno" || p.destiny === "cliente") {
+    return true;
+  }
+  const dests = Array.isArray(p.destinies) && p.destinies.length > 0 ? p.destinies : (p.destiny ? [p.destiny] : []);
+  return dests.includes("interno") || dests.includes("cliente") || dests.includes("informativo");
 }
 
 function getFilteredPosts() {
@@ -1005,7 +1019,7 @@ function renderInternalComms() {
 
     const commPosts = posts.filter(p => {
       if (p.date !== dateStr) return false;
-      return p.destiny === "interno" || (p.destinies && p.destinies.includes("interno")) || p.primaryDestiny === "interno";
+      return isInternalComms(p);
     });
 
     if (dayOfWeek === 2 || dayOfWeek === 4 || commPosts.length > 0) {
