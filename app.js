@@ -8316,7 +8316,9 @@ function renderSugestoes() {
       let typeColor = '#3B82F6';
       let typeBg = '#EFF6FF';
       if(s.tipo === 'Ideia de Post') { typeColor = '#8B5CF6'; typeBg = '#F5F3FF'; }
+      if(s.tipo === 'Informativo Interno') { typeColor = '#26428B'; typeBg = '#E0E7FF'; }
       if(s.tipo === 'Feedback Geral') { typeColor = '#F59E0B'; typeBg = '#FFFBEB'; }
+      if(s.tipo === 'Outros') { typeColor = '#64748B'; typeBg = '#F1F5F9'; }
       
       const toggleAction = s.executada 
         ? `<span style="margin-left: auto; cursor: pointer; color: #64748B; background: #F1F5F9; padding: 4px 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600;" onclick="toggleExecutarSugestao(${s.id})" title="Desfazer">
