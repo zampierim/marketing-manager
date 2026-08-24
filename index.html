@@ -1631,7 +1631,6 @@
     </div>
     <form id="post-form">
       <input type="hidden" id="post-id">
-      
       <div class="row-2">
         <div class="field">
           <label>Data</label>
@@ -1641,13 +1640,6 @@
           <label>Título / Chamada</label>
           <input type="text" id="post-tag" placeholder="Ex: O que muda em 2027?" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--hairline); background: #fff;">
         </div>
-      </div>
-
-      <div class="field" id="field-topic">
-        <label>Tópico / Pilar Editorial</label>
-        <select id="post-topic" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--hairline); background: var(--bg-subtle);">
-          <option value="">-- Selecione um tópico --</option>
-        </select>
       </div>
 
       <!-- Elementos ocultos para manter compatibilidade com JS -->
@@ -1678,19 +1670,9 @@
         <small style="display: block; color: #64748B; font-size: 11px; margin-top: 4px;">💡 No Google Drive: clique em <strong>Compartilhar</strong> e deixe como <em>"Qualquer pessoa com o link pode ver"</em>.</small>
       </div>
 
-      <div class="field" id="field-briefing">
-        <label>Mini Briefing</label>
-        <textarea id="post-briefing" placeholder="Instruções ou resumo para o post..."></textarea>
-      </div>
-
       <div class="field">
         <label>Legenda / Copy</label>
         <textarea id="post-caption" required placeholder="Escreva a legenda do post..."></textarea>
-      </div>
-
-      <div class="field" id="field-comments">
-        <label>Comentários / Feedbacks da Equipe</label>
-        <textarea id="post-comments" placeholder="Deixe um comentário, feedback ou motivo da reprovação..." style="min-height: 70px; border-color: #A5B4FC; background: rgba(238,242,255,0.5);"></textarea>
       </div>
 
       <!-- Blocos de Destino (Checkbox multi-select + primary) -->
@@ -1722,7 +1704,7 @@
       </div>
 
       <!-- Blocos de Status (Radio group visual) -->
-      <div class="field">
+      <div class="field" style="margin-bottom: 12px;">
         <label>Status</label>
         <div class="chip-group" id="status-group">
           <label class="chip status-chip-rascunho">
@@ -1748,13 +1730,20 @@
         </div>
       </div>
 
-      <div class="field" id="field-approval-actions" style="display: flex; gap: 12px; margin-top: 12px;">
-        <button type="button" id="btn-quick-approve" style="flex: 1; padding: 12px; border-radius: 8px; border: none; background: #10B981; color: white; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+      <!-- Ações de Aprovação / Ajuste -->
+      <div class="field" id="field-approval-actions" style="display: flex; gap: 10px; margin-bottom: 12px;">
+        <button type="button" id="btn-quick-approve" style="flex: 1; padding: 12px 16px; border-radius: 8px; border: none; background: #10B981; color: white; font-weight: 700; font-size: 13.5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 6px rgba(16,185,129,0.25);">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Aprovar
         </button>
-        <button type="button" id="btn-quick-reject" style="flex: 1; padding: 12px; border-radius: 8px; border: none; background: #EF4444; color: white; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <button type="button" id="btn-quick-reject" style="flex: 1; padding: 12px 16px; border-radius: 8px; border: 1.5px solid #FCA5A5; background: #FEF2F2; color: #DC2626; font-weight: 700; font-size: 13.5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> Solicitar Ajuste
         </button>
+      </div>
+
+      <!-- Campo de Comentários / Feedbacks / Ajustes (Seguido imediatamente dos botões de aprovação) -->
+      <div class="field" id="field-comments" style="margin-bottom: 16px;">
+        <label>Comentários / Feedbacks / Ajustes da Equipe</label>
+        <textarea id="post-comments" placeholder="Deixe um comentário, feedback ou motivo do ajuste..." style="min-height: 75px; border-color: #CBD5E1; background: #FFFFFF; font-size: 13px;"></textarea>
       </div>
 
       <div class="field" id="field-author">
@@ -1910,7 +1899,7 @@
   </div>
 </div>
 
-<script src="app.js?v=61"></script>
+<script src="app.js?v=62"></script>
 <script src="projects.js?v=8"></script>
 <div id="toast-container" class="toast-container"></div>
 
