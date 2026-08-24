@@ -1766,6 +1766,48 @@
   </div>
 </div>
 
+
+<!-- Modal de Detalhes da Contribuição (Comunidade SAAM) -->
+<div class="overlay hidden" id="collab-details-modal">
+  <div class="modal" style="max-width: 580px; width: 90%;">
+    <div class="modal-header" style="border-bottom: 1px solid var(--hairline); padding-bottom: 14px; margin-bottom: 16px;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span id="collab-modal-type-badge" style="display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700;"></span>
+        <span id="collab-modal-date" style="font-size: 12px; color: #94A3B8;"></span>
+      </div>
+      <button class="icon-btn" id="close-collab-modal" type="button" onclick="closeCollabModal()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div>
+      <h2 id="collab-modal-title" style="margin-top: 0; margin-bottom: 8px; font-size: 19px; color: #0F172A; line-height: 1.35;"></h2>
+      <div style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #64748B; margin-bottom: 18px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Enviado por <strong id="collab-modal-author" style="color: #0F172A;"></strong></span>
+      </div>
+
+      <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 18px; max-height: 380px; overflow-y: auto;">
+        <label style="display: block; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #94A3B8; margin-bottom: 8px; letter-spacing: 0.05em;">Detalhes da Sugestão</label>
+        <p id="collab-modal-desc" style="margin: 0; font-size: 14.5px; color: #334155; line-height: 1.65; white-space: pre-wrap; word-break: break-word;"></p>
+      </div>
+
+      <div class="modal-actions" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+        <button type="button" id="collab-modal-btn-delete" style="color: #EF4444; background: #FEF2F2; border: 1.5px solid #FCA5A5; padding: 9px 16px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          Excluir
+        </button>
+        <div style="display: flex; gap: 10px;">
+          <button type="button" class="btn-cancel" id="collab-modal-btn-close" onclick="closeCollabModal()">Fechar</button>
+          <button type="button" id="collab-modal-btn-toggle" style="background: #10B981; color: white; border: none; padding: 9px 18px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            <span id="collab-modal-toggle-label">Executar</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- PASSWORD MODAL -->
 <div id="password-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; align-items: center; justify-content: center; z-index: 10000; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px);">
   <div class="modal-content" style="max-width: 320px; width: 90%; text-align: center; border-radius: 16px; padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); background: #FFF; animation: slideIn 0.3s ease;">
@@ -1900,7 +1942,7 @@
   </div>
 </div>
 
-<script src="app.js?v=63"></script>
+<script src="app.js?v=64"></script>
 <script src="projects.js?v=8"></script>
 <div id="toast-container" class="toast-container"></div>
 

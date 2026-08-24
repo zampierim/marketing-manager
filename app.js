@@ -8296,6 +8296,7 @@ function renderSugestoes() {
   const countEl = document.getElementById("sugestoes-count");
   const listExecEl = document.getElementById("sugestoes-executadas-list");
   const countExecEl = document.getElementById("sugestoes-executadas-count");
+  
   if (!listEl) return;
   
   const pendentes = sugestoes.filter(s => !s.executada);
@@ -8322,30 +8323,27 @@ function renderSugestoes() {
       if(s.tipo === 'Outros') { typeColor = '#64748B'; typeBg = '#F1F5F9'; }
       
       const toggleAction = s.executada 
-        ? `<span style="margin-left: auto; cursor: pointer; color: #64748B; background: #F1F5F9; padding: 4px 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600;" onclick="toggleExecutarSugestao(${s.id})" title="Desfazer">
+        ? `<span style="margin-left: auto; cursor: pointer; color: #64748B; background: #F1F5F9; padding: 4px 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600;" onclick="event.stopPropagation(); toggleExecutarSugestao(${s.id})" title="Desfazer">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Voltar
            </span>`
-        : `<span style="margin-left: auto; cursor: pointer; color: #059669; background: #D1FAE5; padding: 4px 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600;" onclick="toggleExecutarSugestao(${s.id})" title="Marcar como Executada">
+        : `<span style="margin-left: auto; cursor: pointer; color: #059669; background: #D1FAE5; padding: 4px 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600;" onclick="event.stopPropagation(); toggleExecutarSugestao(${s.id})" title="Marcar como Executada">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Executar
            </span>`;
 
       return `
-        <div style="background: #FFF; border: 1px solid var(--hairline); border-radius: 12px; padding: 16px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 12px; ${s.executada ? 'opacity: 0.6;' : ''}">
-          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-            <div>
-              <span style="display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; color: ${typeColor}; background: ${typeBg}; margin-bottom: 8px;">${s.tipo}</span>
-              <h4 style="margin: 0; font-size: 16px; color: #0F172A;">${s.titulo}</h4>
-            </div>
+        <div style="background: #FFF; border: 1px solid var(--hairline); border-radius: 12px; padding: 16px 18px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 10px; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease; ${s.executada ? 'opacity: 0.65;' : ''}" onclick="openCollabModal(${s.id})" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(0,0,0,0.06)'; this.style.borderColor='#2563EB';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)'; this.style.borderColor='var(--hairline)';" title="Clique para abrir e ver os detalhes">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="display: inline-block; padding: 3px 9px; border-radius: 6px; font-size: 11px; font-weight: 700; color: ${typeColor}; background: ${typeBg};">${s.tipo}</span>
             <span style="font-size: 12px; color: #94A3B8;">${dateStr}</span>
           </div>
-          <p style="margin: 0; font-size: 14px; color: #475569; line-height: 1.5; white-space: pre-wrap;">${s.desc}</p>
-          <div style="border-top: 1px solid #F1F5F9; padding-top: 12px; font-size: 13px; color: #64748B; display: flex; align-items: center; gap: 6px;">
+          <h4 style="margin: 0; font-size: 15.5px; font-weight: 700; color: #0F172A; line-height: 1.4;">${s.titulo}</h4>
+          <div style="border-top: 1px solid #F1F5F9; padding-top: 10px; font-size: 12.5px; color: #64748B; display: flex; align-items: center; gap: 6px;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             Por <strong style="color:#0F172A;">${s.nome}</strong>
             
             ${toggleAction}
             
-            <span style="${s.executada ? 'margin-left: 8px;' : ''} cursor: pointer; color: #EF4444; background: #FEF2F2; padding: 4px 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600;" onclick="deleteSugestao(${s.id})" title="Deletar sugestão">
+            <span style="${s.executada ? 'margin-left: 8px;' : ''} cursor: pointer; color: #EF4444; background: #FEF2F2; padding: 4px 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600;" onclick="event.stopPropagation(); deleteSugestao(${s.id})" title="Deletar sugestão">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
               Excluir
             </span>
@@ -8445,4 +8443,68 @@ window.filterNiches = function() {
       card.style.display = 'none';
     }
   });
+};
+
+
+window.openCollabModal = function(id) {
+  const sug = sugestoes.find(s => s.id === id);
+  if (!sug) return;
+
+  const modal = document.getElementById("collab-details-modal");
+  if (!modal) return;
+
+  const dateStr = new Date(sug.id).toLocaleDateString('pt-BR', {day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute:'2-digit'});
+  
+  let typeColor = '#3B82F6';
+  let typeBg = '#EFF6FF';
+  if(sug.tipo === 'Ideia de Post') { typeColor = '#8B5CF6'; typeBg = '#F5F3FF'; }
+  if(sug.tipo === 'Informativo Interno') { typeColor = '#26428B'; typeBg = '#E0E7FF'; }
+  if(sug.tipo === 'Comercial') { typeColor = '#0D9488'; typeBg = '#CCFBF1'; }
+  if(sug.tipo === 'Feedback Geral') { typeColor = '#F59E0B'; typeBg = '#FFFBEB'; }
+  if(sug.tipo === 'Outros') { typeColor = '#64748B'; typeBg = '#F1F5F9'; }
+
+  const badgeEl = document.getElementById("collab-modal-type-badge");
+  if (badgeEl) {
+    badgeEl.textContent = sug.tipo;
+    badgeEl.style.color = typeColor;
+    badgeEl.style.backgroundColor = typeBg;
+  }
+
+  const dateEl = document.getElementById("collab-modal-date");
+  if (dateEl) dateEl.textContent = dateStr;
+
+  const titleEl = document.getElementById("collab-modal-title");
+  if (titleEl) titleEl.textContent = sug.titulo;
+
+  const authorEl = document.getElementById("collab-modal-author");
+  if (authorEl) authorEl.textContent = sug.nome;
+
+  const descEl = document.getElementById("collab-modal-desc");
+  if (descEl) descEl.textContent = sug.desc || "(Sem descrição detalhada)";
+
+  const toggleBtn = document.getElementById("collab-modal-btn-toggle");
+  const toggleLabel = document.getElementById("collab-modal-toggle-label");
+  if (toggleBtn && toggleLabel) {
+    toggleLabel.textContent = sug.executada ? "Desfazer / Voltar para Pendentes" : "Marcar como Executada";
+    toggleBtn.style.backgroundColor = sug.executada ? "#64748B" : "#10B981";
+    toggleBtn.onclick = () => {
+      toggleExecutarSugestao(sug.id);
+      closeCollabModal();
+    };
+  }
+
+  const deleteBtn = document.getElementById("collab-modal-btn-delete");
+  if (deleteBtn) {
+    deleteBtn.onclick = () => {
+      deleteSugestao(sug.id);
+      closeCollabModal();
+    };
+  }
+
+  modal.classList.remove("hidden");
+};
+
+window.closeCollabModal = function() {
+  const modal = document.getElementById("collab-details-modal");
+  if (modal) modal.classList.add("hidden");
 };
