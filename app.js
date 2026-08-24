@@ -592,13 +592,23 @@ const filterIdea = document.getElementById("filter-idea");
 
 function isEditorial(p) {
   if (!p) return false;
-  if (p.commemorative === true || p.primaryDestiny === "interno" || p.destiny === "interno" || p.destiny === "cliente") {
-    return false;
+  // Always include commemorative dates in Editorial Calendar as red reminder cards
+  if (p.commemorative === true) {
+    return true;
   }
+  
+  // If it's a routine internal comms / newsletter without social media destination, exclude from Editorial Calendar
+  if (p.primaryDestiny === "interno" || p.destiny === "interno" || p.destiny === "cliente") {
+    const dests = Array.isArray(p.destinies) && p.destinies.length > 0 ? p.destinies : [];
+    const hasSocialMedia = dests.some(d => d === "instagram" || d === "linkedin" || d === "youtube" || d === "blog");
+    if (!hasSocialMedia) return false;
+  }
+  
   const dests = Array.isArray(p.destinies) && p.destinies.length > 0 ? p.destinies : (p.destiny ? [p.destiny] : []);
   if (dests.length > 0 && dests.every(d => d === "interno" || d === "cliente" || d === "informativo")) {
     return false;
   }
+  
   return true;
 }
 
