@@ -9,7 +9,7 @@ function setModalLockState(isLocked) {
   const postId = document.getElementById("post-id").value;
 
   const editableInputs = [
-    "post-date", "post-tag", "post-caption", "post-briefing", 
+    "post-date", "post-tag", "post-caption", 
     "post-author", "post-comments", "post-topic", "post-image-url", "post-image-file",
     "post-primary-destiny", "post-idea-link", "post-routine-link"
   ];
@@ -1173,7 +1173,7 @@ function openModal(post = null, prefilledDate = "", prefilledIdeaId = "", prefil
       if (btnDownload) btnDownload.classList.add("hidden");
     }
     
-    document.getElementById("post-briefing").value = post.briefing || generateMiniBriefing(post.tag);
+    if(document.getElementById("post-briefing")) document.getElementById("post-briefing").value = post.briefing || "";
     document.getElementById("post-caption").value = post.caption || "";
     document.getElementById("post-author").value = post.author || "";
     document.getElementById("post-comments").value = post.comments || "";
@@ -1208,7 +1208,7 @@ function openModal(post = null, prefilledDate = "", prefilledIdeaId = "", prefil
     // Toggle fields based on Internal Comms
     const isInternal = destArr.includes('interno');
     document.getElementById("field-topic").style.display = isInternal ? "none" : "block";
-    document.getElementById("field-briefing").style.display = isInternal ? "none" : "block";
+    if(document.getElementById("field-briefing")) document.getElementById("field-briefing").style.display = isInternal ? "none" : "block";
     document.getElementById("field-destiny").style.display = isInternal ? "none" : "block";
     document.getElementById("field-author").style.display = isInternal ? "none" : "block";
     document.getElementById("field-comments").style.display = isInternal ? "none" : "block";
@@ -1255,7 +1255,7 @@ function openModal(post = null, prefilledDate = "", prefilledIdeaId = "", prefil
     if (typeof updateDestinyChipVisuals === 'function') updateDestinyChipVisuals();
 
     document.getElementById("field-topic").style.display = isInternal ? "none" : "block";
-    document.getElementById("field-briefing").style.display = isInternal ? "none" : "block";
+    if(document.getElementById("field-briefing")) document.getElementById("field-briefing").style.display = isInternal ? "none" : "block";
     document.getElementById("field-destiny").style.display = isInternal ? "none" : "block";
     document.getElementById("field-author").style.display = isInternal ? "none" : "block";
     document.getElementById("field-comments").style.display = isInternal ? "none" : "block";
@@ -1468,7 +1468,7 @@ form.addEventListener("submit", (e) => {
     title: tagValue, // ensure title is always saved alongside tag
     topic: topicEl ? topicEl.value : "",
     image: document.getElementById("post-image-data").value,
-    briefing: document.getElementById("post-briefing").value,
+    briefing: document.getElementById("post-briefing") ? document.getElementById("post-briefing").value : "",
     caption: document.getElementById("post-caption").value,
     destiny: primaryDestiny, // backward compat — primary destiny
     destinies: checkedDestinies, // all selected platforms
