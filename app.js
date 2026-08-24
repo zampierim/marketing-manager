@@ -10,7 +10,7 @@ function setModalLockState(isLocked) {
 
   const editableInputs = [
     "post-date", "post-tag", "post-caption", 
-    "post-author", "post-comments", "post-topic", "post-image-url", "post-image-file",
+    "post-author", "post-comments", "post-image-url", "post-image-file",
     "post-primary-destiny", "post-idea-link", "post-routine-link"
   ];
 
@@ -1207,7 +1207,7 @@ function openModal(post = null, prefilledDate = "", prefilledIdeaId = "", prefil
 
     // Toggle fields based on Internal Comms
     const isInternal = destArr.includes('interno');
-    document.getElementById("field-topic").style.display = isInternal ? "none" : "block";
+    if(document.getElementById("field-topic")) document.getElementById("field-topic").style.display = isInternal ? "none" : "block";
     if(document.getElementById("field-briefing")) document.getElementById("field-briefing").style.display = isInternal ? "none" : "block";
     document.getElementById("field-destiny").style.display = isInternal ? "none" : "block";
     document.getElementById("field-author").style.display = isInternal ? "none" : "block";
@@ -1254,7 +1254,7 @@ function openModal(post = null, prefilledDate = "", prefilledIdeaId = "", prefil
     }
     if (typeof updateDestinyChipVisuals === 'function') updateDestinyChipVisuals();
 
-    document.getElementById("field-topic").style.display = isInternal ? "none" : "block";
+    if(document.getElementById("field-topic")) document.getElementById("field-topic").style.display = isInternal ? "none" : "block";
     if(document.getElementById("field-briefing")) document.getElementById("field-briefing").style.display = isInternal ? "none" : "block";
     document.getElementById("field-destiny").style.display = isInternal ? "none" : "block";
     document.getElementById("field-author").style.display = isInternal ? "none" : "block";
