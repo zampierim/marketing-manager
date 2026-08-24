@@ -8317,6 +8317,7 @@ function renderSugestoes() {
       let typeBg = '#EFF6FF';
       if(s.tipo === 'Ideia de Post') { typeColor = '#8B5CF6'; typeBg = '#F5F3FF'; }
       if(s.tipo === 'Informativo Interno') { typeColor = '#26428B'; typeBg = '#E0E7FF'; }
+      if(s.tipo === 'Comercial') { typeColor = '#0D9488'; typeBg = '#CCFBF1'; }
       if(s.tipo === 'Feedback Geral') { typeColor = '#F59E0B'; typeBg = '#FFFBEB'; }
       if(s.tipo === 'Outros') { typeColor = '#64748B'; typeBg = '#F1F5F9'; }
       
