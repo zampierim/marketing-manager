@@ -24,15 +24,23 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Default seed projects
+    // Default seed projects matching user board
   const defaultProjects = [
-    { id: 101, title: "Reestruturação instagram", description: "Destaques, biografia...", status: "backlog" },
-    { id: 102, title: "Estruturação Linkedin", description: "", status: "backlog" },
-    { id: 103, title: "Vídeo demonstrativo - Site", description: "vídeo para o site novo", status: "backlog" },
-    { id: 104, title: "Mapeamento de Eventos", description: "Grupos empresariais, distribuidores, ERPs, atacadistas, pós-graduação (auditores)", status: "backlog" },
-    { id: 105, title: "Lead Magnet (Ímã de Leads)", description: "Conteúdo de valor -> Formulário -> Captura do lead -> Nutrição -> Conversão", status: "backlog" },
+    { id: 101, title: "Estruturação Linkedin", description: "", status: "backlog" },
+    { id: 102, title: "Mapeamento de Eventos", description: "Grupos empresariais, distribuidores, ERPs, atacadistas, pós-graduação (auditores)", status: "backlog" },
+    { id: 103, title: "Lead Magnet (Ímã de Leads)", description: "Conteúdo de valor -> Formulário -> Captura do lead -> Nutrição -> Conversão", status: "backlog" },
+    { id: 104, title: "Reestruturação instagram", description: "Destaques, biografia..", status: "in_progress" },
+    { id: 105, title: "Vídeo demonstrativo - Site", description: "vídeo para o site novo", status: "in_progress" },
     { id: 106, title: "Plataforma Marketing", description: "", status: "in_progress" },
     { id: 107, title: "Squad - Boletim Informativo (PO)", description: "", status: "done" }
+  ];
+
+  const defaultProcesses = [
+    { id: 201, title: "Material para grupo de informativo", frequency: "Semanal: Ter, Qui", days: ["Ter", "Qui"], notes: "" },
+    { id: 202, title: "Acompanhar métricas - ADS", frequency: "Diário", days: [], notes: "" },
+    { id: 203, title: "Material para redes sociais", frequency: "Semanal", days: [], notes: "" },
+    { id: 204, title: "Auxilio com material para o comercial", frequency: "Mensal", days: [], notes: "" },
+    { id: 205, title: "Criação e publicação de artigos - Blog", frequency: "Semanal", days: [], notes: "" }
   ];
 
   // State Management (Local + Cloud)
@@ -47,9 +55,9 @@ document.addEventListener("DOMContentLoaded", () => {
   let processes = [];
   try {
     const savedProc = localStorage.getItem("saam_processes");
-    processes = savedProc ? JSON.parse(savedProc) : [];
+    processes = savedProc ? JSON.parse(savedProc) : defaultProcesses;
   } catch(e) {
-    processes = [];
+    processes = defaultProcesses;
   }
 
   function saveLocal() {
@@ -87,6 +95,9 @@ document.addEventListener("DOMContentLoaded", () => {
           batch.set(firestore.collection("marketing_projects").doc(p.id.toString()), p);
         });
         batch.commit().catch(e => console.warn("Seed projects error:", e));
+        projects = defaultProjects;
+        saveLocal();
+        renderProjects();
       }
     }, err => {
       console.warn("Projects sync note:", err);
@@ -101,23 +112,20 @@ document.addEventListener("DOMContentLoaded", () => {
           const data = doc.data();
           if (data && data.id && data.title) cloudProcesses.push(data);
         });
-        processes = cloudProcesses;
-        saveLocal();
-        renderProcesses();
+        if (cloudProcesses.length > 0) {
+          processes = cloudProcesses;
+          saveLocal();
+          renderProcesses();
+        }
       } else {
-        // Cloud is empty — check if local has processes to preserve
-        try {
-          const savedProc = localStorage.getItem("saam_processes");
-          if (savedProc) {
-            const local = JSON.parse(savedProc);
-            if (Array.isArray(local) && local.length > 0) {
-              processes = local;
-              local.forEach(p => {
-                firestore.collection("marketing_processes").doc(p.id.toString()).set(p).catch(() => {});
-              });
-            }
-          }
-        } catch(e) {}
+        // Seed initial processes to cloud once
+        const batch = firestore.batch();
+        defaultProcesses.forEach(p => {
+          batch.set(firestore.collection("marketing_processes").doc(p.id.toString()), p);
+        });
+        batch.commit().catch(e => console.warn("Seed processes error:", e));
+        processes = defaultProcesses;
+        saveLocal();
         renderProcesses();
       }
     }, err => {
