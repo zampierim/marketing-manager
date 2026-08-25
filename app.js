@@ -8490,51 +8490,72 @@ window.deleteSugestao = function(id) {
   }
 };
 
-const formSugestao = document.getElementById("form-sugestao");
-if (formSugestao) {
-  formSugestao.addEventListener("submit", async (e) => {
+window.submitSugestao = function(e) {
+  if (e && typeof e.preventDefault === 'function') {
     e.preventDefault();
     e.stopPropagation();
-    
-    try {
-      const nomeInput = document.getElementById("sugestao-nome");
-      const tipoInput = document.getElementById("sugestao-tipo");
-      const tituloInput = document.getElementById("sugestao-titulo");
-      const descInput = document.getElementById("sugestao-desc");
+  }
+  
+  try {
+    const nomeInput = document.getElementById("sugestao-nome");
+    const tipoInput = document.getElementById("sugestao-tipo");
+    const tituloInput = document.getElementById("sugestao-titulo");
+    const descInput = document.getElementById("sugestao-desc");
 
-      const nome = nomeInput ? nomeInput.value.trim() : "";
-      const tipo = tipoInput ? tipoInput.value : "Ideia de Post";
-      const titulo = tituloInput ? tituloInput.value.trim() : "";
-      const desc = descInput ? descInput.value.trim() : "";
+    const nome = nomeInput ? nomeInput.value.trim() : "";
+    const tipo = tipoInput ? tipoInput.value : "Ideia de Post";
+    const titulo = tituloInput ? tituloInput.value.trim() : "";
+    const desc = descInput ? descInput.value.trim() : "";
 
-      if (!nome || !titulo || !desc) {
-        alert("Por favor, preencha todos os campos da contribuição.");
-        return;
-      }
-
-      const novaSugestao = {
-        id: Date.now(),
-        nome,
-        tipo,
-        titulo,
-        desc,
-        executada: false
-      };
-
-      sugestoes.unshift(novaSugestao);
-      await saveSugestaoToCloud(novaSugestao);
-      renderSugestoes();
-      formSugestao.reset();
-
+    if (!nome || !titulo || !desc) {
       if (typeof showToast === 'function') {
-        showToast('✅ Contribuição enviada e salva com sucesso!', 'success');
+        showToast('⚠️ Por favor, preencha todos os campos da contribuição.', 'error');
       } else {
-        alert("Contribuição enviada e salva com sucesso!");
+        alert("Por favor, preencha todos os campos da contribuição.");
       }
-    } catch(err) {
-      console.error("Erro ao enviar sugestão:", err);
-      alert("Erro ao enviar contribuição. Tente novamente.");
+      return false;
     }
+
+    const novaSugestao = {
+      id: Date.now(),
+      nome,
+      tipo,
+      titulo,
+      desc,
+      executada: false
+    };
+
+    // 1. Add to local list and update UI immediately
+    sugestoes.unshift(novaSugestao);
+    saveSugestoes();
+    renderSugestoes();
+
+    // 2. Clear inputs
+    if (nomeInput) nomeInput.value = "";
+    if (tituloInput) tituloInput.value = "";
+    if (descInput) descInput.value = "";
+    if (tipoInput) tipoInput.selectedIndex = 0;
+
+    // 3. Save to Firestore in background
+    saveSugestaoToCloud(novaSugestao);
+
+    // 4. Show success toast
+    if (typeof showToast === 'function') {
+      showToast('✅ Contribuição enviada e salva com sucesso!', 'success');
+    }
+  } catch(err) {
+    console.error("Erro ao enviar sugestão:", err);
+  }
+
+  return false;
+};
+
+const formSugestao = document.getElementById("form-sugestao");
+if (formSugestao) {
+  formSugestao.addEventListener("submit", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    window.submitSugestao(e);
     return false;
   });
 }

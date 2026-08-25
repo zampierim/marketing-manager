@@ -1112,7 +1112,7 @@
       <!-- Formulário -->
       <div style="background: #FFF; border: 1px solid var(--hairline); border-radius: 12px; padding: 24px; position: sticky; top: 24px; box-shadow: var(--shadow-sm);">
         <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 18px; color: #0F172A;">Nova Contribuição</h3>
-        <form id="form-sugestao">
+        <form id="form-sugestao" onsubmit="event.preventDefault(); return window.submitSugestao(event);">
           <div class="field">
             <label style="display: block; margin-bottom: 6px; font-size: 13px; font-weight: 700; color: #475569;">Seu Nome / Setor</label>
             <input type="text" id="sugestao-nome" required placeholder="Ex: João (Tributário)" style="width: 100%; padding: 10px 12px; border: 1px solid #CBD5E1; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box;">
@@ -1137,7 +1137,7 @@
             <label style="display: block; margin-bottom: 6px; font-size: 13px; font-weight: 700; color: #475569;">Descrição / Detalhes</label>
             <textarea id="sugestao-desc" required placeholder="Explique sua ideia detalhadamente..." style="min-height: 120px; width: 100%; padding: 10px 12px; border: 1px solid #CBD5E1; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box; resize: vertical;"></textarea>
           </div>
-          <button type="submit" class="btn-new" style="width: 100%; justify-content: center; margin-top: 24px; padding: 12px; font-size: 15px;">Enviar Contribuição</button>
+          <button type="button" id="btn-submit-sugestao" onclick="window.submitSugestao(event)" class="btn-new" style="width: 100%; justify-content: center; margin-top: 24px; padding: 12px; font-size: 15px; cursor: pointer;">Enviar Contribuição</button>
         </form>
       </div>
       
@@ -1944,7 +1944,7 @@
   </div>
 </div>
 
-<script src="app.js?v=69"></script>
+<script src="app.js?v=70"></script>
 <script src="projects.js?v=8"></script>
 <div id="toast-container" class="toast-container"></div>
 
