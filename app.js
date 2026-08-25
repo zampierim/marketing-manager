@@ -8318,34 +8318,27 @@ function renderSugestoes() {
       let typeBg = '#EFF6FF';
       if(s.tipo === 'Ideia de Post') { typeColor = '#8B5CF6'; typeBg = '#F5F3FF'; }
       if(s.tipo === 'Informativo Interno') { typeColor = '#26428B'; typeBg = '#E0E7FF'; }
+      if(s.tipo === 'Marketing Interno') { typeColor = '#4338CA'; typeBg = '#EEF2FF'; }
+      if(s.tipo === 'Marketing Externo') { typeColor = '#EC4899'; typeBg = '#FDF2F8'; }
       if(s.tipo === 'Comercial') { typeColor = '#0D9488'; typeBg = '#CCFBF1'; }
       if(s.tipo === 'Feedback Geral') { typeColor = '#F59E0B'; typeBg = '#FFFBEB'; }
       if(s.tipo === 'Outros') { typeColor = '#64748B'; typeBg = '#F1F5F9'; }
-      
-      const toggleAction = s.executada 
-        ? `<span style="margin-left: auto; cursor: pointer; color: #64748B; background: #F1F5F9; padding: 4px 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600;" onclick="event.stopPropagation(); toggleExecutarSugestao(${s.id})" title="Desfazer">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Voltar
-           </span>`
-        : `<span style="margin-left: auto; cursor: pointer; color: #059669; background: #D1FAE5; padding: 4px 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600;" onclick="event.stopPropagation(); toggleExecutarSugestao(${s.id})" title="Marcar como Executada">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Executar
-           </span>`;
 
       return `
-        <div style="background: #FFF; border: 1px solid var(--hairline); border-radius: 12px; padding: 16px 18px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 10px; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease; ${s.executada ? 'opacity: 0.65;' : ''}" onclick="openCollabModal(${s.id})" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(0,0,0,0.06)'; this.style.borderColor='#2563EB';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)'; this.style.borderColor='var(--hairline)';" title="Clique para abrir e ver os detalhes">
+        <div style="background: #FFF; border: 1px solid var(--hairline); border-radius: 12px; padding: 16px 20px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 10px; cursor: pointer; transition: all 0.2s ease; ${s.executada ? 'opacity: 0.65;' : ''}" onclick="openCollabModal(${s.id})" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.06)'; this.style.borderColor='#2563EB';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)'; this.style.borderColor='var(--hairline)';" title="Clique para abrir e ver os detalhes completos">
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="display: inline-block; padding: 3px 9px; border-radius: 6px; font-size: 11px; font-weight: 700; color: ${typeColor}; background: ${typeBg};">${s.tipo}</span>
+            <span style="display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 11.5px; font-weight: 700; color: ${typeColor}; background: ${typeBg};">${s.tipo}</span>
             <span style="font-size: 12px; color: #94A3B8;">${dateStr}</span>
           </div>
-          <h4 style="margin: 0; font-size: 15.5px; font-weight: 700; color: #0F172A; line-height: 1.4;">${s.titulo}</h4>
-          <div style="border-top: 1px solid #F1F5F9; padding-top: 10px; font-size: 12.5px; color: #64748B; display: flex; align-items: center; gap: 6px;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            Por <strong style="color:#0F172A;">${s.nome}</strong>
-            
-            ${toggleAction}
-            
-            <span style="${s.executada ? 'margin-left: 8px;' : ''} cursor: pointer; color: #EF4444; background: #FEF2F2; padding: 4px 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600;" onclick="event.stopPropagation(); deleteSugestao(${s.id})" title="Deletar sugestão">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-              Excluir
+          <h4 style="margin: 0; font-size: 16px; font-weight: 700; color: #0F172A; line-height: 1.4;">${s.titulo}</h4>
+          <div style="border-top: 1px solid #F1F5F9; padding-top: 10px; font-size: 12.5px; color: #64748B; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <span>Por <strong style="color:#0F172A;">${s.nome}</strong></span>
+            </div>
+            <span style="color: #2563EB; font-weight: 600; font-size: 12px; display: flex; align-items: center; gap: 4px;">
+              Ver detalhes
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
             </span>
           </div>
         </div>
@@ -8459,6 +8452,8 @@ window.openCollabModal = function(id) {
   let typeBg = '#EFF6FF';
   if(sug.tipo === 'Ideia de Post') { typeColor = '#8B5CF6'; typeBg = '#F5F3FF'; }
   if(sug.tipo === 'Informativo Interno') { typeColor = '#26428B'; typeBg = '#E0E7FF'; }
+  if(sug.tipo === 'Marketing Interno') { typeColor = '#4338CA'; typeBg = '#EEF2FF'; }
+  if(sug.tipo === 'Marketing Externo') { typeColor = '#EC4899'; typeBg = '#FDF2F8'; }
   if(sug.tipo === 'Comercial') { typeColor = '#0D9488'; typeBg = '#CCFBF1'; }
   if(sug.tipo === 'Feedback Geral') { typeColor = '#F59E0B'; typeBg = '#FFFBEB'; }
   if(sug.tipo === 'Outros') { typeColor = '#64748B'; typeBg = '#F1F5F9'; }
