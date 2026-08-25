@@ -67,7 +67,7 @@ function setModalLockState(isLocked) {
   // Action Buttons
   if (btnEdit) btnEdit.style.display = lock ? "block" : "none";
   if (btnSave) btnSave.style.display = lock ? "none" : "block";
-  if (btnDel) btnDel.style.display = (lock || !postId) ? "none" : "block";
+  if (btnDel) btnDel.style.display = postId ? "block" : "none";
 
   if (titleEl) {
     if (lock) {
@@ -970,7 +970,7 @@ function renderList() {
       </div>
     `;
 
-    item.addEventListener("click", () => openModal(post));
+    item.addEventListener("click", () => openModal(post, "", "", "Interno"));
     window.currentDayGroupEl.querySelector('.day-posts').appendChild(item);
   });
   renderInternalComms();
