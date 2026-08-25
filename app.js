@@ -2363,6 +2363,7 @@ document.querySelectorAll(".ias-slider").forEach(slider => {
 renderCalendar();
 renderList();
 initCloudSync();
+initSugestoesSync();
 // renderIdeasList removida daqui
 showPage(pageHome);
 
