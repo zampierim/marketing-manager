@@ -8291,21 +8291,32 @@ function saveSugestoes() {
   localStorage.setItem('saam_marketing_sugestoes_v1', JSON.stringify(sugestoes));
 }
 
+let activeCollabFilter = 'all';
+
 function renderSugestoes() {
   const listEl = document.getElementById("sugestoes-list");
   const countEl = document.getElementById("sugestoes-count");
   const listExecEl = document.getElementById("sugestoes-executadas-list");
   const countExecEl = document.getElementById("sugestoes-executadas-count");
+  const countFilterAll = document.getElementById("count-filter-all");
   
   if (!listEl) return;
   
-  const pendentes = sugestoes.filter(s => !s.executada);
-  const executadas = sugestoes.filter(s => s.executada);
+  const allPendentes = sugestoes.filter(s => !s.executada);
+  const allExecutadas = sugestoes.filter(s => s.executada);
+  
+  if (countFilterAll) countFilterAll.textContent = allPendentes.length;
+  
+  const pendentes = activeCollabFilter === 'all' ? allPendentes : allPendentes.filter(s => s.tipo === activeCollabFilter);
+  const executadas = activeCollabFilter === 'all' ? allExecutadas : allExecutadas.filter(s => s.tipo === activeCollabFilter);
   
   const renderList = (arr, container, countContainer, emptyMsg) => {
     if (arr.length === 0) {
-      container.innerHTML = `<div style="text-align: center; padding: 40px; color: #64748B; font-size: 14px; background: #F8FAFC; border-radius: 12px; border: 1px dashed #CBD5E1;">${emptyMsg}</div>`;
-      if(countContainer) countContainer.textContent = `0 contribuições`;
+      const msg = activeCollabFilter !== 'all' 
+        ? `Nenhuma contribuição encontrada para o filtro "${activeCollabFilter}".`
+        : emptyMsg;
+      container.innerHTML = `<div style="text-align: center; padding: 40px; color: #64748B; font-size: 14px; background: #F8FAFC; border-radius: 12px; border: 1px dashed #CBD5E1;">${msg}</div>`;
+      if(countContainer) countContainer.textContent = `${arr.length} contribuiç${arr.length === 1 ? 'ão' : 'ões'}`;
       return;
     }
     
@@ -8353,6 +8364,27 @@ function renderSugestoes() {
     renderList(executadas, listExecEl, countExecEl, "Nenhuma colaboração foi executada ainda.");
   }
 }
+
+window.filterCollabs = function(filter) {
+  activeCollabFilter = filter;
+  
+  document.querySelectorAll('.collab-filter-btn').forEach(btn => {
+    const f = btn.getAttribute('data-filter');
+    if (f === filter) {
+      btn.style.border = '1.5px solid #2563EB';
+      btn.style.background = '#2563EB';
+      btn.style.color = '#FFFFFF';
+      btn.style.fontWeight = '700';
+    } else {
+      btn.style.border = '1px solid #E2E8F0';
+      btn.style.background = '#FFFFFF';
+      btn.style.color = '#475569';
+      btn.style.fontWeight = '600';
+    }
+  });
+  
+  renderSugestoes();
+};
 
 window.toggleExecutarSugestao = function(id) {
   const sug = sugestoes.find(s => s.id === id);
