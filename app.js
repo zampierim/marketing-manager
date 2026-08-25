@@ -1032,105 +1032,69 @@ function renderInternalComms() {
       return isInternalComms(p);
     });
 
-    if (dayOfWeek === 2 || dayOfWeek === 4 || commPosts.length > 0) {
+    if (commPosts.length > 0) {
       hasSlots = true;
       const dayStr = String(d).padStart(2, '0');
       const weekDay = weekNamesShort[dayOfWeek];
 
-      if (commPosts.length > 0) {
-        const dayGroupEl = document.createElement("div");
-        dayGroupEl.className = "day-group";
-        dayGroupEl.style = "display: flex; align-items: stretch; margin-bottom: 12px;";
-        dayGroupEl.innerHTML = `
-          <div class="list-date-block" style="padding-top: 16px; margin-right: 12px; border: none; padding-right: 0;">
-            <span class="day">${dayStr}</span>
-            <span class="weekday">${weekDay}</span>
-          </div>
-          <div class="day-posts" style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px;"></div>
-        `;
-        commsListEl.appendChild(dayGroupEl);
-        const postsContainer = dayGroupEl.querySelector('.day-posts');
+      const dayGroupEl = document.createElement("div");
+      dayGroupEl.className = "day-group";
+      dayGroupEl.style = "display: flex; align-items: stretch; margin-bottom: 12px;";
+      dayGroupEl.innerHTML = `
+        <div class="list-date-block" style="padding-top: 16px; margin-right: 12px; border: none; padding-right: 0;">
+          <span class="day">${dayStr}</span>
+          <span class="weekday">${weekDay}</span>
+        </div>
+        <div class="day-posts" style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px;"></div>
+      `;
+      commsListEl.appendChild(dayGroupEl);
+      const postsContainer = dayGroupEl.querySelector('.day-posts');
 
-        commPosts.forEach(post => {
-          const imgUrl = getPostImage(post) || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' style='background:%23F8FAFC;'><rect width='400' height='400' fill='%23F8FAFC'/><path d='M150 250l30-40 40 50 60-80 50 100H100z' fill='%23E2E8F0'/><circle cx='160' cy='160' r='20' fill='%23E2E8F0'/></svg>";
-          const iconSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>`;
-          
-          const item = document.createElement("div");
-          item.className = "list-item";
-          item.style.marginBottom = "0";
-          const statusLabels = {
-            'rascunho': 'Rascunho',
-            'analise': 'Em Análise',
-            'aprovado': 'Aprovado',
-            'agendado': 'Agendado',
-            'publicado': 'Publicado'
-          };
-          const currentLabel = statusLabels[post.status] || 'Publicado';
-
-          item.innerHTML = `
-            <img src="${imgUrl}" class="list-item-thumb">
-            <div class="list-item-content">
-              <h4 class="list-item-title" style="display: flex; align-items: center;">${iconSvg}${post.title || post.tag}</h4>
-              <p class="list-item-caption">${post.caption || "Sem legenda..."}</p>
-            </div>
-            <div class="list-item-actions">
-              <div class="list-status-badge status-${post.status}">
-                ${currentLabel}
-              </div>
-            </div>
-          `;
-
-          item.addEventListener("click", () => openModal(post));
-          postsContainer.appendChild(item);
-        });
-
-
-      } else {
-        const dayGroupEl = document.createElement("div");
-        dayGroupEl.className = "day-group";
-        dayGroupEl.style = "display: flex; align-items: stretch; margin-bottom: 12px;";
-        dayGroupEl.innerHTML = `
-          <div class="list-date-block" style="padding-top: 16px; margin-right: 12px; border: none; padding-right: 0;">
-            <span class="day">${dayStr}</span>
-            <span class="weekday">${weekDay}</span>
-          </div>
-          <div class="day-posts" style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px;"></div>
-        `;
-        commsListEl.appendChild(dayGroupEl);
-        const postsContainer = dayGroupEl.querySelector('.day-posts');
-
+      commPosts.forEach(post => {
+        const imgUrl = getPostImage(post) || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' style='background:%23F8FAFC;'><rect width='400' height='400' fill='%23F8FAFC'/><path d='M150 250l30-40 40 50 60-80 50 100H100z' fill='%23E2E8F0'/><circle cx='160' cy='160' r='20' fill='%23E2E8F0'/></svg>";
+        const iconSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>`;
+        
         const item = document.createElement("div");
         item.className = "list-item";
         item.style.marginBottom = "0";
-        item.style.opacity = "0.7";
-        item.style.borderStyle = "dashed";
+        item.style.cursor = "pointer";
+        const statusLabels = {
+          'rascunho': 'Rascunho',
+          'analise': 'Em Análise',
+          'aprovado': 'Aprovado',
+          'agendado': 'Agendado',
+          'publicado': 'Publicado'
+        };
+        const currentLabel = statusLabels[post.status] || 'Publicado';
+
         item.innerHTML = `
-          <div class="list-item-thumb" style="background: #F1F5F9; display: flex; align-items: center; justify-content: center;">
-            <svg width="24" height="24" fill="none" stroke="#94A3B8" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-          </div>
+          <img src="${imgUrl}" class="list-item-thumb">
           <div class="list-item-content">
-            <h4 class="list-item-title" style="color: #64748B;">Espaço disponível</h4>
-            <p class="list-item-caption">Nenhuma comunicação interna programada.</p>
+            <h4 class="list-item-title" style="display: flex; align-items: center;">${iconSvg}${post.title || post.tag}</h4>
+            <p class="list-item-caption">${post.caption || "Sem legenda..."}</p>
           </div>
           <div class="list-item-actions">
-            <span style="font-size: 12px; font-weight: 800; color: #26428B; text-transform: uppercase; padding: 6px 12px; background: rgba(38,66,139,0.1); border-radius: 6px;">Planejar</span>
+            <div class="list-status-badge status-${post.status}">
+              ${currentLabel}
+            </div>
           </div>
         `;
-        item.addEventListener("click", () => {
-          openModal({
-            date: dateStr,
-            destinies: ['interno'],
-            primaryDestiny: 'interno',
-            status: 'rascunho'
-          });
-        });
+
+        item.addEventListener("click", () => openModal(post, "", "", "Interno"));
         postsContainer.appendChild(item);
-      }
+      });
     }
   }
 
   if (!hasSlots) {
-    commsListEl.innerHTML = "<p class='placeholder-text'>Nenhuma terça ou quinta neste período.</p>";
+    commsListEl.innerHTML = `
+      <div style="text-align: center; padding: 36px 16px; color: #64748B; font-size: 14px; background: #F8FAFC; border: 1px dashed #CBD5E1; border-radius: 12px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+        <span>Nenhuma comunicação interna programada para este mês.</span>
+        <button type="button" onclick="document.getElementById('btn-add-internal-comm').click()" style="background: #2563EB; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;">
+          + Programar Nova Comunicação
+        </button>
+      </div>
+    `;
   }
 }
 
