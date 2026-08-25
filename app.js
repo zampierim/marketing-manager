@@ -8279,20 +8279,84 @@ setTimeout(() => {
 
 // --- COLABORAÇÃO (SUGESTÕES) MODULE ---
 let sugestoes = [];
+let activeCollabFilter = 'all';
+
+// Load cached suggestions on startup
 try {
   const savedSug = localStorage.getItem('saam_marketing_sugestoes_v1');
   if (savedSug) {
     sugestoes = JSON.parse(savedSug);
   }
 } catch(e) {
-  console.error(e);
+  console.error("Local storage error:", e);
+}
+
+// 1. Real-Time Cloud Firestore Sync for Comunidade SAAM
+function initSugestoesSync() {
+  if (typeof db === 'undefined') {
+    console.warn("Firestore db not available yet for sugestoes");
+    return;
+  }
+
+  try {
+    db.collection("marketing_sugestoes").onSnapshot((snapshot) => {
+      const cloudList = [];
+      snapshot.forEach(doc => {
+        cloudList.push(doc.data());
+      });
+      
+      if (cloudList.length > 0) {
+        // Merge cloud with local cache (cloud takes precedence by ID)
+        const map = new Map();
+        sugestoes.forEach(s => map.set(String(s.id), s));
+        cloudList.forEach(s => map.set(String(s.id), s));
+        sugestoes = Array.from(map.values());
+      }
+      
+      try {
+        localStorage.setItem('saam_marketing_sugestoes_v1', JSON.stringify(sugestoes));
+      } catch(lsErr) {}
+      
+      renderSugestoes();
+    }, (err) => {
+      console.error("Erro sincronizando sugestões do Firebase:", err);
+    });
+  } catch(syncErr) {
+    console.error("Erro ao inicializar sync de sugestões:", syncErr);
+  }
+}
+
+async function saveSugestaoToCloud(sug) {
+  try {
+    if (typeof db !== 'undefined') {
+      await db.collection("marketing_sugestoes").doc(String(sug.id)).set(sug);
+    }
+  } catch(e) {
+    console.error("Erro ao salvar sugestão no Firestore:", e);
+  }
+  try {
+    localStorage.setItem('saam_marketing_sugestoes_v1', JSON.stringify(sugestoes));
+  } catch(e) {}
+}
+
+async function deleteSugestaoFromCloud(id) {
+  try {
+    if (typeof db !== 'undefined') {
+      await db.collection("marketing_sugestoes").doc(String(id)).delete();
+    }
+  } catch(e) {
+    console.error("Erro ao excluir sugestão no Firestore:", e);
+  }
+  try {
+    localStorage.setItem('saam_marketing_sugestoes_v1', JSON.stringify(sugestoes));
+  } catch(e) {}
 }
 
 function saveSugestoes() {
-  localStorage.setItem('saam_marketing_sugestoes_v1', JSON.stringify(sugestoes));
+  try {
+    localStorage.setItem('saam_marketing_sugestoes_v1', JSON.stringify(sugestoes));
+  } catch(e) {}
 }
-
-let activeCollabFilter = 'all';
 
 function renderSugestoes() {
   const listEl = document.getElementById("sugestoes-list");
@@ -8388,89 +8452,92 @@ window.filterCollabs = function(filter) {
 };
 
 window.toggleExecutarSugestao = function(id) {
-  const sug = sugestoes.find(s => s.id === id);
-  if (sug) {
-    sug.executada = !sug.executada;
-    saveSugestoes();
-    renderSugestoes();
+  const action = () => {
+    const sug = sugestoes.find(s => s.id === id);
+    if (sug) {
+      sug.executada = !sug.executada;
+      saveSugestaoToCloud(sug);
+      renderSugestoes();
+      if (typeof showToast === 'function') {
+        showToast(sug.executada ? '✅ Marcada como executada!' : '↩️ Movida de volta para pendentes!', 'success');
+      }
+    }
+  };
+
+  if (sessionStorage.getItem("saam_unlocked") === "true") {
+    action();
+  } else {
+    requirePassword(action);
   }
 };
 
 window.deleteSugestao = function(id) {
-  if(confirm("Deseja realmente remover esta contribuição?")) {
-    sugestoes = sugestoes.filter(s => s.id !== id);
-    saveSugestoes();
-    renderSugestoes();
+  const action = () => {
+    if (confirm("Deseja realmente remover esta contribuição?")) {
+      sugestoes = sugestoes.filter(s => s.id !== id);
+      deleteSugestaoFromCloud(id);
+      renderSugestoes();
+      if (typeof showToast === 'function') {
+        showToast('Contribuição excluída com sucesso.', 'success');
+      }
+    }
+  };
+
+  if (sessionStorage.getItem("saam_unlocked") === "true") {
+    action();
+  } else {
+    requirePassword(action);
   }
 };
 
 const formSugestao = document.getElementById("form-sugestao");
 if (formSugestao) {
-  formSugestao.addEventListener("submit", (e) => {
+  formSugestao.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const nome = document.getElementById("sugestao-nome").value;
-    const tipo = document.getElementById("sugestao-tipo").value;
-    const titulo = document.getElementById("sugestao-titulo").value;
-    const desc = document.getElementById("sugestao-desc").value;
+    e.stopPropagation();
     
-    sugestoes.push({
-      id: Date.now(),
-      nome, tipo, titulo, desc
-    });
-    
-    saveSugestoes();
-    renderSugestoes();
-    formSugestao.reset();
-    
-    if (typeof showToast === 'function') {
-      showToast('✅ Contribuição enviada com sucesso!', 'success');
-    } else {
-      alert("Enviado com sucesso!");
+    try {
+      const nomeInput = document.getElementById("sugestao-nome");
+      const tipoInput = document.getElementById("sugestao-tipo");
+      const tituloInput = document.getElementById("sugestao-titulo");
+      const descInput = document.getElementById("sugestao-desc");
+
+      const nome = nomeInput ? nomeInput.value.trim() : "";
+      const tipo = tipoInput ? tipoInput.value : "Ideia de Post";
+      const titulo = tituloInput ? tituloInput.value.trim() : "";
+      const desc = descInput ? descInput.value.trim() : "";
+
+      if (!nome || !titulo || !desc) {
+        alert("Por favor, preencha todos os campos da contribuição.");
+        return;
+      }
+
+      const novaSugestao = {
+        id: Date.now(),
+        nome,
+        tipo,
+        titulo,
+        desc,
+        executada: false
+      };
+
+      sugestoes.unshift(novaSugestao);
+      await saveSugestaoToCloud(novaSugestao);
+      renderSugestoes();
+      formSugestao.reset();
+
+      if (typeof showToast === 'function') {
+        showToast('✅ Contribuição enviada e salva com sucesso!', 'success');
+      } else {
+        alert("Contribuição enviada e salva com sucesso!");
+      }
+    } catch(err) {
+      console.error("Erro ao enviar sugestão:", err);
+      alert("Erro ao enviar contribuição. Tente novamente.");
     }
+    return false;
   });
 }
-
-
-// Niche Filter & Search in Guia do SAAM
-let activeNicheCategory = 'all';
-
-window.setNicheFilter = function(category, btnEl) {
-  activeNicheCategory = category;
-  
-  document.querySelectorAll('#niche-filter-pills .niche-filter-btn').forEach(btn => {
-    btn.style.background = '#FFFFFF';
-    btn.style.borderColor = '#CBD5E1';
-    btn.style.color = '#475569';
-  });
-
-  if (btnEl) {
-    btnEl.style.background = '#26428B';
-    btnEl.style.borderColor = '#26428B';
-    btnEl.style.color = '#FFFFFF';
-  }
-
-  filterNiches();
-};
-
-window.filterNiches = function() {
-  const query = (document.getElementById('niche-search-input')?.value || '').toLowerCase().trim();
-  const cards = document.querySelectorAll('#niches-grid .niche-card');
-
-  cards.forEach(card => {
-    const category = card.getAttribute('data-category');
-    const text = card.textContent.toLowerCase();
-
-    const matchesCategory = activeNicheCategory === 'all' || category === activeNicheCategory;
-    const matchesQuery = query === '' || text.includes(query);
-
-    if (matchesCategory && matchesQuery) {
-      card.style.display = 'block';
-    } else {
-      card.style.display = 'none';
-    }
-  });
-};
-
 
 window.openCollabModal = function(id) {
   const sug = sugestoes.find(s => s.id === id);
