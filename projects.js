@@ -5,13 +5,25 @@ document.addEventListener("DOMContentLoaded", () => {
   const pageHome = document.getElementById("page-home");
   const btnOpenProjetos = document.getElementById("btn-open-projetos");
 
-  // Navigation
+  // Navigation (Password Protected)
   if (btnOpenProjetos) {
     btnOpenProjetos.addEventListener("click", () => {
-      document.querySelectorAll(".app > div[id^='page-']").forEach(p => p.classList.add("hidden"));
-      if (pageProjetos) pageProjetos.classList.remove("hidden");
-      renderProjects();
-      renderProcesses();
+      const openPage = () => {
+        document.querySelectorAll(".app > div[id^='page-']").forEach(p => p.classList.add("hidden"));
+        if (pageProjetos) pageProjetos.classList.remove("hidden");
+        renderProjects();
+        renderProcesses();
+      };
+
+      if (sessionStorage.getItem("saam_unlocked") === "true") {
+        openPage();
+      } else {
+        if (typeof window.requirePassword === 'function') {
+          window.requirePassword(openPage);
+        } else {
+          openPage();
+        }
+      }
     });
   }
 
