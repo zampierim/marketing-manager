@@ -597,15 +597,12 @@ function isEditorial(p) {
     return true;
   }
   
-  // If it's a routine internal comms / newsletter without social media destination, exclude from Editorial Calendar
-  if (p.primaryDestiny === "interno" || p.destiny === "interno" || p.destiny === "cliente") {
-    const dests = Array.isArray(p.destinies) && p.destinies.length > 0 ? p.destinies : [];
-    const hasSocialMedia = dests.some(d => d === "instagram" || d === "linkedin" || d === "youtube" || d === "blog");
-    if (!hasSocialMedia) return false;
-  }
-  
+  // If it's internal comms without social media destination, exclude from Editorial Calendar
   const dests = Array.isArray(p.destinies) && p.destinies.length > 0 ? p.destinies : (p.destiny ? [p.destiny] : []);
   if (dests.length > 0 && dests.every(d => d === "interno" || d === "cliente" || d === "informativo")) {
+    return false;
+  }
+  if ((p.primaryDestiny === "interno" || p.destiny === "interno" || p.destiny === "cliente") && !dests.some(d => d === "instagram" || d === "linkedin" || d === "youtube" || d === "blog")) {
     return false;
   }
   
@@ -614,7 +611,11 @@ function isEditorial(p) {
 
 function isInternalComms(p) {
   if (!p) return false;
-  if (p.commemorative === true || p.primaryDestiny === "interno" || p.destiny === "interno" || p.destiny === "cliente") {
+  // Commemorative dates are strictly for Editorial Calendar, never for Internal Comms
+  if (p.commemorative === true) {
+    return false;
+  }
+  if (p.primaryDestiny === "interno" || p.destiny === "interno" || p.destiny === "cliente") {
     return true;
   }
   const dests = Array.isArray(p.destinies) && p.destinies.length > 0 ? p.destinies : (p.destiny ? [p.destiny] : []);
