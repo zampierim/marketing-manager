@@ -741,30 +741,32 @@ function renderCalendar() {
 function createPostCard(post) {
   const card = document.createElement("div");
   card.className = "post-card";
+  card.style.cursor = "pointer";
   
   const imgUrl = getPostImage(post) || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' style='background:%23F8FAFC;'><rect width='400' height='400' fill='%23F8FAFC'/><path d='M150 250l30-40 40 50 60-80 50 100H100z' fill='%23E2E8F0'/><circle cx='160' cy='160' r='20' fill='%23E2E8F0'/></svg>";
 
   let iconSvg = '';
   if(post.destiny === 'WhatsApp') {
-    iconSvg = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>`;
+    iconSvg = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>`;
   } else if(post.destiny === 'YouTube') {
-    iconSvg = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33 2.78 2.78 0 0 0 1.94 2c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.33 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>`;
+    iconSvg = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33 2.78 2.78 0 0 0 1.94 2c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.33 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>`;
   } else if(post.destiny === 'Blog') {
-    iconSvg = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>`;
+    iconSvg = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>`;
   } else { 
     iconSvg = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>`;
   }
 
   let destinyBadge = '';
-  const destinyLabel = post.destiny || '';
-  // Support both single string and array of destinies
-  const destinyArr = Array.isArray(post.destinies) ? post.destinies : (destinyLabel ? [destinyLabel] : []);
-  const primaryDest = post.primaryDestiny || destinyArr[0] || destinyLabel || '';
+  const rawDestArr = Array.isArray(post.destinies) ? post.destinies : (post.destiny ? [post.destiny] : []);
+  // Normalize insta-feed / insta-story to single 'instagram'
+  let destinyArr = rawDestArr.map(d => (d === 'insta-feed' || d === 'insta-story') ? 'instagram' : d);
+  destinyArr = Array.from(new Set(destinyArr));
+
+  let primaryDest = post.primaryDestiny || destinyArr[0] || post.destiny || '';
+  if (primaryDest === 'insta-feed' || primaryDest === 'insta-story') primaryDest = 'instagram';
 
   const destinyColors = {
-    'insta-feed': { bg: 'linear-gradient(135deg,#F56040,#C13584)', label: 'INSTA FEED' },
-    'insta-story': { bg: 'linear-gradient(135deg,#C13584,#833AB4)', label: 'INSTA STORY' },
-    'instagram': { bg: 'linear-gradient(135deg,#F56040,#C13584)', label: 'INSTA FEED' },
+    'instagram': { bg: 'linear-gradient(135deg,#F56040,#C13584)', label: 'INSTAGRAM' },
     'linkedin': { bg: '#0A66C2', label: 'LINKEDIN' },
     'interno': { bg: '#26428B', label: 'INTERNO / CLIENTE' },
     'blog': { bg: '#F59E0B', label: 'BLOG' },
@@ -780,11 +782,6 @@ function createPostCard(post) {
       return `<span style="display:inline-block;${bgStyle};color:#fff;font-size:8px;font-weight:800;padding:2px 6px;border-radius:8px;letter-spacing:0.04em;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,0.2);${isPrimary ? 'border:1px solid #FCD34D;' : ''}">${star}${cfg.label}</span>`;
     });
     destinyBadge = `<div style="position:absolute;top:6px;left:50%;transform:translateX(-50%);z-index:11;display:flex;gap:3px;flex-wrap:wrap;justify-content:center;max-width:95%;">${badges.join('')}</div>`;
-  } else {
-    // Fallback for old posts with single destiny string
-    const cfg = destinyColors[destinyLabel] || destinyColors['instagram'];
-    const bgStyle = cfg.bg.includes('gradient') ? `background:${cfg.bg}` : `background:${cfg.bg}`;
-    destinyBadge = `<span style="position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:11;${bgStyle};color:#fff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:10px;letter-spacing:0.04em;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.25);">${cfg.label}</span>`;
   }
 
   let cardHTML = ``;
@@ -816,27 +813,35 @@ function createPostCard(post) {
 
   card.innerHTML = cardHTML;
   
-  const dot = card.querySelector(".status-dot");
-  dot.addEventListener("click", (e) => {
-    e.stopPropagation();
-    if (sessionStorage.getItem("saam_unlocked") !== "true") {
-      requirePassword(() => {
-        let idx = statusCycle.indexOf(post.status);
-        let nextStatus = statusCycle[(idx + 1) % statusCycle.length];
-        post.status = nextStatus;
-        savePostToCloud(post);
-        renderCalendar();
-        renderList();
-      });
-      return;
-    }
-    let idx = statusCycle.indexOf(post.status);
-    let nextStatus = statusCycle[(idx + 1) % statusCycle.length];
-    post.status = nextStatus;
-    savePostToCloud(post);
-    renderCalendar();
-    renderList();
+  // Direct click listener to open the modal instantly when clicking the card
+  card.addEventListener("click", (e) => {
+    if (e.target.classList.contains("status-dot") || e.target.closest(".quick-status-menu")) return;
+    openModal(post);
   });
+
+  const dot = card.querySelector(".status-dot");
+  if (dot) {
+    dot.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (sessionStorage.getItem("saam_unlocked") !== "true") {
+        requirePassword(() => {
+          let idx = statusCycle.indexOf(post.status);
+          let nextStatus = statusCycle[(idx + 1) % statusCycle.length];
+          post.status = nextStatus;
+          savePostToCloud(post);
+          renderCalendar();
+          renderList();
+        });
+        return;
+      }
+      let idx = statusCycle.indexOf(post.status);
+      let nextStatus = statusCycle[(idx + 1) % statusCycle.length];
+      post.status = nextStatus;
+      savePostToCloud(post);
+      renderCalendar();
+      renderList();
+    });
+  }
   
   return card;
 }
