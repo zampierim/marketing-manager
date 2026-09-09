@@ -768,10 +768,10 @@ function createPostCard(post) {
 
   const destinyColors = {
     'instagram': { bg: 'linear-gradient(135deg,#F56040,#C13584)', label: 'INSTAGRAM' },
+    'interno': { bg: '#26428B', label: 'INTERNO' },
+    'cliente': { bg: '#059669', label: 'CLIENTE' },
     'linkedin': { bg: '#0A66C2', label: 'LINKEDIN' },
-    'interno': { bg: '#26428B', label: 'INTERNO / CLIENTE' },
     'blog': { bg: '#F59E0B', label: 'BLOG' },
-    'cliente': { bg: '#26428B', label: 'INTERNO / CLIENTE' },
   };
 
   if (destinyArr.length > 0) {
@@ -1179,7 +1179,7 @@ function openModal(post = null, prefilledDate = "", prefilledIdeaId = "", prefil
     const isInternal = destArr.includes('interno');
     if(document.getElementById("field-topic")) document.getElementById("field-topic").style.display = isInternal ? "none" : "block";
     if(document.getElementById("field-briefing")) document.getElementById("field-briefing").style.display = isInternal ? "none" : "block";
-    document.getElementById("field-destiny").style.display = isInternal ? "none" : "block";
+    document.getElementById("field-destiny").style.display = "block";
     document.getElementById("field-author").style.display = isInternal ? "none" : "block";
     document.getElementById("field-comments").style.display = isInternal ? "none" : "block";
     const qaContainer = document.getElementById("field-approval-actions");
