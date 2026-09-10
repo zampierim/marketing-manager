@@ -568,7 +568,8 @@ async function deletePostFromCloud(id) {
   }
 }
 
-let currentDate = new Date(2026, 7, 1); // Agosto 2026
+const _todayInit = new Date();
+let currentDate = new Date(_todayInit.getFullYear(), _todayInit.getMonth(), 1);
 
 const calendarDaysEl = document.getElementById("calendar-days");
 const currentMonthYearEl = document.getElementById("current-month-year");
