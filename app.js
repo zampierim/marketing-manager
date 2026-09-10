@@ -469,13 +469,32 @@ if (corruptedFixed) {
 // 2. REAL-TIME CLOUD SYNC
 function initCloudSync() {
   const postsRef = db.collection("marketing_posts");
+  const deletedRef = db.collection("marketing_deleted_ids");
+
+  // Track deleted IDs in real time from cloud
+  deletedRef.onSnapshot((snapshot) => {
+    snapshot.forEach(doc => {
+      deletedPostIds.add(doc.id);
+      deletedPostIds.add(Number(doc.id));
+    });
+    try {
+      localStorage.setItem('saam_deleted_post_ids_v1', JSON.stringify(Array.from(deletedPostIds)));
+    } catch(e) {}
+    
+    posts = posts.filter(p => !deletedPostIds.has(String(p.id)) && !deletedPostIds.has(Number(p.id)));
+    renderCalendar();
+    renderList();
+    if (typeof renderInternalComms === 'function') renderInternalComms();
+  }, (err) => {
+    console.warn("Deleted IDs sync notice:", err);
+  });
 
   postsRef.onSnapshot(async (snapshot) => {
     const deleteBatch = db.batch();
     let hasDeletes = false;
     snapshot.forEach(doc => {
       const data = doc.data();
-      if (!isKeepPost(data) || doc.id === "99016") {
+      if (!isKeepPost(data) || doc.id === "99016" || deletedPostIds.has(doc.id) || deletedPostIds.has(Number(doc.id))) {
         deleteBatch.delete(postsRef.doc(doc.id));
         hasDeletes = true;
       }
@@ -484,12 +503,24 @@ function initCloudSync() {
       deleteBatch.commit().catch(e => console.warn("Purged rejected docs:", e));
     }
     const cloudPosts = [];
-    snapshot.forEach(doc => cloudPosts.push(doc.data()));
+    snapshot.forEach(doc => {
+      if (!deletedPostIds.has(doc.id) && !deletedPostIds.has(Number(doc.id))) {
+        cloudPosts.push(doc.data());
+      }
+    });
     
-    // Merge cloud posts with all default posts (cloud posts take precedence by ID)
+    // Merge cloud posts with all default posts (excluding any deleted ones)
     const postMap = new Map();
-    [...defaultPosts, ...specialDates].forEach(p => postMap.set(p.id, p));
-    cloudPosts.forEach(p => postMap.set(p.id, p));
+    [...defaultPosts, ...specialDates].forEach(p => {
+      if (!deletedPostIds.has(String(p.id)) && !deletedPostIds.has(Number(p.id))) {
+        postMap.set(p.id, p);
+      }
+    });
+    cloudPosts.forEach(p => {
+      if (!deletedPostIds.has(String(p.id)) && !deletedPostIds.has(Number(p.id))) {
+        postMap.set(p.id, p);
+      }
+    });
     posts = Array.from(postMap.values());
     
     // FIX CORRUPTED COMMEMORATIVE POSTS
@@ -555,9 +586,23 @@ async function savePostToCloud(post) {
 
 async function deletePostFromCloud(id) {
   try {
+    deletedPostIds.add(String(id));
+    deletedPostIds.add(Number(id));
+    try {
+      localStorage.setItem('saam_deleted_post_ids_v1', JSON.stringify(Array.from(deletedPostIds)));
+    } catch(e) {}
+    
     await deleteImageFromIdb(id);
     delete imageCache[String(id)];
+    
+    // Delete from posts collection and register in deleted IDs tombstone
     await db.collection("marketing_posts").doc(id.toString()).delete();
+    await db.collection("marketing_deleted_ids").doc(id.toString()).set({
+      id: id,
+      deletedAt: Date.now()
+    });
+    
+    posts = posts.filter(p => p.id !== id && String(p.id) !== String(id));
     try {
       localStorage.setItem('saam_marketing_posts_v14', JSON.stringify(posts));
     } catch(lsError) {
