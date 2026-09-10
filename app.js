@@ -613,6 +613,107 @@ async function deletePostFromCloud(id) {
   }
 }
 
+// --- COMUNIDADE SAAM (SUGESTOES) SEED & STATE ---
+const defaultSugestoes = [
+  { id: 1724584500000, nome: "Jhonatan", tipo: "Ideia de Post", titulo: "Ajustar as visitas presenciais da diretoria", desc: "Alinhar visitas presenciais da diretoria com cobertura de fotos e vídeos.", executada: false },
+  { id: 1724584440000, nome: "Jhonatan", tipo: "Marketing Interno", titulo: "Distribuição de brindes durantes as lives", desc: "Distribuir brindes personalizados durante as transmissões ao vivo para engajar a equipe.", executada: false },
+  { id: 1724584380000, nome: "Jhonatan", tipo: "Marketing Externo", titulo: "Contratar palestrante", desc: "Contratar palestrante renomado do setor fiscal/tributário para evento de atração.", executada: false },
+  { id: 1724584320000, nome: "Jhonatan", tipo: "Marketing Externo", titulo: "Campanhas solidárias", desc: "Ação de arrecadação de alimentos e agasalhos com a marca SAAM.", executada: false },
+  { id: 1724583840000, nome: "Jhonatan", tipo: "Ideia de Post", titulo: "Utilizar apresentações já gravadas", desc: "Reaproveitar trechos e cortes de apresentações já gravadas para cortes de reels/shorts.", executada: false },
+  { id: 1724527260000, nome: "Brenda", tipo: "Ideia de Post", titulo: "Mensagem de Visualização Única", desc: "Criar conteúdo abordando privacidade e segurança nas mensagens do aplicativo.", executada: false },
+  { id: 1724526600000, nome: "Brenda", tipo: "Comercial", titulo: "Experimente uma Rotina Premium", desc: "Campanha convidando clientes a testarem um módulo avançado sem compromisso.", executada: false },
+  { id: 1724526300000, nome: "Brenda", tipo: "Comercial", titulo: "Raspadinha da sorte", desc: "Ação interativa com cupom de desconto ou brinde para novos contatos comerciais.", executada: false }
+];
+
+var sugestoes = [];
+try {
+  const savedSug = localStorage.getItem('saam_marketing_sugestoes_v1');
+  if (savedSug) {
+    sugestoes = JSON.parse(savedSug);
+  } else {
+    sugestoes = defaultSugestoes;
+  }
+} catch(e) {
+  sugestoes = defaultSugestoes;
+}
+
+function initSugestoesSync() {
+  if (typeof db === 'undefined') {
+    setTimeout(initSugestoesSync, 300);
+    return;
+  }
+
+  try {
+    db.collection("marketing_sugestoes").onSnapshot((snapshot) => {
+      if (!snapshot.empty) {
+        const cloudList = [];
+        snapshot.forEach(doc => {
+          const d = doc.data();
+          if (d && d.id) cloudList.push(d);
+        });
+        
+        if (cloudList.length > 0) {
+          sugestoes = cloudList;
+          try {
+            localStorage.setItem('saam_marketing_sugestoes_v1', JSON.stringify(sugestoes));
+          } catch(e) {}
+          if (typeof renderSugestoes === 'function') renderSugestoes();
+        }
+      } else {
+        // Seed default sugestoes to Firestore
+        const batch = db.batch();
+        defaultSugestoes.forEach(s => {
+          batch.set(db.collection("marketing_sugestoes").doc(String(s.id)), s);
+        });
+        batch.commit().catch(e => console.warn("Seed sugestoes error:", e));
+        sugestoes = defaultSugestoes;
+        try {
+          localStorage.setItem('saam_marketing_sugestoes_v1', JSON.stringify(sugestoes));
+        } catch(e) {}
+        if (typeof renderSugestoes === 'function') renderSugestoes();
+      }
+    }, (err) => {
+      console.warn("Sugestoes sync error:", err);
+      if (typeof renderSugestoes === 'function') renderSugestoes();
+    });
+  } catch(syncErr) {
+    console.error("Erro ao inicializar sync de sugestões:", syncErr);
+  }
+}
+
+async function saveSugestaoToCloud(sug) {
+  try {
+    if (typeof db !== 'undefined') {
+      await db.collection("marketing_sugestoes").doc(String(sug.id)).set(sug);
+    }
+  } catch(e) {
+    console.error("Erro ao salvar sugestão no Firestore:", e);
+  }
+  try {
+    localStorage.setItem('saam_marketing_sugestoes_v1', JSON.stringify(sugestoes));
+  } catch(e) {}
+}
+
+async function deleteSugestaoFromCloud(id) {
+  try {
+    if (typeof db !== 'undefined') {
+      await db.collection("marketing_sugestoes").doc(String(id)).delete();
+    }
+  } catch(e) {
+    console.error("Erro ao excluir sugestão no Firestore:", e);
+  }
+  try {
+    localStorage.setItem('saam_marketing_sugestoes_v1', JSON.stringify(sugestoes));
+  } catch(e) {}
+}
+
+function saveSugestoes() {
+  try {
+    localStorage.setItem('saam_marketing_sugestoes_v1', JSON.stringify(sugestoes));
+  } catch(e) {}
+}
+
+
 const _todayInit = new Date();
 let currentDate = new Date(_todayInit.getFullYear(), _todayInit.getMonth(), 1);
 
