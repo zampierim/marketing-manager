@@ -343,7 +343,7 @@
       </div>
       <div style="flex: 1;">
         <h2>Banco de Ideias</h2>
-        <p>Estratégias editoriais por mês e banco geral de ideias categorizadas.</p>
+        <p>Banco geral de ideias e pautas categorizadas por temas, formatos e audiência.</p>
       </div>
       <button class="btn-primary" id="btn-nova-ideia" style="padding: 10px 20px;">+ Nova Ideia</button>
     </div>
@@ -442,197 +442,8 @@
 
     <div class="ai-container">
       
-      <!-- VIEW: IDEIAS POR MÊS -->
-      <div id="view-ideias-mes" style="margin-top: 12px;">
-        
-        <!-- Unified Folder Tab Header Bar -->
-        <div id="ideas-months-pills-container" style="background: #F8FAFC; border: 1px solid #E2E8F0; border-bottom: none; border-top-left-radius: 16px; border-top-right-radius: 16px; padding: 12px 16px 0 16px; display: flex; align-items: flex-end; gap: 4px; margin-bottom: -1px; z-index: 2; position: relative;">
-          <button type="button" class="ideas-month-pill" onclick="changeIdeasMonth(7)" data-month="7" style="border: 1px solid transparent; border-bottom: none; border-top-left-radius: 10px; border-top-right-radius: 10px; padding: 10px 20px; font-weight: 700; font-size: 12px; cursor: pointer; text-transform: uppercase; font-family: 'Outfit', sans-serif; transition: all 0.2s; outline: none; background: transparent; color: #64748B;">Agosto</button>
-          <button type="button" class="ideas-month-pill" onclick="changeIdeasMonth(8)" data-month="8" style="border: 1px solid transparent; border-bottom: none; border-top-left-radius: 10px; border-top-right-radius: 10px; padding: 10px 20px; font-weight: 700; font-size: 12px; cursor: pointer; text-transform: uppercase; font-family: 'Outfit', sans-serif; transition: all 0.2s; outline: none; background: transparent; color: #64748B;">Setembro</button>
-          <button type="button" class="ideas-month-pill" onclick="changeIdeasMonth(9)" data-month="9" style="border: 1px solid transparent; border-bottom: none; border-top-left-radius: 10px; border-top-right-radius: 10px; padding: 10px 20px; font-weight: 700; font-size: 12px; cursor: pointer; text-transform: uppercase; font-family: 'Outfit', sans-serif; transition: all 0.2s; outline: none; background: transparent; color: #64748B;">Outubro</button>
-          <button type="button" class="ideas-month-pill" onclick="changeIdeasMonth(10)" data-month="10" style="border: 1px solid transparent; border-bottom: none; border-top-left-radius: 10px; border-top-right-radius: 10px; padding: 10px 20px; font-weight: 700; font-size: 12px; cursor: pointer; text-transform: uppercase; font-family: 'Outfit', sans-serif; transition: all 0.2s; outline: none; background: transparent; color: #64748B;">Novembro</button>
-          <button type="button" class="ideas-month-pill" onclick="changeIdeasMonth(11)" data-month="11" style="border: 1px solid transparent; border-bottom: none; border-top-left-radius: 10px; border-top-right-radius: 10px; padding: 10px 20px; font-weight: 700; font-size: 12px; cursor: pointer; text-transform: uppercase; font-family: 'Outfit', sans-serif; transition: all 0.2s; outline: none; background: transparent; color: #64748B;">Dezembro</button>
-          <button type="button" class="ideas-month-pill" onclick="changeIdeasMonth(0)" data-month="0" style="border: 1px solid transparent; border-bottom: none; border-top-left-radius: 10px; border-top-right-radius: 10px; padding: 10px 20px; font-weight: 700; font-size: 12px; cursor: pointer; text-transform: uppercase; font-family: 'Outfit', sans-serif; transition: all 0.2s; outline: none; background: transparent; color: #64748B;">Janeiro 2027</button>
-        </div>
-
-        <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 0 0 16px 16px; padding: 28px; box-shadow: var(--shadow-sm); margin-bottom: 24px; position: relative; z-index: 1;" id="ideas-header-card">
-          <div style="margin-bottom: 24px; border-bottom: 1px solid var(--hairline); padding-bottom: 16px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-              <span style="background: #FFFBEB; color: #D97706; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; font-family: 'Roboto', sans-serif;">🎯 OPORTUNIDADE DE CAMPANHA</span>
-            </div>
-            <h3 style="margin: 6px 0 8px 0; font-size: 22px; color: #0A1C2D; font-weight: 800; font-family: 'Outfit', sans-serif;" id="ideas-strat-title">O Futuro do Fiscal Já Começou</h3>
-            <p style="margin: 0; font-size: 14.5px; color: #475569; line-height: 1.6; font-family: 'Poppins', sans-serif; background: #FFF; border-left: 4px solid #F5C544; padding-left: 14px;" id="ideas-strat-desc">
-              ...
-            </p>
-          </div>
-
-          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
-            
-            <!-- 40% Educacional (Atração) -->
-            <div style="background: #F8F6F7; border: 1px solid #E2E8F0; border-radius: 12px; padding: 20px; position: relative; overflow: hidden; border-left: 5px solid #3F77C1;">
-              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-                <h4 style="margin: 0; font-size: 16px; color: #0A1C2D; font-weight: 800; font-family: 'Outfit', sans-serif;" id="ideas-card-label-1">Atração & Consciência</h4>
-                <span style="background: #DAEDF4; color: #26428B; font-weight: 800; font-size: 15px; padding: 4px 10px; border-radius: 6px; font-family: 'Roboto', sans-serif;" id="ideas-card-pct-1">40%</span>
-              </div>
-              <p style="margin: 0 0 12px 0; font-size: 13.5px; color: #475569; line-height: 1.5; font-family: 'Poppins', sans-serif;" id="ideas-card-motivo-1">
-                <strong>O Motivo:</strong> Atrair novos leads (público frio) e criar demanda.
-              </p>
-              <div style="background: rgba(63,119,193,0.06); padding: 12px; border-radius: 8px; margin-bottom: 12px; font-size: 13px; border-left: 3px solid #3F77C1; font-family: 'Poppins', sans-serif;">
-                <strong>Como funciona na prática:</strong> <span id="ideas-card-ex-1" style="font-style: italic; color: #1E3A8A; display: block; margin-top: 4px;">Carregando exemplo...</span>
-              </div>
-              <ul style="margin: 0; padding-left: 18px; font-size: 12.5px; color: #64748B; line-height: 1.5; font-family: 'Poppins', sans-serif;">
-                <li><strong>Como funciona:</strong> Reels rápidos, pílulas de notícias, "Fiscal ou Ficção?" e dúvidas.</li>
-                <li><strong>Foco principal:</strong> Ganho de seguidores e atração de novos leads (Topo de Funil).</li>
-              </ul>
-            </div>
-
-            <!-- 30% Conversão -->
-            <div style="background: #F8F6F7; border: 1px solid #E2E8F0; border-radius: 12px; padding: 20px; position: relative; overflow: hidden; border-left: 5px solid #26428B;">
-              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-                <h4 style="margin: 0; font-size: 16px; color: #0A1C2D; font-weight: 800; font-family: 'Outfit', sans-serif;" id="ideas-card-label-2">Autoridade & Venda</h4>
-                <span style="background: #FBECD7; color: #D97706; font-weight: 800; font-size: 15px; padding: 4px 10px; border-radius: 6px; font-family: 'Roboto', sans-serif;" id="ideas-card-pct-2">30%</span>
-              </div>
-              <p style="margin: 0 0 12px 0; font-size: 13.5px; color: #475569; line-height: 1.5; font-family: 'Poppins', sans-serif;" id="ideas-card-motivo-2">
-                <strong>O Motivo:</strong> Convencer o lead aquecido de que a SAAM é a autoridade técnica.
-              </p>
-              <div style="background: rgba(38,66,139,0.06); padding: 12px; border-radius: 8px; margin-bottom: 12px; font-size: 13px; border-left: 3px solid #26428B; font-family: 'Poppins', sans-serif;">
-                <strong>Como funciona na prática:</strong> <span id="ideas-card-ex-2" style="font-style: italic; color: #1E3A8A; display: block; margin-top: 4px;">Carregando exemplo...</span>
-              </div>
-              <ul style="margin: 0; padding-left: 18px; font-size: 12.5px; color: #64748B; line-height: 1.5; font-family: 'Poppins', sans-serif;">
-                <li><strong>Como funciona:</strong> Carrosséis detalhados, estudos de caso, análises de leis.</li>
-                <li><strong>Foco principal:</strong> Demonstração de valor e agendamento (Meio/Fundo de Funil).</li>
-              </ul>
-            </div>
-
-            <!-- 20% Retenção -->
-            <div style="background: #F8F6F7; border: 1px solid #E2E8F0; border-radius: 12px; padding: 20px; position: relative; overflow: hidden; border-left: 5px solid #10B981;">
-              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-                <h4 style="margin: 0; font-size: 16px; color: #0A1C2D; font-weight: 800; font-family: 'Outfit', sans-serif;" id="ideas-card-label-3">Adoção & Sucesso</h4>
-                <span style="background: #ECFDF5; color: #059669; font-weight: 800; font-size: 15px; padding: 4px 10px; border-radius: 6px; font-family: 'Roboto', sans-serif;" id="ideas-card-pct-3">20%</span>
-              </div>
-              <p style="margin: 0 0 12px 0; font-size: 13.5px; color: #475569; line-height: 1.5; font-family: 'Poppins', sans-serif;" id="ideas-card-motivo-3">
-                <strong>O Motivo:</strong> Manter a base ativa engajada, atalhos do sistema.
-              </p>
-              <div style="background: rgba(16,185,129,0.06); padding: 12px; border-radius: 8px; margin-bottom: 12px; font-size: 13px; border-left: 3px solid #10B981; font-family: 'Poppins', sans-serif;">
-                <strong>Como funciona na prática:</strong> <span id="ideas-card-ex-3" style="font-style: italic; color: #047857; display: block; margin-top: 4px;">Carregando exemplo...</span>
-              </div>
-              <ul style="margin: 0; padding-left: 18px; font-size: 12.5px; color: #64748B; line-height: 1.5; font-family: 'Poppins', sans-serif;">
-                <li><strong>Como funciona:</strong> Dicas de rotinas, checklists operacionais, tutoriais de produto.</li>
-                <li><strong>Foco principal:</strong> Sucesso do cliente, valor contínuo e engajamento da base.</li>
-              </ul>
-            </div>
-
-            <!-- 10% Institucional -->
-            <div style="background: #F8F6F7; border: 1px solid #E2E8F0; border-radius: 12px; padding: 20px; position: relative; overflow: hidden; border-left: 5px solid #F5C544;">
-              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-                <h4 style="margin: 0; font-size: 16px; color: #0A1C2D; font-weight: 800; font-family: 'Outfit', sans-serif;" id="ideas-card-label-4">Branding & Conexão</h4>
-                <span style="background: #FFFBEB; color: #D97706; font-weight: 800; font-size: 15px; padding: 4px 10px; border-radius: 6px; font-family: 'Roboto', sans-serif;" id="ideas-card-pct-4">10%</span>
-              </div>
-              <p style="margin: 0 0 12px 0; font-size: 13.5px; color: #475569; line-height: 1.5; font-family: 'Poppins', sans-serif;" id="ideas-card-motivo-4">
-                <strong>O Motivo:</strong> Humanizar a marca, cultura e bastidores da equipe.
-              </p>
-              <div style="background: rgba(245,197,68,0.08); padding: 12px; border-radius: 8px; margin-bottom: 12px; font-size: 13px; border-left: 3px solid #F5C544; font-family: 'Poppins', sans-serif;">
-                <strong>Como funciona na prática:</strong> <span id="ideas-card-ex-4" style="font-style: italic; color: #B45309; display: block; margin-top: 4px;">Carregando exemplo...</span>
-              </div>
-              <ul style="margin: 0; padding-left: 18px; font-size: 12.5px; color: #64748B; line-height: 1.5; font-family: 'Poppins', sans-serif;">
-                <li><strong>Como funciona:</strong> Datas comemorativas importantes, manifestos, conquistas.</li>
-                <li><strong>Foco principal:</strong> Senso de comunidade, valorização do profissional.</li>
-              </ul>
-            </div>
-
-          </div>
-        </div>
-
-        <!-- Simulador Interativo de Metas de Posts Redesenhado -->
-        <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 16px; padding: 32px; box-shadow: var(--shadow-sm); margin-top: 24px; margin-bottom: 24px;">
-          <div style="border-bottom: 1px solid var(--hairline); padding-bottom: 18px; margin-bottom: 24px;">
-            <h4 style="margin: 0 0 6px 0; font-size: 20px; color: #0A1C2D; font-weight: 800; font-family: 'Outfit', sans-serif;">🧮 Calculadora de Distribuição Editorial do Mês</h4>
-            <p style="margin: 0; font-size: 13.5px; color: #64748B; font-family: 'Poppins', sans-serif;">Ajuste o número de publicações mensais estimadas e veja como distribuir os temas no funil de marketing da SAAM:</p>
-          </div>
-
-          <div style="display: flex; gap: 32px; align-items: flex-start; flex-wrap: wrap;">
-            <!-- Controles -->
-            <div style="flex: 1; min-width: 250px; background: #F8F6F7; padding: 24px; border-radius: 12px; border: 1px solid #CBD5E1;">
-              <label style="font-size: 13px; font-weight: 800; color: #0A1C2D; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 10px; font-family: 'Roboto', sans-serif;">Meta de Publicações no Mês</label>
-              <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-                <input type="number" id="ideas-sim-total" value="20" min="1" max="100" oninput="updateIdeasSimulation()" style="width: 90px; padding: 12px 16px; border-radius: 8px; border: 1px solid #CBD5E1; font-weight: 800; font-size: 20px; text-align: center; color: #0A1C2D; outline: none; background: #FFF;">
-                <span style="font-size: 15px; font-weight: 700; color: #26428B; font-family: 'Roboto', sans-serif;">Posts Totais</span>
-              </div>
-              <p style="margin: 0; font-size: 12.5px; color: #475569; line-height: 1.5; font-family: 'Poppins', sans-serif;">
-                👉 <strong>Regra recomendada:</strong> Para marcas B2B de tecnologia e inteligência fiscal como o SAAM, o ideal é manter uma constância de pelo menos 12 a 20 publicações por mês (2 a 4 posts por semana) distribuídos equilibradamente.
-              </p>
-            </div>
-
-            <!-- Resultados Explicativos -->
-            <div style="flex: 2; min-width: 350px; display: flex; flex-direction: column; gap: 16px;">
-              
-              <!-- Atração -->
-              <div style="display: flex; align-items: center; gap: 16px; background: #F8FAFC; border: 1px solid #E2E8F0; padding: 16px; border-radius: 12px;">
-                <div style="background: #DAEDF4; min-width: 60px; height: 60px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                  <strong style="font-size: 24px; color: #26428B; font-family: 'Outfit', sans-serif; line-height: 1;" id="sim-val-1">8</strong>
-                  <span style="font-size: 9px; font-weight: 800; color: #26428B; font-family: 'Roboto', sans-serif;">POSTS</span>
-                </div>
-                <div style="flex: 1;">
-                  <strong style="font-size: 14px; color: #0A1C2D; font-family: 'Outfit', sans-serif; display: block;" id="sim-lbl-1">Atração (40%)</strong>
-                  <p style="margin: 4px 0 0 0; font-size: 12.5px; color: #475569; line-height: 1.4; font-family: 'Poppins', sans-serif;">
-                    Foco em engajar e trazer novos seguidores. Reels, carrosséis curtos de dores fiscais cotidianas ou notícias rápidas do Radar Fiscal.
-                  </p>
-                </div>
-              </div>
-
-              <!-- Conversão -->
-              <div style="display: flex; align-items: center; gap: 16px; background: #F8FAFC; border: 1px solid #E2E8F0; padding: 16px; border-radius: 12px;">
-                <div style="background: #FBECD7; min-width: 60px; height: 60px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                  <strong style="font-size: 24px; color: #D97706; font-family: 'Outfit', sans-serif; line-height: 1;" id="sim-val-2">6</strong>
-                  <span style="font-size: 9px; font-weight: 800; color: #D97706; font-family: 'Roboto', sans-serif;">POSTS</span>
-                </div>
-                <div style="flex: 1;">
-                  <strong style="font-size: 14px; color: #0A1C2D; font-family: 'Outfit', sans-serif; display: block;" id="sim-lbl-2">Conversão (30%)</strong>
-                  <p style="margin: 4px 0 0 0; font-size: 12.5px; color: #475569; line-height: 1.4; font-family: 'Poppins', sans-serif;">
-                    Foco comercial e de autoridade. Apresentações de cases, PDFs explicativos de ROI e chamadas para demonstração gratuita do sistema.
-                  </p>
-                </div>
-              </div>
-
-              <!-- Retenção -->
-              <div style="display: flex; align-items: center; gap: 16px; background: #F8FAFC; border: 1px solid #E2E8F0; padding: 16px; border-radius: 12px;">
-                <div style="background: #ECFDF5; min-width: 60px; height: 60px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                  <strong style="font-size: 24px; color: #059669; font-family: 'Outfit', sans-serif; line-height: 1;" id="sim-val-3">4</strong>
-                  <span style="font-size: 9px; font-weight: 800; color: #059669; font-family: 'Roboto', sans-serif;">POSTS</span>
-                </div>
-                <div style="flex: 1;">
-                  <strong style="font-size: 14px; color: #0A1C2D; font-family: 'Outfit', sans-serif; display: block;" id="sim-lbl-3">Retenção (20%)</strong>
-                  <p style="margin: 4px 0 0 0; font-size: 12.5px; color: #475569; line-height: 1.4; font-family: 'Poppins', sans-serif;">
-                    Foco na base de clientes ativos. Dicas de uso avançado, atalhos de ferramentas, novidades da plataforma e tutoriais rápidos.
-                  </p>
-                </div>
-              </div>
-
-              <!-- Institucional -->
-              <div style="display: flex; align-items: center; gap: 16px; background: #F8FAFC; border: 1px solid #E2E8F0; padding: 16px; border-radius: 12px;">
-                <div style="background: #FFFBEB; min-width: 60px; height: 60px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                  <strong style="font-size: 24px; color: #D97706; font-family: 'Outfit', sans-serif; line-height: 1;" id="sim-val-4">2</strong>
-                  <span style="font-size: 9px; font-weight: 800; color: #D97706; font-family: 'Roboto', sans-serif;">POSTS</span>
-                </div>
-                <div style="flex: 1;">
-                  <strong style="font-size: 14px; color: #0A1C2D; font-family: 'Outfit', sans-serif; display: block;" id="sim-lbl-4">Institucional (10%)</strong>
-                  <p style="margin: 4px 0 0 0; font-size: 12.5px; color: #475569; line-height: 1.4; font-family: 'Poppins', sans-serif;">
-                    Foco em conexão e employer branding. Fotos e depoimentos da equipe, valores da empresa e celebração de datas do mercado fiscal.
-                  </p>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        <!-- Guia Editorial do Mês Centralizado -->
-        <div id="ideas-campaign-playbook" style="margin-top: 24px;">
-          <!-- Renderizado dinamicamente via JS -->
-        </div>
-      </div>
-      </div>
-      
-      <!-- VIEW: BANCO GERAL -->
-      <div id="view-ideias-geral" class="hidden">
+      <!-- VIEW: BANCO GERAL DE IDEIAS -->
+      <div id="view-ideias-geral">
         
         <div style="display: flex; gap: 8px; margin-bottom: 12px; align-items: center;">
           <button class="filter-pill active" onclick="filterAudience('Todos')" id="btn-aud-todos">Todos (665)</button>
@@ -1676,6 +1487,40 @@
           <button type="button" id="btn-apply-image-url" style="padding: 9px 16px; font-size: 12px; font-weight: 700; background: #2563EB; color: #FFF; border-radius: 6px; white-space: nowrap; border: none; cursor: pointer; transition: background 0.2s;">Usar Link</button>
         </div>
         <small style="display: block; color: #64748B; font-size: 11px; margin-top: 4px;">💡 No Google Drive: clique em <strong>Compartilhar</strong> e deixe como <em>"Qualquer pessoa com o link pode ver"</em>.</small>
+      </div>
+
+      <!-- CARROSSEL DE IMAGENS -->
+      <div class="field" id="field-carousel">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+          <label style="margin-bottom: 0;">
+            🎠 Carrossel de Imagens
+            <span style="font-weight: 400; font-size: 11px; color: #94A3B8; margin-left: 4px;">(role para o lado para ver todos)</span>
+          </label>
+          <button type="button" id="btn-add-carousel-img" onclick="window.addCarouselImage()" style="padding: 6px 14px; background: #2563EB; color: #fff; border: none; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: background 0.2s;" onmouseover="this.style.background='#1D4ED8'" onmouseout="this.style.background='#2563EB'">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            + Imagem
+          </button>
+        </div>
+
+        <!-- Carrossel rolável horizontalmente -->
+        <div id="carousel-track-wrapper" style="position: relative;">
+          <div id="carousel-track" style="display: flex; gap: 10px; overflow-x: auto; padding: 12px 4px 16px 4px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: thin; scrollbar-color: #CBD5E1 transparent; min-height: 130px; align-items: center;">
+            <!-- Imagens renderizadas via JS -->
+            <div id="carousel-empty-hint" style="color: #94A3B8; font-size: 13px; font-style: italic; padding: 20px; text-align: center; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1.5px dashed #CBD5E1; border-radius: 10px; min-height: 100px;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><circle cx="8.5" cy="15" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+              Clique em "+ Imagem" para montar o carrossel
+            </div>
+          </div>
+          <!-- Input file oculto para carousel -->
+          <input type="file" id="carousel-file-input" accept="image/*" multiple style="display:none">
+        </div>
+
+        <!-- Área para adicionar via link URL -->
+        <div style="display: flex; gap: 8px; margin-top: 4px;">
+          <input type="url" id="carousel-url-input" placeholder="Ou cole a URL de uma imagem para adicionar ao carrossel..." style="flex: 1; padding: 8px 12px; border-radius: 6px; border: 1px solid #CBD5E1; font-size: 12px; outline: none; box-sizing: border-box;">
+          <button type="button" onclick="window.addCarouselUrl()" style="padding: 8px 14px; background: #0F172A; color: #FFF; border: none; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap;">+ URL</button>
+        </div>
+        <input type="hidden" id="post-carousel-data" value="[]">
       </div>
 
       <div class="field">
@@ -2983,7 +2828,7 @@
 </div>
 
 
-<script src="app.js?v=85"></script>
+<script src="app.js?v=87"></script>
 <script src="projects.js?v=13"></script>
 <div id="toast-container" class="toast-container"></div>
 </body>

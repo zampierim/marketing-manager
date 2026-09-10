@@ -952,8 +952,9 @@ function createPostCard(post) {
         <h4 style="position: absolute; bottom: 26px; left: 6px; right: 6px; color: #FFF; font-size: 12px; font-weight: 700; text-align: left; margin: 0; z-index: 2; text-shadow: 0 1px 3px rgba(0,0,0,0.9); line-height: 1.25; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">${post.title || post.tag}</h4>
 
         <div class="status-dot status-${post.status}" title="Clique para avançar status" data-post-id="${post.id}"></div>
-        <div class="post-card-info" style="display: flex; align-items: center; z-index: 2; position: relative;">
-          <span class="post-tag" style="display: flex; align-items: center;">${iconSvg}${post.tag}</span>
+        <div class="post-card-info" style="display: flex; align-items: center; justify-content: space-between; width: 100%; box-sizing: border-box; z-index: 2; position: relative;">
+          <span class="post-tag" style="display: flex; align-items: center; max-width: calc(100% - 24px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${iconSvg}${post.tag}</span>
+          ${(post.carousel && post.carousel.length > 0) ? `<div title="Possui carrossel (${post.carousel.length + 1} imagens no total)" style="background: rgba(0,0,0,0.6); border-radius: 4px; padding: 2px 4px; display: flex; align-items: center; gap: 3px; color: white;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg><span style="font-size:10px; font-weight:bold;">+${post.carousel.length}</span></div>` : ''}
         </div>
       </div>
     `;
@@ -1334,10 +1335,12 @@ function openModal(post = null, prefilledDate = "", prefilledIdeaId = "", prefil
     
     document.getElementById("post-author").required = !isInternal;
 
+    if(window.loadCarouselForPost) window.loadCarouselForPost(post);
   } else {
     document.getElementById("modal-title").textContent = "Novo Criativo";
     setModalLockState(false);
     document.getElementById("post-id").value = "";
+    if(window.loadCarouselForPost) window.loadCarouselForPost(null);
     document.getElementById("post-image-data").value = "";
     document.getElementById("post-image-file").value = "";
     const inputImageUrl = document.getElementById("post-image-url");
@@ -1595,6 +1598,14 @@ form.addEventListener("submit", (e) => {
     ideaId: document.getElementById("post-idea-link").value || null,
     routineId: document.getElementById("post-routine-link").value || null,
   };
+
+  // Attach carousel data
+  try {
+    const carouselDataStr = document.getElementById("post-carousel-data").value;
+    newPost.carousel = JSON.parse(carouselDataStr || "[]");
+  } catch (e) {
+    newPost.carousel = [];
+  }
   
   const imgVal = document.getElementById("post-image-data").value;
   if (imgVal && imgVal.startsWith('data:')) {
@@ -8662,3 +8673,144 @@ window.closeCollabModal = function() {
   const modal = document.getElementById("collab-details-modal");
   if (modal) modal.classList.add("hidden");
 };
+
+// --- CAROUSEL LOGIC ---
+window.currentCarousel = [];
+
+window.loadCarouselForPost = function(post) {
+  if (post && post.carousel && Array.isArray(post.carousel)) {
+    window.currentCarousel = [...post.carousel];
+  } else {
+    window.currentCarousel = [];
+  }
+  document.getElementById("post-carousel-data").value = JSON.stringify(window.currentCarousel);
+  window.renderCarouselUI();
+};
+
+window.renderCarouselUI = function() {
+  const track = document.getElementById("carousel-track");
+  const dataInput = document.getElementById("post-carousel-data");
+  if (!track || !dataInput) return;
+
+  dataInput.value = JSON.stringify(window.currentCarousel);
+
+  // Clear existing items except the empty hint
+  track.innerHTML = "";
+
+  if (window.currentCarousel.length === 0) {
+    track.innerHTML = `
+      <div id="carousel-empty-hint" style="color: #94A3B8; font-size: 13px; font-style: italic; padding: 20px; text-align: center; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1.5px dashed #CBD5E1; border-radius: 10px; min-height: 100px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><circle cx="8.5" cy="15" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        Clique em "+ Imagem" para montar o carrossel
+      </div>
+    `;
+    return;
+  }
+
+  window.currentCarousel.forEach((imgUrl, index) => {
+    const item = document.createElement("div");
+    item.style.position = "relative";
+    item.style.width = "100px";
+    item.style.height = "100px";
+    item.style.flexShrink = "0";
+    item.style.borderRadius = "8px";
+    item.style.overflow = "hidden";
+    item.style.border = "1px solid #CBD5E1";
+    item.style.scrollSnapAlign = "start";
+    
+    // Add number indicator
+    const numberBadge = document.createElement("div");
+    numberBadge.textContent = (index + 1);
+    numberBadge.style.position = "absolute";
+    numberBadge.style.top = "4px";
+    numberBadge.style.left = "4px";
+    numberBadge.style.background = "rgba(15, 23, 42, 0.7)";
+    numberBadge.style.color = "#FFF";
+    numberBadge.style.fontSize = "10px";
+    numberBadge.style.fontWeight = "bold";
+    numberBadge.style.width = "18px";
+    numberBadge.style.height = "18px";
+    numberBadge.style.borderRadius = "50%";
+    numberBadge.style.display = "flex";
+    numberBadge.style.alignItems = "center";
+    numberBadge.style.justifyContent = "center";
+    numberBadge.style.zIndex = "2";
+
+    const img = document.createElement("img");
+    img.src = imgUrl;
+    img.style.width = "100%";
+    img.style.height = "100%";
+    img.style.objectFit = "cover";
+
+    const removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.innerHTML = "×";
+    removeBtn.style.position = "absolute";
+    removeBtn.style.top = "4px";
+    removeBtn.style.right = "4px";
+    removeBtn.style.background = "rgba(239, 68, 68, 0.9)";
+    removeBtn.style.color = "white";
+    removeBtn.style.border = "none";
+    removeBtn.style.borderRadius = "50%";
+    removeBtn.style.width = "20px";
+    removeBtn.style.height = "20px";
+    removeBtn.style.display = "flex";
+    removeBtn.style.alignItems = "center";
+    removeBtn.style.justifyContent = "center";
+    removeBtn.style.cursor = "pointer";
+    removeBtn.style.fontSize = "14px";
+    removeBtn.style.lineHeight = "1";
+    removeBtn.onclick = (e) => {
+      e.stopPropagation();
+      window.removeCarouselImage(index);
+    };
+
+    item.appendChild(img);
+    item.appendChild(numberBadge);
+    item.appendChild(removeBtn);
+    track.appendChild(item);
+  });
+};
+
+window.addCarouselImage = function() {
+  const input = document.getElementById("carousel-file-input");
+  if(input) input.click();
+};
+
+window.removeCarouselImage = function(index) {
+  window.currentCarousel.splice(index, 1);
+  window.renderCarouselUI();
+};
+
+window.addCarouselUrl = function() {
+  const urlInput = document.getElementById("carousel-url-input");
+  const url = urlInput.value.trim();
+  if (url) {
+    window.currentCarousel.push(url);
+    urlInput.value = "";
+    window.renderCarouselUI();
+  }
+};
+
+// Event listener for carousel file input
+document.addEventListener("DOMContentLoaded", () => {
+  const carouselInput = document.getElementById("carousel-file-input");
+  if(carouselInput) {
+    carouselInput.addEventListener("change", (e) => {
+      const files = e.target.files;
+      if (!files || files.length === 0) return;
+      
+      Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          window.currentCarousel.push(event.target.result);
+          window.renderCarouselUI();
+        };
+        reader.readAsDataURL(file);
+      });
+      
+      // Reset input so same file can be selected again if needed
+      carouselInput.value = "";
+    });
+  }
+});
