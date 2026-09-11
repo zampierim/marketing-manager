@@ -8855,7 +8855,7 @@ window.renderCarouselUI = function() {
     track.innerHTML = `
       <div id="carousel-empty-hint" style="color: #94A3B8; font-size: 13px; font-style: italic; padding: 20px; text-align: center; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1.5px dashed #CBD5E1; border-radius: 10px; min-height: 100px;">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><circle cx="8.5" cy="15" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-        Clique em "+ Imagem" para montar o carrossel
+        Clique em "Imagem" para montar o carrossel
       </div>
     `;
     return;
