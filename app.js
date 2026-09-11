@@ -387,6 +387,19 @@ window.db = db;
 let posts = [];
 let isLoadingCloud = true;
 
+// IDs excluídos funcionam como "tombstones": impedem que publicações padrão
+// sejam recriadas ao recarregar a página ou ao receber um snapshot do Firebase.
+let deletedPostIds = new Set();
+const pendingDeletedPostIds = new Set();
+try {
+  const savedDeletedIds = JSON.parse(localStorage.getItem('saam_deleted_post_ids_v1') || '[]');
+  if (Array.isArray(savedDeletedIds)) {
+    deletedPostIds = new Set(savedDeletedIds.map(id => String(id)));
+  }
+} catch (e) {
+  console.warn('Não foi possível carregar os IDs excluídos:', e);
+}
+
 // FORCED RESET: Ensure exact special dates and purge duplicates
 const specialTitles = [
   "Aniversário de Anápolis", "Dia dos Pais", "Aniversário SISAUDCON", 
@@ -414,12 +427,12 @@ try {
     const postMap = new Map();
     [...defaultPosts, ...specialDates].forEach(p => postMap.set(p.id, p));
     localPosts.forEach(p => postMap.set(p.id, p));
-    posts = Array.from(postMap.values());
+    posts = Array.from(postMap.values()).filter(p => !deletedPostIds.has(String(p.id)));
   } else {
-    posts = [...defaultPosts, ...specialDates];
+    posts = [...defaultPosts, ...specialDates].filter(p => !deletedPostIds.has(String(p.id)));
   }
 } catch(e) {
-  posts = [...defaultPosts, ...specialDates];
+  posts = [...defaultPosts, ...specialDates].filter(p => !deletedPostIds.has(String(p.id)));
 }
 
 // FIX CORRUPTED COMMEMORATIVE POSTS
@@ -472,16 +485,39 @@ function initCloudSync() {
   const deletedRef = db.collection("marketing_deleted_ids");
 
   // Track deleted IDs in real time from cloud
-  deletedRef.onSnapshot((snapshot) => {
+  deletedRef.onSnapshot(async (snapshot) => {
+    const cloudDeletedIds = new Set();
     snapshot.forEach(doc => {
-      deletedPostIds.add(doc.id);
-      deletedPostIds.add(Number(doc.id));
+      cloudDeletedIds.add(String(doc.id));
+      pendingDeletedPostIds.delete(String(doc.id));
     });
+    // O Firebase é a fonte de verdade. Isso remove tombstones locais antigos
+    // que poderiam esconder publicações válidas para sempre.
+    deletedPostIds = new Set([...cloudDeletedIds, ...pendingDeletedPostIds]);
     try {
       localStorage.setItem('saam_deleted_post_ids_v1', JSON.stringify(Array.from(deletedPostIds)));
     } catch(e) {}
     
-    posts = posts.filter(p => !deletedPostIds.has(String(p.id)) && !deletedPostIds.has(Number(p.id)));
+    // Reconstrói a lista, em vez de apenas filtrar a lista atual. Assim, itens
+    // anteriormente escondidos por um tombstone local voltam imediatamente.
+    try {
+      const currentPostsSnapshot = await postsRef.get();
+      const postMap = new Map();
+      [...defaultPosts, ...specialDates].forEach(p => {
+        if (!deletedPostIds.has(String(p.id))) postMap.set(p.id, p);
+      });
+      currentPostsSnapshot.forEach(doc => {
+        if (!deletedPostIds.has(String(doc.id))) {
+          const post = doc.data();
+          postMap.set(post.id, post);
+        }
+      });
+      posts = Array.from(postMap.values());
+      localStorage.setItem('saam_marketing_posts_v14', JSON.stringify(posts));
+    } catch (error) {
+      console.warn('Não foi possível restaurar os posts após sincronizar exclusões:', error);
+      posts = posts.filter(p => !deletedPostIds.has(String(p.id)));
+    }
     renderCalendar();
     renderList();
     if (typeof renderInternalComms === 'function') renderInternalComms();
@@ -576,18 +612,35 @@ async function savePostToCloud(post) {
     try {
       localStorage.setItem('saam_marketing_posts_v14', JSON.stringify(posts));
     } catch(lsError) {}
+    return true;
   } catch(e) {
     console.error('Erro ao salvar post na nuvem:', e);
     if (typeof showToast === 'function') {
       showToast('Erro ao salvar na nuvem.', 'error');
     }
+    return false;
   }
+}
+
+async function persistCarouselImages(postId, images) {
+  if (!Array.isArray(images) || images.length === 0) return [];
+
+  return Promise.all(images.map(async (imageUrl, index) => {
+    if (typeof imageUrl !== 'string' || !imageUrl.startsWith('data:')) return imageUrl;
+
+    const mimeMatch = imageUrl.match(/^data:(image\/[a-zA-Z0-9.+-]+);/);
+    const extension = mimeMatch && mimeMatch[1].includes('png') ? 'png' : 'jpg';
+    const fileName = `${Date.now()}-${index}-${Math.random().toString(36).slice(2, 8)}.${extension}`;
+    const imageRef = storage.ref().child(`marketing_carousels/${postId}/${fileName}`);
+    await imageRef.putString(imageUrl, 'data_url');
+    return imageRef.getDownloadURL();
+  }));
 }
 
 async function deletePostFromCloud(id) {
   try {
     deletedPostIds.add(String(id));
-    deletedPostIds.add(Number(id));
+    pendingDeletedPostIds.add(String(id));
     try {
       localStorage.setItem('saam_deleted_post_ids_v1', JSON.stringify(Array.from(deletedPostIds)));
     } catch(e) {}
@@ -595,12 +648,15 @@ async function deletePostFromCloud(id) {
     await deleteImageFromIdb(id);
     delete imageCache[String(id)];
     
-    // Delete from posts collection and register in deleted IDs tombstone
-    await db.collection("marketing_posts").doc(id.toString()).delete();
-    await db.collection("marketing_deleted_ids").doc(id.toString()).set({
+    // Registra a exclusão e remove o post atomicamente para nenhum snapshot
+    // intermediário conseguir recriar uma data comemorativa padrão.
+    const batch = db.batch();
+    batch.delete(db.collection("marketing_posts").doc(id.toString()));
+    batch.set(db.collection("marketing_deleted_ids").doc(id.toString()), {
       id: id,
       deletedAt: Date.now()
     });
+    await batch.commit();
     
     posts = posts.filter(p => p.id !== id && String(p.id) !== String(id));
     try {
@@ -610,6 +666,11 @@ async function deletePostFromCloud(id) {
     }
   } catch(e) {
     console.error('Erro ao excluir post na nuvem:', e);
+    pendingDeletedPostIds.delete(String(id));
+    deletedPostIds.delete(String(id));
+    if (typeof showToast === 'function') {
+      showToast('Não foi possível excluir. A publicação será restaurada na próxima sincronização.', 'error');
+    }
   }
 }
 
@@ -1554,7 +1615,7 @@ if(btnDelete) {
   });
 }
 
-form.addEventListener("submit", (e) => {
+form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   if (sessionStorage.getItem("saam_unlocked") !== "true") {
@@ -1587,6 +1648,7 @@ form.addEventListener("submit", (e) => {
     tag: tagValue,
     title: tagValue, // ensure title is always saved alongside tag
     topic: topicEl ? topicEl.value : "",
+    mediaType: document.getElementById("post-media-type")?.value || "static",
     image: document.getElementById("post-image-data").value,
     briefing: document.getElementById("post-briefing") ? document.getElementById("post-briefing").value : "",
     caption: document.getElementById("post-caption").value,
@@ -1606,11 +1668,53 @@ form.addEventListener("submit", (e) => {
   } catch (e) {
     newPost.carousel = [];
   }
+
+  const saveButton = document.getElementById("btn-save");
+  if (saveButton) {
+    saveButton.disabled = true;
+    saveButton.textContent = "Salvando imagens...";
+  }
+
+  try {
+    if (window.carouselFileJobs && window.carouselFileJobs.length) {
+      await Promise.all(window.carouselFileJobs);
+    }
+    if (newPost.mediaType === 'carousel') {
+      const persistedSlides = await persistCarouselImages(idInt, window.currentCarousel || []);
+      newPost.image = persistedSlides[0] || '';
+      newPost.carousel = persistedSlides.slice(1);
+      window.currentCarousel = [...persistedSlides];
+      document.getElementById("post-image-data").value = newPost.image;
+      document.getElementById("post-carousel-data").value = JSON.stringify(newPost.carousel);
+    } else {
+      newPost.carousel = [];
+      document.getElementById("post-carousel-data").value = '[]';
+    }
+  } catch (error) {
+    console.error("Erro ao enviar imagens do carrossel:", error);
+    if (typeof showToast === 'function') {
+      showToast('Não foi possível salvar as imagens. Tente novamente.', 'error');
+    }
+    if (saveButton) {
+      saveButton.disabled = false;
+      saveButton.textContent = "Salvar Criativo";
+    }
+    return;
+  }
   
   const imgVal = document.getElementById("post-image-data").value;
   if (imgVal && imgVal.startsWith('data:')) {
     cacheImage(idInt, imgVal);
     saveImageToIdb(idInt, imgVal);
+  }
+
+  const savedToCloud = await savePostToCloud(newPost);
+  if (!savedToCloud) {
+    if (saveButton) {
+      saveButton.disabled = false;
+      saveButton.textContent = "Salvar Criativo";
+    }
+    return;
   }
 
   if (idVal) {
@@ -1621,7 +1725,11 @@ form.addEventListener("submit", (e) => {
   } else {
     posts.push(newPost);
   }
-  savePostToCloud(newPost);
+  try {
+    localStorage.setItem('saam_marketing_posts_v14', JSON.stringify(posts));
+  } catch (storageError) {
+    console.warn('Não foi possível atualizar o cache local:', storageError);
+  }
   closeModal();
   
   renderCalendar();
@@ -1631,6 +1739,10 @@ form.addEventListener("submit", (e) => {
   
   if (typeof showToast === 'function') {
     showToast('✅ Criativo salvo com sucesso!', 'success');
+  }
+  if (saveButton) {
+    saveButton.disabled = false;
+    saveButton.textContent = "Salvar Criativo";
   }
 });
 
@@ -8676,14 +8788,53 @@ window.closeCollabModal = function() {
 
 // --- CAROUSEL LOGIC ---
 window.currentCarousel = [];
+window.carouselFileJobs = [];
+window.carouselActiveIndex = 0;
 
 window.loadCarouselForPost = function(post) {
-  if (post && post.carousel && Array.isArray(post.carousel)) {
-    window.currentCarousel = [...post.carousel];
+  const hasCarousel = Boolean(post && Array.isArray(post.carousel) && post.carousel.length > 0);
+  const mediaType = post?.mediaType === 'carousel' || hasCarousel ? 'carousel' : 'static';
+  const mediaTypeSelect = document.getElementById('post-media-type');
+  if (mediaTypeSelect) mediaTypeSelect.value = mediaType;
+
+  if (post && mediaType === 'carousel') {
+    const mainImage = getPostImage(post);
+    window.currentCarousel = [mainImage, ...(post.carousel || [])].filter(Boolean);
   } else {
     window.currentCarousel = [];
   }
   document.getElementById("post-carousel-data").value = JSON.stringify(window.currentCarousel);
+  window.setPostMediaType(mediaType, false);
+  window.renderCarouselUI();
+};
+
+window.setPostMediaType = function(mediaType, transferImage = true) {
+  const staticField = document.getElementById('field-static-image');
+  const carouselField = document.getElementById('field-carousel');
+  const select = document.getElementById('post-media-type');
+  const isCarousel = mediaType === 'carousel';
+  if (select) select.value = isCarousel ? 'carousel' : 'static';
+  if (staticField) staticField.style.display = isCarousel ? 'none' : 'block';
+  if (carouselField) carouselField.style.display = isCarousel ? 'block' : 'none';
+
+  if (transferImage && isCarousel && window.currentCarousel.length === 0) {
+    const mainImage = document.getElementById('post-image-data')?.value;
+    if (mainImage) window.currentCarousel.push(mainImage);
+  }
+
+  if (transferImage && !isCarousel && window.currentCarousel.length > 0) {
+    const firstImage = window.currentCarousel[0];
+    const imageData = document.getElementById('post-image-data');
+    const preview = document.getElementById('upload-preview');
+    const placeholder = document.getElementById('upload-placeholder');
+    if (imageData) imageData.value = firstImage;
+    if (preview) {
+      preview.src = firstImage;
+      preview.classList.remove('hidden');
+    }
+    placeholder?.classList.add('hidden');
+  }
+
   window.renderCarouselUI();
 };
 
@@ -8691,6 +8842,9 @@ window.renderCarouselUI = function() {
   const track = document.getElementById("carousel-track");
   const dataInput = document.getElementById("post-carousel-data");
   if (!track || !dataInput) return;
+
+  const wrapper = document.getElementById("carousel-track-wrapper");
+  wrapper?.querySelectorAll('.carousel-nav, .carousel-counter').forEach(el => el.remove());
 
   dataInput.value = JSON.stringify(window.currentCarousel);
 
@@ -8709,9 +8863,11 @@ window.renderCarouselUI = function() {
 
   window.currentCarousel.forEach((imgUrl, index) => {
     const item = document.createElement("div");
+    item.className = "carousel-slide";
     item.style.position = "relative";
-    item.style.width = "100px";
-    item.style.height = "100px";
+    item.style.width = "calc(100% - 8px)";
+    item.style.height = "min(62vh, 520px)";
+    item.style.minHeight = "320px";
     item.style.flexShrink = "0";
     item.style.borderRadius = "8px";
     item.style.overflow = "hidden";
@@ -8740,7 +8896,8 @@ window.renderCarouselUI = function() {
     img.src = imgUrl;
     img.style.width = "100%";
     img.style.height = "100%";
-    img.style.objectFit = "cover";
+    img.style.objectFit = "contain";
+    img.style.background = "#F8FAFC";
 
     const removeBtn = document.createElement("button");
     removeBtn.type = "button";
@@ -8770,6 +8927,43 @@ window.renderCarouselUI = function() {
     item.appendChild(removeBtn);
     track.appendChild(item);
   });
+
+  if (wrapper && window.currentCarousel.length > 0) {
+    const previous = document.createElement('button');
+    previous.type = 'button';
+    previous.className = 'carousel-nav carousel-nav-prev';
+    previous.setAttribute('aria-label', 'Imagem anterior');
+    previous.innerHTML = '&#10094;';
+    previous.onclick = () => window.scrollCarousel(-1);
+
+    const next = document.createElement('button');
+    next.type = 'button';
+    next.className = 'carousel-nav carousel-nav-next';
+    next.setAttribute('aria-label', 'Próxima imagem');
+    next.innerHTML = '&#10095;';
+    next.onclick = () => window.scrollCarousel(1);
+
+    const counter = document.createElement('div');
+    counter.className = 'carousel-counter';
+    counter.textContent = `1 / ${window.currentCarousel.length}`;
+    wrapper.append(previous, next, counter);
+
+    const updatePosition = () => {
+      const slideWidth = track.clientWidth || 1;
+      window.carouselActiveIndex = Math.max(0, Math.min(window.currentCarousel.length - 1, Math.round(track.scrollLeft / slideWidth)));
+      counter.textContent = `${window.carouselActiveIndex + 1} / ${window.currentCarousel.length}`;
+      previous.disabled = window.carouselActiveIndex === 0;
+      next.disabled = window.carouselActiveIndex === window.currentCarousel.length - 1;
+    };
+    track.onscroll = updatePosition;
+    requestAnimationFrame(updatePosition);
+  }
+};
+
+window.scrollCarousel = function(direction) {
+  const track = document.getElementById('carousel-track');
+  if (!track) return;
+  track.scrollBy({ left: direction * track.clientWidth, behavior: 'smooth' });
 };
 
 window.addCarouselImage = function() {
@@ -8786,7 +8980,7 @@ window.addCarouselUrl = function() {
   const urlInput = document.getElementById("carousel-url-input");
   const url = urlInput.value.trim();
   if (url) {
-    window.currentCarousel.push(url);
+    window.currentCarousel.push(convertGoogleDriveUrl(url));
     urlInput.value = "";
     window.renderCarouselUI();
   }
@@ -8794,22 +8988,56 @@ window.addCarouselUrl = function() {
 
 // Event listener for carousel file input
 document.addEventListener("DOMContentLoaded", () => {
+  const mediaTypeSelect = document.getElementById('post-media-type');
+  if (mediaTypeSelect) {
+    mediaTypeSelect.addEventListener('change', () => {
+      window.setPostMediaType(mediaTypeSelect.value);
+    });
+  }
+
   const carouselInput = document.getElementById("carousel-file-input");
   if(carouselInput) {
-    carouselInput.addEventListener("change", (e) => {
+    carouselInput.addEventListener("change", async (e) => {
       const files = e.target.files;
       if (!files || files.length === 0) return;
-      
-      Array.from(files).forEach(file => {
+
+      const jobs = Array.from(files).map(file => new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = function(event) {
-          window.currentCarousel.push(event.target.result);
-          window.renderCarouselUI();
+        reader.onload = event => {
+          const sourceImage = new Image();
+          sourceImage.onload = () => {
+            const MAX_SIZE = 1400;
+            let width = sourceImage.width;
+            let height = sourceImage.height;
+            const scale = Math.min(1, MAX_SIZE / Math.max(width, height));
+            width = Math.max(1, Math.round(width * scale));
+            height = Math.max(1, Math.round(height * scale));
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            canvas.getContext('2d').drawImage(sourceImage, 0, 0, width, height);
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+            window.currentCarousel.push(dataUrl);
+            window.renderCarouselUI();
+            resolve(dataUrl);
+          };
+          sourceImage.onerror = reject;
+          sourceImage.src = event.target.result;
         };
+        reader.onerror = reject;
         reader.readAsDataURL(file);
-      });
-      
-      // Reset input so same file can be selected again if needed
+      }));
+
+      window.carouselFileJobs = jobs;
+      try {
+        await Promise.all(jobs);
+      } catch (error) {
+        console.error('Erro ao preparar imagem do carrossel:', error);
+        if (typeof showToast === 'function') showToast('Uma das imagens não pôde ser processada.', 'error');
+      } finally {
+        window.carouselFileJobs = [];
+      }
+
       carouselInput.value = "";
     });
   }

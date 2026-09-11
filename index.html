@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Roboto:wght@400;500;700&family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=4">
+  <link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 <div class="app">
@@ -1466,7 +1466,12 @@
       <select id="post-routine-link" style="display: none;"></select>
 
       <div class="field">
-        <label>Imagem da Publicação</label>
+        <label>Formato da mídia</label>
+        <select id="post-media-type" style="width: 100%; padding: 10px 12px; margin-bottom: 12px; border-radius: 8px; border: 1px solid #CBD5E1; background: #fff; font-size: 13px; font-weight: 700; color: #0F172A;">
+          <option value="static">Imagem estática</option>
+          <option value="carousel">Carrossel de imagens</option>
+        </select>
+        <div id="field-static-image">
         <div class="image-upload-box" id="image-upload-box">
           <input type="file" id="post-image-file" accept="image/*" class="hidden-file-input">
           <input type="hidden" id="post-image-data">
@@ -1487,13 +1492,14 @@
           <button type="button" id="btn-apply-image-url" style="padding: 9px 16px; font-size: 12px; font-weight: 700; background: #2563EB; color: #FFF; border-radius: 6px; white-space: nowrap; border: none; cursor: pointer; transition: background 0.2s;">Usar Link</button>
         </div>
         <small style="display: block; color: #64748B; font-size: 11px; margin-top: 4px;">💡 No Google Drive: clique em <strong>Compartilhar</strong> e deixe como <em>"Qualquer pessoa com o link pode ver"</em>.</small>
+        </div>
       </div>
 
       <!-- CARROSSEL DE IMAGENS -->
-      <div class="field" id="field-carousel">
+      <div class="field" id="field-carousel" style="display: none;">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
           <label style="margin-bottom: 0;">
-            🎠 Carrossel de Imagens
+            🎠 Imagens do carrossel
             <span style="font-weight: 400; font-size: 11px; color: #94A3B8; margin-left: 4px;">(role para o lado para ver todos)</span>
           </label>
           <button type="button" id="btn-add-carousel-img" onclick="window.addCarouselImage()" style="padding: 6px 14px; background: #2563EB; color: #fff; border: none; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: background 0.2s;" onmouseover="this.style.background='#1D4ED8'" onmouseout="this.style.background='#2563EB'">
@@ -2828,7 +2834,7 @@
 </div>
 
 
-<script src="app.js?v=87"></script>
+<script src="app.js?v=90"></script>
 <script src="projects.js?v=13"></script>
 <div id="toast-container" class="toast-container"></div>
 </body>

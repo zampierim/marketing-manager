@@ -1308,3 +1308,66 @@ select.list-status-select.status-publicado { background: var(--c-publicado); }
 .list-status-badge.status-aprovado { background: var(--c-aprovado); }
 .list-status-badge.status-agendado { background: var(--c-agendado); }
 .list-status-badge.status-publicado { background: var(--c-publicado); }
+#carousel-track-wrapper {
+  position: relative;
+}
+
+#carousel-track {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+
+#carousel-track::-webkit-scrollbar {
+  display: none;
+}
+
+.carousel-slide {
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+  background: #f8fafc;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
+}
+
+.carousel-nav {
+  position: absolute;
+  top: 50%;
+  z-index: 5;
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.78);
+  color: #fff;
+  font-size: 22px;
+  cursor: pointer;
+  transform: translateY(-50%);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.25);
+}
+
+.carousel-nav-prev { left: 14px; }
+.carousel-nav-next { right: 14px; }
+.carousel-nav:disabled { opacity: 0.3; cursor: default; }
+
+.carousel-counter {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  z-index: 5;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.78);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+#btn-save:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
