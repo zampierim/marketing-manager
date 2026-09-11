@@ -696,6 +696,7 @@ const defaultSugestoes = [
 ];
 
 var sugestoes = [];
+const pendingSugestaoIds = new Set();
 try {
   const savedSug = localStorage.getItem('saam_marketing_sugestoes_v1');
   if (savedSug) {
@@ -719,11 +720,27 @@ function initSugestoesSync() {
         const cloudList = [];
         snapshot.forEach(doc => {
           const d = doc.data();
-          if (d && d.id) cloudList.push(d);
+          if (d && d.id) {
+            cloudList.push(d);
+            pendingSugestaoIds.delete(String(d.id));
+          }
         });
         
         if (cloudList.length > 0) {
-          sugestoes = cloudList;
+          const cloudIds = new Set(cloudList.map(s => String(s.id)));
+          const cloudSignatures = new Set(cloudList.map(s => String(s.titulo || '').trim().toLowerCase()));
+          const localOnly = sugestoes.filter(s =>
+            !cloudIds.has(String(s.id)) &&
+            !cloudSignatures.has(String(s.titulo || '').trim().toLowerCase())
+          );
+          localOnly.forEach(s => {
+            const suggestionId = String(s.id);
+            if (!pendingSugestaoIds.has(suggestionId)) {
+              pendingSugestaoIds.add(suggestionId);
+              saveSugestaoToCloud(s);
+            }
+          });
+          sugestoes = [...localOnly, ...cloudList];
           try {
             localStorage.setItem('saam_marketing_sugestoes_v1', JSON.stringify(sugestoes));
           } catch(e) {}
@@ -752,16 +769,19 @@ function initSugestoesSync() {
 }
 
 async function saveSugestaoToCloud(sug) {
+  let saved = false;
   try {
     if (typeof db !== 'undefined') {
       await db.collection("marketing_sugestoes").doc(String(sug.id)).set(sug);
     }
+    saved = true;
   } catch(e) {
     console.error("Erro ao salvar sugestão no Firestore:", e);
   }
   try {
     localStorage.setItem('saam_marketing_sugestoes_v1', JSON.stringify(sugestoes));
   } catch(e) {}
+  return saved;
 }
 
 async function deleteSugestaoFromCloud(id) {
@@ -8674,10 +8694,20 @@ window.deleteSugestao = function(id) {
   }
 };
 
-window.submitSugestao = function(e) {
+let isSavingSugestao = false;
+
+window.submitSugestao = async function(e) {
   if (e && typeof e.preventDefault === 'function') {
     e.preventDefault();
     e.stopPropagation();
+  }
+
+  if (isSavingSugestao) return false;
+  isSavingSugestao = true;
+  const submitButton = document.getElementById('btn-submit-sugestao');
+  if (submitButton) {
+    submitButton.disabled = true;
+    submitButton.textContent = 'Salvando...';
   }
   
   try {
@@ -8711,24 +8741,38 @@ window.submitSugestao = function(e) {
 
     // 1. Add to local list and update UI immediately
     sugestoes.unshift(novaSugestao);
+    pendingSugestaoIds.add(String(novaSugestao.id));
     saveSugestoes();
     renderSugestoes();
 
-    // 2. Clear inputs
+    // 2. Aguarda a confirmação real do Firestore
+    const savedToCloud = await saveSugestaoToCloud(novaSugestao);
+    if (!savedToCloud) {
+      if (typeof showToast === 'function') {
+        showToast('A contribuição ficou salva neste navegador e será reenviada quando a conexão voltar.', 'error');
+      }
+      return false;
+    }
+    pendingSugestaoIds.delete(String(novaSugestao.id));
+
+    // 3. Limpa os campos somente depois da confirmação da nuvem
     if (nomeInput) nomeInput.value = "";
     if (tituloInput) tituloInput.value = "";
     if (descInput) descInput.value = "";
     if (tipoInput) tipoInput.selectedIndex = 0;
 
-    // 3. Save to Firestore in background
-    saveSugestaoToCloud(novaSugestao);
-
-    // 4. Show success toast
+    // 4. Mostra sucesso somente depois da confirmação da nuvem
     if (typeof showToast === 'function') {
       showToast('✅ Contribuição enviada e salva com sucesso!', 'success');
     }
   } catch(err) {
     console.error("Erro ao enviar sugestão:", err);
+  } finally {
+    isSavingSugestao = false;
+    if (submitButton) {
+      submitButton.disabled = false;
+      submitButton.textContent = 'Enviar Contribuição';
+    }
   }
 
   return false;
@@ -8736,10 +8780,10 @@ window.submitSugestao = function(e) {
 
 const formSugestao = document.getElementById("form-sugestao");
 if (formSugestao) {
-  formSugestao.addEventListener("submit", (e) => {
+  formSugestao.addEventListener("submit", async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    window.submitSugestao(e);
+    await window.submitSugestao(e);
     return false;
   });
 }
