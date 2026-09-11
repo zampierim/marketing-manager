@@ -628,12 +628,21 @@ async function persistCarouselImages(postId, images) {
   return Promise.all(images.map(async (imageUrl, index) => {
     if (typeof imageUrl !== 'string' || !imageUrl.startsWith('data:')) return imageUrl;
 
-    const mimeMatch = imageUrl.match(/^data:(image\/[a-zA-Z0-9.+-]+);/);
-    const extension = mimeMatch && mimeMatch[1].includes('png') ? 'png' : 'jpg';
-    const fileName = `${Date.now()}-${index}-${Math.random().toString(36).slice(2, 8)}.${extension}`;
-    const imageRef = storage.ref().child(`marketing_carousels/${postId}/${fileName}`);
-    await imageRef.putString(imageUrl, 'data_url');
-    return imageRef.getDownloadURL();
+    // A capa permanece no documento principal. Cada slide adicional é salvo
+    // separadamente para nunca ultrapassar o limite de tamanho do Firestore.
+    if (index === 0) return imageUrl;
+    const imageId = `${postId}_${Date.now()}_${index}_${Math.random().toString(36).slice(2, 8)}`;
+    await Promise.race([
+      db.collection('marketing_carousel_images').doc(imageId).set({
+        postId: String(postId),
+        index,
+        dataUrl: imageUrl,
+        createdAt: Date.now()
+      }),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Tempo limite ao salvar imagem')), 30000))
+    ]);
+    carouselImageCache[imageId] = imageUrl;
+    return `firestore-carousel://${imageId}`;
   }));
 }
 
@@ -8790,8 +8799,9 @@ window.closeCollabModal = function() {
 window.currentCarousel = [];
 window.carouselFileJobs = [];
 window.carouselActiveIndex = 0;
+const carouselImageCache = {};
 
-window.loadCarouselForPost = function(post) {
+window.loadCarouselForPost = async function(post) {
   const hasCarousel = Boolean(post && Array.isArray(post.carousel) && post.carousel.length > 0);
   const mediaType = post?.mediaType === 'carousel' || hasCarousel ? 'carousel' : 'static';
   const mediaTypeSelect = document.getElementById('post-media-type');
@@ -8805,6 +8815,19 @@ window.loadCarouselForPost = function(post) {
   }
   document.getElementById("post-carousel-data").value = JSON.stringify(window.currentCarousel);
   window.setPostMediaType(mediaType, false);
+  await Promise.all(window.currentCarousel.map(async imageRef => {
+    if (typeof imageRef !== 'string' || !imageRef.startsWith('firestore-carousel://')) return;
+    const imageId = imageRef.slice('firestore-carousel://'.length);
+    if (carouselImageCache[imageId]) return;
+    try {
+      const snapshot = await db.collection('marketing_carousel_images').doc(imageId).get();
+      if (snapshot.exists && snapshot.data().dataUrl) {
+        carouselImageCache[imageId] = snapshot.data().dataUrl;
+      }
+    } catch (error) {
+      console.warn('Não foi possível carregar um slide do carrossel:', error);
+    }
+  }));
   window.renderCarouselUI();
 };
 
@@ -8893,7 +8916,10 @@ window.renderCarouselUI = function() {
     numberBadge.style.zIndex = "2";
 
     const img = document.createElement("img");
-    img.src = imgUrl;
+    const imageId = typeof imgUrl === 'string' && imgUrl.startsWith('firestore-carousel://')
+      ? imgUrl.slice('firestore-carousel://'.length)
+      : '';
+    img.src = imageId ? (carouselImageCache[imageId] || '') : imgUrl;
     img.style.width = "100%";
     img.style.height = "auto";
     img.style.objectFit = "initial";
@@ -9006,7 +9032,7 @@ document.addEventListener("DOMContentLoaded", () => {
         reader.onload = event => {
           const sourceImage = new Image();
           sourceImage.onload = () => {
-            const MAX_SIZE = 1400;
+            const MAX_SIZE = 1080;
             let width = sourceImage.width;
             let height = sourceImage.height;
             const scale = Math.min(1, MAX_SIZE / Math.max(width, height));
@@ -9016,7 +9042,7 @@ document.addEventListener("DOMContentLoaded", () => {
             canvas.width = width;
             canvas.height = height;
             canvas.getContext('2d').drawImage(sourceImage, 0, 0, width, height);
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.76);
             window.currentCarousel.push(dataUrl);
             window.renderCarouselUI();
             resolve(dataUrl);
