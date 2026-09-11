@@ -8865,9 +8865,9 @@ window.renderCarouselUI = function() {
     const item = document.createElement("div");
     item.className = "carousel-slide";
     item.style.position = "relative";
-    item.style.width = "calc(100% - 8px)";
-    item.style.height = "min(62vh, 520px)";
-    item.style.minHeight = "320px";
+    item.style.width = "100%";
+    item.style.height = "auto";
+    item.style.minHeight = "0";
     item.style.flexShrink = "0";
     item.style.borderRadius = "8px";
     item.style.overflow = "hidden";
@@ -8895,9 +8895,9 @@ window.renderCarouselUI = function() {
     const img = document.createElement("img");
     img.src = imgUrl;
     img.style.width = "100%";
-    img.style.height = "100%";
-    img.style.objectFit = "contain";
-    img.style.background = "#F8FAFC";
+    img.style.height = "auto";
+    img.style.objectFit = "initial";
+    img.style.display = "block";
 
     const removeBtn = document.createElement("button");
     removeBtn.type = "button";
@@ -9028,14 +9028,17 @@ document.addEventListener("DOMContentLoaded", () => {
         reader.readAsDataURL(file);
       }));
 
-      window.carouselFileJobs = jobs;
+      // Acumula todos os lotes ainda em processamento. Assim, se o usuário
+      // adicionar mais imagens antes do primeiro lote terminar, nenhuma fica
+      // fora do salvamento.
+      window.carouselFileJobs.push(...jobs);
       try {
         await Promise.all(jobs);
       } catch (error) {
         console.error('Erro ao preparar imagem do carrossel:', error);
         if (typeof showToast === 'function') showToast('Uma das imagens não pôde ser processada.', 'error');
       } finally {
-        window.carouselFileJobs = [];
+        window.carouselFileJobs = window.carouselFileJobs.filter(job => !jobs.includes(job));
       }
 
       carouselInput.value = "";
