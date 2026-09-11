@@ -839,8 +839,14 @@ function isInternalComms(p) {
   return dests.includes("interno") || dests.includes("cliente") || dests.includes("informativo");
 }
 
+function uniquePostsById(items) {
+  const unique = new Map();
+  items.forEach(post => unique.set(String(post.id), post));
+  return Array.from(unique.values());
+}
+
 function getFilteredPosts() {
-  let filtered = posts.filter(isEditorial);
+  let filtered = uniquePostsById(posts.filter(isEditorial));
   const term = searchInput ? searchInput.value.toLowerCase() : "";
   const destiny = filterDestiny ? filterDestiny.value : "";
   const idea = filterIdea ? filterIdea.value : "";
@@ -1251,10 +1257,10 @@ function renderInternalComms() {
     const dayOfWeek = dateObj.getDay();
     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
 
-    const commPosts = posts.filter(p => {
+    const commPosts = uniquePostsById(posts.filter(p => {
       if (p.date !== dateStr) return false;
       return isInternalComms(p);
-    });
+    }));
 
     if (commPosts.length > 0) {
       hasSlots = true;
@@ -1624,6 +1630,8 @@ if(btnDelete) {
   });
 }
 
+let isSavingPost = false;
+
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -1708,8 +1716,12 @@ form.addEventListener("submit", async (e) => {
       saveButton.disabled = false;
       saveButton.textContent = "Salvar Criativo";
     }
+    isSavingPost = false;
     return;
   }
+
+  if (isSavingPost) return;
+  isSavingPost = true;
   
   const imgVal = document.getElementById("post-image-data").value;
   if (imgVal && imgVal.startsWith('data:')) {
@@ -1723,14 +1735,15 @@ form.addEventListener("submit", async (e) => {
       saveButton.disabled = false;
       saveButton.textContent = "Salvar Criativo";
     }
+    isSavingPost = false;
     return;
   }
 
-  if (idVal) {
-    const index = posts.findIndex(p => p.id === newPost.id);
-    if (index > -1) {
-      posts[index] = newPost;
-    }
+  // O snapshot do Firebase pode chegar antes desta linha. Sempre faz upsert
+  // pelo ID para não inserir o mesmo criativo duas vezes na memória.
+  const existingIndex = posts.findIndex(p => String(p.id) === String(newPost.id));
+  if (existingIndex > -1) {
+    posts[existingIndex] = newPost;
   } else {
     posts.push(newPost);
   }
@@ -1753,6 +1766,7 @@ form.addEventListener("submit", async (e) => {
     saveButton.disabled = false;
     saveButton.textContent = "Salvar Criativo";
   }
+  isSavingPost = false;
 });
 
 const btnApprove = document.getElementById("btn-quick-approve");
