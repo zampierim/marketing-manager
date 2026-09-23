@@ -567,9 +567,53 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    processes.forEach(p => {
+    const frequencyGroups = [
+      { key: "daily", label: "Diários", icon: "☀️", color: "#059669", bg: "#ECFDF5", border: "#A7F3D0", matches: freq => freq.startsWith("diar") },
+      { key: "weekly", label: "Semanais", icon: "📅", color: "#2563EB", bg: "#EFF6FF", border: "#BFDBFE", matches: freq => freq.startsWith("seman") },
+      { key: "monthly", label: "Mensais", icon: "🗓️", color: "#D97706", bg: "#FFFBEB", border: "#FDE68A", matches: freq => freq.startsWith("mensal") },
+      { key: "other", label: "Outras frequências", icon: "🔄", color: "#7C3AED", bg: "#F5F3FF", border: "#DDD6FE", matches: () => true }
+    ];
+
+    const normalizeFrequency = value => String(value || "Diário")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+
+    const grouped = { daily: [], weekly: [], monthly: [], other: [] };
+    processes.forEach(process => {
+      const normalized = normalizeFrequency(process.frequency);
+      const group = frequencyGroups.find(item => item.key !== "other" && item.matches(normalized));
+      grouped[group ? group.key : "other"].push(process);
+    });
+
+    const groupsGrid = document.createElement("div");
+    groupsGrid.className = "process-frequency-grid";
+    groupsGrid.style.cssText = "display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;align-items:start;";
+
+    frequencyGroups.forEach(groupConfig => {
+      const groupItems = grouped[groupConfig.key];
+      if (groupItems.length === 0) return;
+
+      const groupSection = document.createElement("section");
+      groupSection.style.cssText = `background:${groupConfig.bg};border:1px solid ${groupConfig.border};border-radius:12px;padding:14px;min-width:0;`;
+      groupSection.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:8px;color:${groupConfig.color};font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;">
+            <span aria-hidden="true">${groupConfig.icon}</span>
+            <span>${groupConfig.label}</span>
+          </div>
+          <span style="min-width:24px;height:24px;padding:0 7px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px;background:#FFF;color:${groupConfig.color};font-size:11px;font-weight:800;border:1px solid ${groupConfig.border};">${groupItems.length}</span>
+        </div>
+      `;
+
+      const cardsContainer = document.createElement("div");
+      cardsContainer.style.cssText = "display:flex;flex-direction:column;gap:9px;";
+
+      groupItems
+        .sort((a, b) => String(a.title).localeCompare(String(b.title), "pt-BR"))
+        .forEach(p => {
       const el = document.createElement("div");
-      el.style = "background: #F8FAFC; border: 1px solid #E2E8F0; padding: 12px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all 0.2s;";
+      el.style = "background: #FFFFFF; border: 1px solid #E2E8F0; padding: 12px 14px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.2s; min-width: 0;";
       
       let freqColor = "#64748B";
       let freqBg = "#F1F5F9";
@@ -586,8 +630,14 @@ document.addEventListener("DOMContentLoaded", () => {
       el.onmouseout = () => { el.style.background = "#F8FAFC"; el.style.borderColor = "#E2E8F0"; };
       el.onclick = () => editProcess(p.id);
       
-      container.appendChild(el);
+          cardsContainer.appendChild(el);
+        });
+
+      groupSection.appendChild(cardsContainer);
+      groupsGrid.appendChild(groupSection);
     });
+
+    container.appendChild(groupsGrid);
   }
 
   // Initial render on boot
