@@ -727,8 +727,15 @@ function initSugestoesSync() {
         });
         
         if (cloudList.length > 0) {
-          const cloudIds = new Set(cloudList.map(s => String(s.id)));
-          const cloudSignatures = new Set(cloudList.map(s => String(s.titulo || '').trim().toLowerCase()));
+          // Mantém somente a versão mais recente quando existem cópias com o
+          // mesmo título (algumas foram criadas por migrações antigas).
+          const uniqueCloudMap = new Map();
+          [...cloudList]
+            .sort((a, b) => Number(a.id) - Number(b.id))
+            .forEach(s => uniqueCloudMap.set(String(s.titulo || '').trim().toLowerCase(), s));
+          const uniqueCloudList = Array.from(uniqueCloudMap.values());
+          const cloudIds = new Set(uniqueCloudList.map(s => String(s.id)));
+          const cloudSignatures = new Set(uniqueCloudList.map(s => String(s.titulo || '').trim().toLowerCase()));
           const localOnly = sugestoes.filter(s =>
             !cloudIds.has(String(s.id)) &&
             !cloudSignatures.has(String(s.titulo || '').trim().toLowerCase())
@@ -740,7 +747,7 @@ function initSugestoesSync() {
               saveSugestaoToCloud(s);
             }
           });
-          sugestoes = [...localOnly, ...cloudList];
+          sugestoes = [...localOnly, ...uniqueCloudList];
           try {
             localStorage.setItem('saam_marketing_sugestoes_v1', JSON.stringify(sugestoes));
           } catch(e) {}
@@ -8561,6 +8568,8 @@ setTimeout(() => {
 }, 1200);
 
 // --- COLABORAÇÃO (SUGESTÕES) UI MODULE ---
+
+let activeCollabFilter = 'all';
 
 function renderSugestoes() {
   const listEl = document.getElementById("sugestoes-list");
