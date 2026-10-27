@@ -9,8 +9,8 @@ function setModalLockState(isLocked) {
   const postId = document.getElementById("post-id").value;
 
   const editableInputs = [
-    "post-date", "post-tag", "post-caption", 
-    "post-author", "post-comments", "post-image-url", "post-image-file",
+    "post-date", "post-tag", "post-caption",
+    "post-briefing", "post-image-url", "post-image-file",
     "post-primary-destiny", "post-idea-link", "post-routine-link"
   ];
 
@@ -185,28 +185,22 @@ function getPostImage(post) {
 // Navigation logic
 const pageHome = document.getElementById("page-home");
 const pageCalendario = document.getElementById("page-calendario");
-const pageIdeias = document.getElementById("page-ideias");
-const pageRotinas = document.getElementById("page-rotinas");
 const pageCampanhas = document.getElementById("page-campanhas");
 const pageExcelencia = document.getElementById("page-excelencia");
 const pageColaboracao = document.getElementById("page-colaboracao");
 
 const btnTabCalendario = document.getElementById("btn-tab-calendario");
-const btnTabIdeias = document.getElementById("btn-tab-ideias");
 const btnTabCampanhas = document.getElementById("btn-tab-campanhas");
-const btnTabRotinas = document.getElementById("btn-tab-rotinas");
 const btnTabExcelencia = document.getElementById("btn-tab-excelencia");
 const btnTabColaboracao = document.getElementById("btn-tab-colaboracao");
 const backBtns = document.querySelectorAll(".back-btn[data-target='home']");
 
-// Cada página tem uma chave na URL (#calendario, #ideias...). A página inicial é a
+// Cada página tem uma chave na URL (#calendario, #guia...). A página inicial é a
 // entrada base do histórico, então o Voltar do navegador volta para ela em vez de sair do site.
 const pagesByKey = {
   home: pageHome,
   calendario: pageCalendario,
   projetos: document.getElementById("page-projetos"),
-  rotinas: pageRotinas,
-  ideias: pageIdeias,
   guia: pageExcelencia,
   ads: pageCampanhas,
   comunidade: pageColaboracao,
@@ -322,25 +316,10 @@ setTimeout(() => {
   }
 }, 100);
 
-btnTabIdeias.addEventListener("click", () => {
-  requirePassword(() => {
-    showPage(pageIdeias);
-  });
-});
-
 if (btnTabCampanhas) {
   btnTabCampanhas.addEventListener("click", () => {
     requirePassword(() => {
       showPage(pageCampanhas);
-    });
-  });
-}
-
-if (btnTabRotinas) {
-  btnTabRotinas.addEventListener("click", () => {
-    requirePassword(() => {
-      showPage(pageRotinas);
-      renderRoutinesList();
     });
   });
 }
@@ -372,7 +351,7 @@ if (btnTabExcelencia) {
     requirePassword(() => {
       showPage(pageExcelencia);
       if (typeof switchGuiaSection === 'function') {
-        switchGuiaSection('capitulos');
+        switchGuiaSection('nichos');
       }
       if (typeof backToChapterIndex === 'function') {
         backToChapterIndex();
@@ -392,8 +371,6 @@ const pageOpeners = {
   home: () => showPage(pageHome),
   calendario: () => btnTabCalendario.click(),
   projetos: () => document.getElementById("btn-open-projetos")?.click(),
-  rotinas: () => btnTabRotinas?.click(),
-  ideias: () => btnTabIdeias.click(),
   guia: () => btnTabExcelencia?.click(),
   ads: () => btnTabCampanhas?.click(),
   comunidade: () => btnTabColaboracao?.click(),
@@ -1525,10 +1502,8 @@ function openModal(post = null, prefilledDate = "", prefilledIdeaId = "", prefil
       if (btnDownload) btnDownload.classList.add("hidden");
     }
     
-    if(document.getElementById("post-briefing")) document.getElementById("post-briefing").value = post.briefing || "";
+    document.getElementById("post-briefing").value = post.briefing || "";
     document.getElementById("post-caption").value = post.caption || "";
-    document.getElementById("post-author").value = post.author || "";
-    document.getElementById("post-comments").value = post.comments || "";
     
     // Set topic
     const topicEl = document.getElementById("post-topic");
@@ -1560,14 +1535,7 @@ function openModal(post = null, prefilledDate = "", prefilledIdeaId = "", prefil
     // Toggle fields based on Internal Comms
     const isInternal = destArr.includes('interno');
     if(document.getElementById("field-topic")) document.getElementById("field-topic").style.display = isInternal ? "none" : "block";
-    if(document.getElementById("field-briefing")) document.getElementById("field-briefing").style.display = isInternal ? "none" : "block";
     document.getElementById("field-destiny").style.display = "block";
-    document.getElementById("field-author").style.display = isInternal ? "none" : "block";
-    document.getElementById("field-comments").style.display = isInternal ? "none" : "block";
-    const qaContainer = document.getElementById("field-approval-actions");
-    if(qaContainer) qaContainer.style.display = isInternal ? "none" : "flex";
-    
-    document.getElementById("post-author").required = !isInternal;
 
     if(window.loadCarouselForPost) window.loadCarouselForPost(post);
     loadReelsFraming(post);
@@ -1611,14 +1579,7 @@ function openModal(post = null, prefilledDate = "", prefilledIdeaId = "", prefil
     if (typeof updateDestinyChipVisuals === 'function') updateDestinyChipVisuals();
 
     if(document.getElementById("field-topic")) document.getElementById("field-topic").style.display = isInternal ? "none" : "block";
-    if(document.getElementById("field-briefing")) document.getElementById("field-briefing").style.display = isInternal ? "none" : "block";
     document.getElementById("field-destiny").style.display = isInternal ? "none" : "block";
-    document.getElementById("field-author").style.display = isInternal ? "none" : "block";
-    document.getElementById("field-comments").style.display = isInternal ? "none" : "block";
-    const qaContainer = document.getElementById("field-approval-actions");
-    if(qaContainer) qaContainer.style.display = isInternal ? "none" : "flex";
-    
-    document.getElementById("post-author").required = !isInternal;
   }
   modal.classList.remove("hidden");
   // Entrada própria no histórico: o Voltar (inclusive no celular) fecha o formulário sem sair da página.
@@ -1838,13 +1799,11 @@ form.addEventListener("submit", async (e) => {
     coverFit: document.getElementById("post-cover-fit").value === "contain" ? "contain" : "cover",
     coverPositionX: Number(document.getElementById("post-cover-x").value),
     coverPositionY: Number(document.getElementById("post-cover-y").value),
-    briefing: document.getElementById("post-briefing") ? document.getElementById("post-briefing").value : "",
+    briefing: document.getElementById("post-briefing").value,
     caption: document.getElementById("post-caption").value,
     destiny: primaryDestiny, // backward compat — primary destiny
     destinies: checkedDestinies, // all selected platforms
     primaryDestiny: primaryDestiny, // explicit primary
-    author: document.getElementById("post-author").value,
-    comments: document.getElementById("post-comments").value,
     ideaId: document.getElementById("post-idea-link").value || null,
     routineId: document.getElementById("post-routine-link").value || null,
   };
@@ -1939,34 +1898,6 @@ form.addEventListener("submit", async (e) => {
   }
   isSavingPost = false;
 });
-
-const btnApprove = document.getElementById("btn-quick-approve");
-if(btnApprove) {
-  btnApprove.addEventListener("click", () => {
-    const statusRadio = form.querySelector(`input[name="post_status"][value="aprovado"]`);
-    if(statusRadio) statusRadio.checked = true;
-    
-    // Highlight the status chips correctly
-    form.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
-    if(statusRadio) statusRadio.parentElement.classList.add('selected');
-
-    form.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
-  });
-}
-
-const btnReject = document.getElementById("btn-quick-reject");
-if(btnReject) {
-  btnReject.addEventListener("click", () => {
-    const statusRadio = form.querySelector(`input[name="post_status"][value="rascunho"]`);
-    if(statusRadio) statusRadio.checked = true;
-    
-    // Highlight the status chips correctly
-    form.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
-    if(statusRadio) statusRadio.parentElement.classList.add('selected');
-
-    form.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
-  });
-}
 
 document.getElementById("post-image-file").addEventListener("change", async function(e) {
   const file = e.target.files[0];
@@ -2687,6 +2618,16 @@ function renderRoutinesList(filterText = "") {
         <p style="margin: 0; font-size: 15px; font-weight: 600;">Nenhuma rotina encontrada para a busca / filtro selecionado.</p>
       </div>
     `;
+  }
+
+  // Resumo do catálogo no topo da aba Rotinas do Guia.
+  const summaryEl = document.getElementById("routines-summary");
+  if (summaryEl) {
+    const allItems = routines.flatMap(area => area.items);
+    const premiumCount = allItems.filter(rt => rt.premium).length;
+    summaryEl.textContent = term
+      ? `${totalCount} de ${allItems.length} rotinas`
+      : `${routines.length} módulos · ${allItems.length} rotinas · ${premiumCount} Premium`;
   }
 }
 
@@ -8007,28 +7948,6 @@ window.filterGeral = function(theme) {
 };
 
 
-function generateMiniBriefing(title) {
-  if(!title) return '';
-  const idea = window.ideasData.find(i => i.title.toLowerCase().includes(title.toLowerCase()) || title.toLowerCase().includes(i.title.toLowerCase()));
-  if(idea) {
-    let focus = idea.audience === 'Externo' ? 'Atração de novos leads (Topo/Meio de Funil)' : 'Retenção, Educação e Customer Success (Fundo de Funil)';
-    return '🎯 PILAR ESTRATÉGICO: ' + idea.series + '\n👥 PÚBLICO-ALVO: ' + idea.audience + ' - ' + focus + '\n📱 CANAL RECOMENDADO: ' + idea.destiny + '\n\n💡 DIRECIONAMENTO: Desenvolva o conteúdo focando em resolver a dor principal relacionada a "' + idea.title + '".';
-  }
-  return '💡 DIRECIONAMENTO: Desenvolva o conteúdo com foco na dor principal do cliente, mostrando como o SAAM traz inteligência fiscal e produtividade.';
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  const tagInput = document.getElementById('post-tag');
-  if(tagInput) {
-    tagInput.addEventListener('change', (e) => {
-      const briefingEl = document.getElementById('post-briefing');
-      if(briefingEl && !briefingEl.value.includes('DIRECIONAMENTO')) {
-         briefingEl.value = generateMiniBriefing(e.target.value) + (briefingEl.value ? '\n\n' + briefingEl.value : '');
-      }
-    });
-  }
-});
-
 // ==========================================
 // --- GUIA DO SAAM ADDITIONAL FUNCTIONS ---
 // ==========================================
@@ -8054,6 +7973,9 @@ window.switchGuiaSection = function(section) {
   
   if (section === 'concorrencia') {
     window.loadCompetitors();
+  }
+  if (section === 'rotinas') {
+    renderRoutinesList(document.getElementById('search-routines')?.value || '');
   }
 };
 
