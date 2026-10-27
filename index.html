@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=13">
+  <link rel="stylesheet" href="style.css?v=14">
 </head>
 <body>
 <!-- Menu superior: fica sempre visível e cada item vira uma entrada no histórico do navegador -->
@@ -996,18 +996,55 @@
       </div>
       <div>
         <h2>Ads & Tráfego Pago</h2>
-        <p>Estratégia de anúncios pagos, funis de conversão de leads e planejamento de criativos.</p>
+        <p>Distribua a verba entre os canais e acompanhe as métricas mês a mês para saber o que melhorar.</p>
       </div>
     </div>
 
-    <!-- Conteúdo de Ads & Tráfego Pago: será alimentado depois -->
-    <div class="empty-section">
-      <div class="empty-section-icon">
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
-      </div>
-      <h3>Em breve</h3>
-      <p>Esta área de anúncios e tráfego pago ainda vai ser alimentada.</p>
+    <!-- Painel mensal de Ads (preenchido pelo ads.js e salvo automaticamente) -->
+    <div class="ads-month-bar">
+      <button type="button" class="icon-btn" id="ads-prev-month" aria-label="Mês anterior">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <h3 class="ads-month-label" id="ads-month-label">Mês</h3>
+      <button type="button" class="icon-btn" id="ads-next-month" aria-label="Próximo mês">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <span class="ads-save-state" id="ads-save-state"></span>
     </div>
+
+    <section class="ads-block">
+      <div class="ads-block-head">
+        <h3>Distribuição da verba</h3>
+        <p>Defina o orçamento do mês e a porcentagem de cada canal. O investido vem dos números preenchidos em cada canal.</p>
+      </div>
+      <div id="ads-budget"></div>
+    </section>
+
+    <section class="ads-block">
+      <div class="ads-block-head">
+        <h3>Números e métricas do mês</h3>
+        <p id="ads-inputs-note">Escolha um canal para preencher os números.</p>
+      </div>
+      <div class="ads-tabs" id="ads-channel-tabs" role="group" aria-label="Canal"></div>
+      <div class="ads-inputs" id="ads-inputs"></div>
+      <div class="ads-funnel" id="ads-metrics"></div>
+    </section>
+
+    <section class="ads-block">
+      <div class="ads-block-head">
+        <h3>Análise do mês</h3>
+        <p>Anote o que aprendeu para decidir a verba e os testes do próximo mês.</p>
+      </div>
+      <div class="ads-notes" id="ads-notes"></div>
+    </section>
+
+    <section class="ads-block">
+      <div class="ads-block-head">
+        <h3>Evolução mês a mês</h3>
+        <p>Totais de todos os canais. Clique em um mês para abrir.</p>
+      </div>
+      <div id="ads-history"></div>
+    </section>
   </div>
 </div>
 
@@ -2413,8 +2450,9 @@
 </div>
 
 
-<script src="app.js?v=102"></script>
+<script src="app.js?v=103"></script>
 <script src="projects.js?v=15"></script>
+<script src="ads.js?v=1"></script>
 <div id="toast-container" class="toast-container"></div>
 </body>
 </html>

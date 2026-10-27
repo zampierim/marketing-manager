@@ -320,6 +320,7 @@ if (btnTabCampanhas) {
   btnTabCampanhas.addEventListener("click", () => {
     requirePassword(() => {
       showPage(pageCampanhas);
+      if (typeof window.openAdsMetrics === "function") window.openAdsMetrics();
     });
   });
 }
