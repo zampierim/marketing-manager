@@ -1141,8 +1141,10 @@ function createPostCard(post) {
   if (format === 'reels') {
     formatBadge = `<span class="card-format-badge" title="Reels"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="7 4 20 12 7 20 7 4"/></svg>Reels</span>`;
   } else if (format === 'carousel') {
-    const slideCount = (post.carousel ? post.carousel.length : 0) + 1;
-    formatBadge = `<span class="card-format-badge" title="Carrossel com ${slideCount} imagens"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="14" height="14" rx="2"/><path d="M3 17V5a2 2 0 0 1 2-2h12"/></svg>${slideCount}</span>`;
+    // Carrossel ainda sem imagens mostra só "Carrossel" em vez de uma contagem.
+    const slideCount = (hasImage ? 1 : 0) + (post.carousel ? post.carousel.length : 0);
+    const slideLabel = slideCount > 0 ? slideCount : 'Carrossel';
+    formatBadge = `<span class="card-format-badge" title="${slideCount > 0 ? `Carrossel com ${slideCount} imagens` : 'Carrossel'}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="14" height="14" rx="2"/><path d="M3 17V5a2 2 0 0 1 2-2h12"/></svg>${slideLabel}</span>`;
   }
 
   let cardHTML = ``;
