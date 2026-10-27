@@ -11,28 +11,30 @@
   100% { background-position: 200% 0; }
 }
 @keyframes pulseGlow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(27, 63, 139,0.25); }
-  50% { box-shadow: 0 0 0 8px rgba(27, 63, 139,0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(31, 61, 255,0.25); }
+  50% { box-shadow: 0 0 0 8px rgba(31, 61, 255,0); }
 }
 
 :root {
-  /* Identidade visual SAAM Auditoria (mesma do informativo mensal) */
-  --bg: #f7f9fc; /* Fundo */
-  --bg-subtle: #f7f9fc;
-  --panel: #FFFFFF; /* Superfície */
-  --ink: #0f1c38; /* Texto principal */
-  --ink-soft: #6b7a99; /* Texto de apoio */
-  --ink-faint: #8a97b3;
-  --hairline: #e2e8f4; /* Bordas */
-  --hairline-soft: #eef3ff;
+  /* Identidade visual do site saamauditoria.com.br */
+  --bg: #F3F6FF; /* Fundo das seções claras */
+  --bg-subtle: #F3F6FF;
+  --panel: #FFFFFF;
+  --ink: #0A1A5C; /* Azul-marinho: títulos e menu */
+  --ink-soft: #2A3A78; /* Texto corrido */
+  --ink-faint: #8D9BBF;
+  --hairline: #E2E8F4; /* Bordas */
+  --hairline-soft: #EEF2FF;
+  --highlight: #FFC62B; /* Amarelo que marca palavras-chave */
+  --card-shadow: 0 22px 44px -26px rgba(31, 61, 255, 0.38), 0 2px 8px rgba(10, 26, 92, 0.05);
 
-  /* Primary — Azul institucional SAAM */
-  --primary: #1b3f8b;
-  --primary-dark: #2251b8; /* Hover */
-  --primary-darker: #0f1c38;
-  --primary-soft: #eef3ff;
-  --primary-soft-2: #d6e4fb;
-  --primary-glow: rgba(27,63,139,0.12);
+  /* Primary — Azul elétrico dos botões e destaques */
+  --primary: #1F3DFF;
+  --primary-dark: #1830D6; /* Hover */
+  --primary-darker: #0A1A5C;
+  --primary-soft: #DCE5FF;
+  --primary-soft-2: #C9D6FF;
+  --primary-glow: rgba(31, 61, 255, 0.12);
 
   /* Accent colours */
   --emerald: #10B981;
@@ -45,8 +47,8 @@
   --sky-soft: #DAEDF4;
   --orange: #F59E0B;
   --orange-soft: #FFFBEB;
-  --violet: #1b3f8b;
-  --violet-soft: #eef3ff;
+  --violet: #1F3DFF;
+  --violet-soft: #DCE5FF;
   --teal: #14B8A6;
   --teal-soft: #F0FDFA;
 
@@ -56,7 +58,7 @@
   --shadow-md: 0 4px 6px -1px rgba(10,28,45,0.07), 0 2px 4px -2px rgba(10,28,45,0.05);
   --shadow-lg: 0 10px 15px -3px rgba(10,28,45,0.08), 0 4px 6px -4px rgba(10,28,45,0.05);
   --shadow-xl: 0 20px 25px -5px rgba(10,28,45,0.1), 0 8px 10px -6px rgba(10,28,45,0.06);
-  --shadow-glow: 0 0 20px rgba(27,63,139,0.15);
+  --shadow-glow: 0 0 20px rgba(31,61,255,0.15);
 
   --radius-xl: 20px;
   --radius-lg: 16px;
@@ -70,7 +72,7 @@
   --c-aprovado: #10B981;
   --c-agendado: #3F77C1;
   --c-reprovado: #F43F5E;
-  --c-publicado: #1b3f8b;
+  --c-publicado: #0A1A5C;
 
   /* Legacy aliases */
   --blue: var(--primary);
@@ -85,7 +87,7 @@ html, body { margin: 0; padding: 0; }
 body {
   background: var(--bg);
   color: var(--ink);
-  font-family: 'Inter', -apple-system, sans-serif;
+  font-family: 'DM Sans', -apple-system, sans-serif;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -97,14 +99,13 @@ img { max-width: 100%; display: block; }
 .app { max-width: 1440px; margin: 0 auto; padding: 28px 24px 120px; }
 .hidden { display: none !important; }
 
-/* ============ Menu superior ============ */
+/* ============ Menu superior (azul-marinho, como o menu do site da SAAM) ============ */
 .topbar {
   position: sticky;
   top: 0;
   z-index: 90;
-  background: rgba(255, 255, 255, 0.96);
+  background: rgba(10, 26, 92, 0.97);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--hairline);
 }
 .topbar-inner {
   max-width: 1440px;
@@ -123,26 +124,26 @@ img { max-width: 100%; display: block; }
   cursor: pointer;
   white-space: nowrap;
 }
-.topbar-name { font-size: 17px; font-weight: 700; color: var(--ink); }
-.topbar-name span { font-weight: 600; color: var(--primary); }
+.topbar-name { font-size: 17px; font-weight: 700; color: #FFFFFF; }
+.topbar-name span { font-weight: 600; color: var(--highlight); }
 .topbar-nav { display: flex; align-items: center; gap: 4px; }
 .topbar-link {
   display: flex;
   align-items: center;
   gap: 7px;
-  padding: 8px 12px;
+  padding: 8px 14px;
   border: none;
-  border-radius: 10px;
+  border-radius: 999px;
   background: transparent;
-  color: #475569;
-  font-size: 13.5px;
-  font-weight: 600;
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 14px;
+  font-weight: 500;
   white-space: nowrap;
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
 }
-.topbar-link:hover { background: var(--primary-soft); color: var(--ink); }
-.topbar-link.active { background: var(--primary); color: #FFFFFF; }
+.topbar-link:hover { background: rgba(255, 255, 255, 0.1); color: #FFFFFF; }
+.topbar-link.active { background: var(--primary); color: #FFFFFF; font-weight: 700; }
 .topbar-link svg { flex-shrink: 0; }
 .topbar-sync {
   display: flex;
@@ -150,7 +151,7 @@ img { max-width: 100%; display: block; }
   gap: 6px;
   font-size: 12px;
   font-weight: 500;
-  color: #64748B;
+  color: rgba(255, 255, 255, 0.74);
   white-space: nowrap;
 }
 .topbar-sync::before {
@@ -158,7 +159,7 @@ img { max-width: 100%; display: block; }
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #CBD5E1;
+  background: rgba(255, 255, 255, 0.4);
 }
 .topbar-sync[data-state="ok"]::before { background: #10B981; }
 .topbar-sync[data-state="error"]::before { background: #EF4444; }
@@ -183,54 +184,59 @@ img { max-width: 100%; display: block; }
 }
 
 /* ============ Hero Banner ============ */
-/* Topo do Início no padrão do informativo SAAM: fundo claro, título escuro com destaque azul */
+/* Topo do Início no padrão do site da SAAM: azul-marinho, título branco com palavra marcada em amarelo */
 .hero {
   position: relative;
   overflow: hidden;
-  border-radius: 16px;
-  padding: 40px;
-  background: var(--panel);
-  border: 1px solid var(--hairline);
-  color: var(--ink);
+  border-radius: 24px;
+  padding: 48px;
+  background: var(--ink);
+  color: #FFFFFF;
   margin-bottom: 24px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 32px;
+  box-shadow: var(--card-shadow);
   animation: fadeInUp 0.6s ease-out;
 }
 .hero-eyebrow {
   display: inline-flex;
   align-items: center;
-  margin-bottom: 16px;
-  padding: 6px 12px;
-  border-radius: 20px;
-  background: var(--primary-soft);
-  color: var(--primary);
-  font-size: 12px;
+  gap: 12px;
+  margin-bottom: 18px;
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 14px;
   font-weight: 700;
-  letter-spacing: 2px;
+  letter-spacing: 1.68px;
   text-transform: uppercase;
+}
+.hero-eyebrow::before {
+  content: '';
+  width: 24px;
+  height: 2px;
+  background: currentColor;
 }
 .hero-title {
   font-weight: 800;
   font-size: clamp(32px, 5vw, 52px);
-  line-height: 1.1;
-  margin: 0 0 14px;
-  letter-spacing: -0.02em;
+  line-height: 1.12;
+  margin: 0 0 16px;
+  letter-spacing: -0.025em;
+  color: #FFFFFF;
+}
+.hero-title .accent {
+  padding: 0 0.18em;
+  border-radius: 6px;
+  background: var(--highlight);
   color: var(--ink);
 }
-.hero-title .accent { color: var(--primary); }
 .hero-sub {
-  color: var(--ink-soft);
-  font-size: 16px;
-  max-width: 560px;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 18px;
+  max-width: 600px;
   line-height: 1.6;
   margin: 0;
 }
 @media (max-width: 760px) {
-  .hero { padding: 28px 20px; }
+  .hero { padding: 32px 22px; }
+  .hero-sub { font-size: 16px; }
 }
 
 /* ============ Home Dashboard Cards ============ */
@@ -247,13 +253,13 @@ img { max-width: 100%; display: block; }
   align-items: flex-start;
   gap: 18px;
   text-align: left;
-  padding: 26px 24px;
-  border-radius: var(--radius-xl);
-  border: 1px solid var(--hairline);
+  padding: 28px 26px;
+  border-radius: 24px;
+  border: 1px solid transparent;
   background: var(--panel);
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--card-shadow);
   position: relative;
   overflow: hidden;
 }
@@ -268,10 +274,11 @@ img { max-width: 100%; display: block; }
   background: linear-gradient(135deg, var(--primary-glow) 0%, transparent 60%);
 }
 .tab-btn:hover {
-  box-shadow: var(--shadow-lg), var(--shadow-glow);
-  transform: translateY(-3px);
-  border-color: var(--primary);
-}.tab-btn:hover::after { opacity: 1; }
+  box-shadow: 0 28px 50px -24px rgba(31, 61, 255, 0.5), 0 2px 8px rgba(10, 26, 92, 0.06);
+  transform: translateY(-4px);
+  border-color: var(--primary-soft-2);
+}
+.tab-btn:hover::after { opacity: 1; }
 .tab-btn:active { transform: translateY(-1px); }
 
 .tab-card-top {
@@ -283,9 +290,9 @@ img { max-width: 100%; display: block; }
   z-index: 1;
 }
 .tab-btn .tab-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-md);
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
   background: var(--primary-soft);
   color: var(--primary);
   display: flex;
@@ -316,7 +323,7 @@ img { max-width: 100%; display: block; }
 
 .tab-btn .tab-text { min-width: 0; position: relative; z-index: 1; }
 .tab-btn .tab-title {
-  font-family: 'Inter', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   font-weight: 800;
   font-size: 17px;
   color: var(--ink);
@@ -384,7 +391,7 @@ img { max-width: 100%; display: block; }
 .page-icon-blue { background: var(--primary-soft); color: var(--primary); }
 .page-icon-purple { background: var(--violet-soft); color: var(--violet); }
 .page-header h2 {
-  font-family: 'Inter', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   font-weight: 800;
   font-size: 22px;
   margin: 0;
@@ -396,10 +403,10 @@ img { max-width: 100%; display: block; }
 /* ============ Toolbar ============ */
 .toolbar {
   background: var(--panel);
-  border-radius: var(--radius-lg);
+  border-radius: 20px;
   padding: 14px 18px;
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--hairline);
+  box-shadow: var(--card-shadow);
+  border: none;
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
@@ -512,20 +519,20 @@ img { max-width: 100%; display: block; }
   background: var(--primary);
   color: #fff;
   border: none;
-  padding: 11px 22px;
-  border-radius: var(--radius-sm);
+  padding: 12px 24px;
+  border-radius: 999px;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 15px;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 8px;
-  box-shadow: 0 2px 8px rgba(27, 63, 139,0.35);
+  box-shadow: 0 14px 30px -14px rgba(31, 61, 255, 0.9);
   transition: all 0.2s ease;
 }
 .btn-new:hover {
   background: var(--primary-dark);
-  box-shadow: 0 4px 16px rgba(27, 63, 139,0.4);
+  box-shadow: 0 18px 34px -14px rgba(31, 61, 255, 0.95);
   transform: translateY(-1px);
 }
 .btn-ghost {
@@ -547,10 +554,10 @@ img { max-width: 100%; display: block; }
 /* ============ Calendar Grid ============ */
 .calendar-container {
   background: var(--panel);
-  border-radius: var(--radius-xl);
+  border-radius: 24px;
   padding: 28px;
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--hairline);
+  box-shadow: var(--card-shadow);
+  border: none;
   margin-bottom: 28px;
   animation: fadeInUp 0.5s ease-out 0.1s both;
 }
@@ -561,7 +568,7 @@ img { max-width: 100%; display: block; }
   margin-bottom: 24px;
 }
 .calendar-header h2 {
-  font-family: 'Inter', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   font-size: 22px;
   font-weight: 800;
   margin: 0;
@@ -751,7 +758,7 @@ img { max-width: 100%; display: block; }
   display: flex;
   align-items: center;
   gap: 5px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   text-shadow: 0 1px 4px rgba(0,0,0,0.4);
   line-height: 1.3;
 }
@@ -813,10 +820,10 @@ img { max-width: 100%; display: block; }
 /* ============ List View ============ */
 .list-view-container {
   background: var(--panel);
-  border-radius: var(--radius-xl);
+  border-radius: 24px;
   padding: 24px;
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--hairline);
+  box-shadow: var(--card-shadow);
+  border: none;
   margin-bottom: 24px;
   animation: fadeInUp 0.5s ease-out 0.2s both;
 }
@@ -826,7 +833,7 @@ img { max-width: 100%; display: block; }
   padding-bottom: 12px;
 }
 .list-view-header h3 {
-  font-family: 'Inter', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   margin: 0;
   font-size: 18px;
   color: var(--ink);
@@ -975,7 +982,7 @@ img { max-width: 100%; display: block; }
   margin-bottom: 24px;
 }
 .modal h2 {
-  font-family: 'Inter', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   font-weight: 800;
   margin: 0;
   font-size: 20px;
@@ -1034,7 +1041,7 @@ img { max-width: 100%; display: block; }
   background: var(--primary);
   color: #fff;
   border-color: var(--primary);
-  box-shadow: 0 2px 8px rgba(27, 63, 139,0.3);
+  box-shadow: 0 2px 8px rgba(31, 61, 255,0.3);
 }
 
 /* Status chip variants */
@@ -1056,18 +1063,18 @@ img { max-width: 100%; display: block; }
   background: var(--primary);
   color: #fff;
   border: none;
-  padding: 11px 24px;
-  border-radius: var(--radius-sm);
+  padding: 12px 26px;
+  border-radius: 999px;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 15px;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(27, 63, 139,0.3);
+  box-shadow: 0 14px 30px -14px rgba(31, 61, 255, 0.9);
   display: flex;
   align-items: center;
   gap: 8px;
   transition: all 0.2s ease;
 }
-.btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(27, 63, 139,0.35); }
+.btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 18px 34px -14px rgba(31, 61, 255, 0.95); }
 .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 .btn-cancel {
   background: var(--panel);
@@ -1098,7 +1105,7 @@ img { max-width: 100%; display: block; }
 }
 .ai-results-panel h3 {
   margin-top: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   font-size: 18px;
   letter-spacing: -0.01em;
 }
@@ -1115,7 +1122,7 @@ img { max-width: 100%; display: block; }
 .xml-topic:hover { border-color: var(--primary-soft-2); box-shadow: var(--shadow-sm); }
 .xml-topic-title {
   font-weight: 800;
-  font-family: 'Inter', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   color: var(--primary-dark);
   font-size: 15px;
   margin: 0 0 8px 0;
@@ -1323,7 +1330,7 @@ img { max-width: 100%; display: block; }
 
 /* List Month Headers */
 .list-month-header {
-  font-family: 'Inter', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   font-weight: 800;
   font-size: 18px;
   color: var(--ink);
@@ -1378,7 +1385,7 @@ select.list-status-select.status-publicado { background: var(--c-publicado); }
   background: var(--primary);
   color: #fff;
   border-color: var(--primary);
-  box-shadow: 0 2px 8px rgba(27, 63, 139,0.25);
+  box-shadow: 0 2px 8px rgba(31, 61, 255,0.25);
 }
 
 /* ============ Toast Notifications ============ */
@@ -1635,9 +1642,13 @@ select.list-status-select.status-publicado { background: var(--c-publicado); }
 ::-webkit-scrollbar-thumb { background: var(--hairline); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--ink-faint); }
 
-/* Identidade SAAM: Inter em todo o site, inclusive nos estilos escritos direto no HTML e no JS */
+/* Fontes do site da SAAM: DM Sans no texto e Sora nos títulos, inclusive nos estilos escritos direto no HTML e no JS */
 body * {
-  font-family: 'Inter', -apple-system, sans-serif !important;
+  font-family: 'DM Sans', -apple-system, sans-serif !important;
+}
+body h1, body h2, body h3, body h4,
+body .hero-title, body .tab-title, body .month-name, body .topbar-name {
+  font-family: 'Sora', 'DM Sans', sans-serif !important;
 }
 .day-number, .tab-stat { font-variant-numeric: tabular-nums; }
 
