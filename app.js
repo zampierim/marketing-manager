@@ -1268,7 +1268,7 @@ function renderList() {
     if (weekGroup !== currentWeekGroup) {
       currentWeekGroup = weekGroup;
       
-      const themeColor = d.getMonth() === 8 ? "#059669" : "#26428B";
+      const themeColor = d.getMonth() === 8 ? "#059669" : "#1b3f8b";
       
       const header = document.createElement("div");
       header.className = "list-month-header";
@@ -2536,10 +2536,10 @@ function renderRoutinesList(filterText = "") {
       
       // Módulo Header Bar (Sleek Dark Accent, Collapsible)
       areaBlock.innerHTML = `
-        <div class="routine-area-header" style="background: #FFFFFF; color: #101B3B; padding: 18px 24px; border-radius: 16px; display: flex; align-items: center; justify-content: space-between; border-left: 6px solid #26428B; border-top: 1px solid #E2E8F0; border-right: 1px solid #E2E8F0; border-bottom: 1px solid #E2E8F0; cursor: pointer; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);" onclick="toggleAccordion('routine-area-${area.id}')" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)';">
-          <h3 style="margin: 0; font-size: 17px; font-weight: 800; font-family: 'Outfit', sans-serif; color: #0A1C2D;">${area.area}</h3>
+        <div class="routine-area-header" style="background: #FFFFFF; color: #0f1c38; padding: 18px 24px; border-radius: 16px; display: flex; align-items: center; justify-content: space-between; border-left: 6px solid #1b3f8b; border-top: 1px solid #E2E8F0; border-right: 1px solid #E2E8F0; border-bottom: 1px solid #E2E8F0; cursor: pointer; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);" onclick="toggleAccordion('routine-area-${area.id}')" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)';">
+          <h3 style="margin: 0; font-size: 17px; font-weight: 800; font-family: 'Outfit', sans-serif; color: #0f1c38;">${area.area}</h3>
           <div style="display: flex; align-items: center; gap: 14px;">
-            <span style="background: rgba(38, 66, 139, 0.08); color: #26428B; border: 1px solid rgba(38, 66, 139, 0.15); padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 800; font-family: 'Roboto', sans-serif;">${filteredItems.length} rotinas</span>
+            <span style="background: rgba(27, 63, 139, 0.08); color: #1b3f8b; border: 1px solid rgba(27, 63, 139, 0.15); padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 800; font-family: 'Roboto', sans-serif;">${filteredItems.length} rotinas</span>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3F77C1" stroke-width="2.5" class="accordion-icon" id="icon-routine-area-${area.id}">${chevron}</svg>
           </div>
         </div>
@@ -7593,8 +7593,8 @@ window.renderIdeiasGeral = function() {
   filtered.forEach((idea, index) => {
     const idxStr = (index+1).toString().padStart(2, '0');
     const tagColor = idea.series === 'Reforma Tributária' ? '#EA580C' : 
-                     idea.series === 'Captura e Organização' ? '#033059' :
-                     idea.series === 'SPED Fiscal' ? '#26428B' :
+                     idea.series === 'Captura e Organização' ? '#1b3f8b' :
+                     idea.series === 'SPED Fiscal' ? '#1b3f8b' :
                      idea.series === 'Cruzamento de Dados' ? '#3F77C1' : '#10B981';
     
     const usageCount = posts.filter(p => p.ideaId == idea.id).length;
@@ -7611,24 +7611,24 @@ window.renderIdeiasGeral = function() {
     const dynamicDetails = getIdeaCopyAndBriefing(idea);
 
     html += `
-      <div class="idea-modern-card" style="cursor: pointer; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid #E2E8F0; padding: 22px; border-radius: 16px; background: #FFFFFF; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);" onclick="toggleIdeaAccordion(event, 'idea-body-${idea.id}')" onmouseover="this.style.boxShadow='0 12px 20px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04)'; this.style.borderColor='#26428B'; this.style.transform='translateY(-2px)';" onmouseout="this.style.boxShadow='0 4px 6px -1px rgba(0, 0, 0, 0.03)'; this.style.borderColor='#E2E8F0'; this.style.transform='translateY(0)';" title="Clique para expandir o briefing">
+      <div class="idea-modern-card" style="cursor: pointer; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid #E2E8F0; padding: 22px; border-radius: 16px; background: #FFFFFF; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);" onclick="toggleIdeaAccordion(event, 'idea-body-${idea.id}')" onmouseover="this.style.boxShadow='0 12px 20px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04)'; this.style.borderColor='#1b3f8b'; this.style.transform='translateY(-2px)';" onmouseout="this.style.boxShadow='0 4px 6px -1px rgba(0, 0, 0, 0.03)'; this.style.borderColor='#E2E8F0'; this.style.transform='translateY(0)';" title="Clique para expandir o briefing">
         <div>
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
             <span style="font-size: 13px; font-weight: 800; color: #94A3B8; font-family: 'Roboto', sans-serif;">${idxStr}</span>
             <div style="width: 8px; height: 8px; border-radius: 50%; background: ${tagColor};"></div>
           </div>
           <span style="font-size: 11px; font-weight: 800; color: ${tagColor}; letter-spacing: 0.5px; text-transform: uppercase; font-family: 'Roboto', sans-serif; display: block; margin-bottom: 8px;">${ideaTag}</span>
-          <h4 style="margin: 0; font-size: 17px; color: #0A1C2D; font-weight: 800; line-height: 1.4; font-family: 'Outfit', sans-serif;">${cleanTitle}</h4>
+          <h4 style="margin: 0; font-size: 17px; color: #0f1c38; font-weight: 800; line-height: 1.4; font-family: 'Outfit', sans-serif;">${cleanTitle}</h4>
           
           <!-- Expandable Briefing Drawer -->
           <div id="idea-body-${idea.id}" class="idea-body-drawer" style="display: none; margin-top: 16px; border-top: 1px solid var(--hairline); padding-top: 16px;" onclick="event.stopPropagation();">
             <div style="margin-bottom: 12px;">
-              <strong style="font-size: 11.5px; color: #26428B; text-transform: uppercase; display: block; margin-bottom: 4px; font-family: 'Roboto', sans-serif;">🎯 Mini Briefing:</strong>
-              <p style="margin: 0; font-size: 13px; color: #0A1C2D; line-height: 1.5; font-family: 'Poppins', sans-serif;">${dynamicDetails.briefing}</p>
+              <strong style="font-size: 11.5px; color: #1b3f8b; text-transform: uppercase; display: block; margin-bottom: 4px; font-family: 'Roboto', sans-serif;">🎯 Mini Briefing:</strong>
+              <p style="margin: 0; font-size: 13px; color: #0f1c38; line-height: 1.5; font-family: 'Poppins', sans-serif;">${dynamicDetails.briefing}</p>
             </div>
-            <div style="background: #FFFBF7; border-left: 4px solid #26428B; padding: 12px; border-radius: 8px; border: 1px solid #FBECD7;">
-              <strong style="font-size: 11.5px; color: #26428B; text-transform: uppercase; display: block; margin-bottom: 4px; font-family: 'Roboto', sans-serif;">💬 Como poderia ser falado:</strong>
-              <p style="margin: 0; font-size: 13px; color: #033059; line-height: 1.5; font-family: 'Poppins', sans-serif; font-style: italic;">"${dynamicDetails.copy}"</p>
+            <div style="background: #FFFBF7; border-left: 4px solid #1b3f8b; padding: 12px; border-radius: 8px; border: 1px solid #FBECD7;">
+              <strong style="font-size: 11.5px; color: #1b3f8b; text-transform: uppercase; display: block; margin-bottom: 4px; font-family: 'Roboto', sans-serif;">💬 Como poderia ser falado:</strong>
+              <p style="margin: 0; font-size: 13px; color: #1b3f8b; line-height: 1.5; font-family: 'Poppins', sans-serif; font-style: italic;">"${dynamicDetails.copy}"</p>
             </div>
           </div>
         </div>
@@ -7637,11 +7637,11 @@ window.renderIdeiasGeral = function() {
           <div>
              <span style="display: block; font-size: 9px; font-weight: 800; color: #64748B; letter-spacing: 0.5px; text-transform: uppercase; font-family: 'Roboto', sans-serif;">PÚBLICO-ALVO</span>
              <div style="display: flex; align-items: center; margin-top: 2px;">
-               <span style="font-size: 12px; font-weight: 700; color: #0A1C2D; font-family: 'Poppins', sans-serif;">${ideaDestiny}</span>
+               <span style="font-size: 12px; font-weight: 700; color: #0f1c38; font-family: 'Poppins', sans-serif;">${ideaDestiny}</span>
                ${badgeHtml}
              </div>
           </div>
-          <button onclick="planejarIdeia('${idea.id}')" style="background: none; border: none; color: #26428B; font-size: 13px; font-weight: 800; display: flex; align-items: center; gap: 4px; cursor: pointer; font-family: 'Roboto', sans-serif;">
+          <button onclick="planejarIdeia('${idea.id}')" style="background: none; border: none; color: #1b3f8b; font-size: 13px; font-weight: 800; display: flex; align-items: center; gap: 4px; cursor: pointer; font-family: 'Roboto', sans-serif;">
             Planejar <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           </button>
         </div>
@@ -7680,7 +7680,7 @@ function renderSeasonBanner() {
     bannerContainer.innerHTML = `
       <div class="page-header" style="flex-direction: column; align-items: flex-start; background: linear-gradient(135deg, #1E1B4B 0%, #312E81 100%); padding: 32px; border-radius: 16px; color: white; margin-bottom: 24px; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(30,27,75,0.2); transition: all 0.3s ease;">
         <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
-        <div style="position: absolute; bottom: -20px; right: 100px; width: 100px; height: 100px; background: rgba(38, 66, 139,0.2); border-radius: 50%; filter: blur(20px);"></div>
+        <div style="position: absolute; bottom: -20px; right: 100px; width: 100px; height: 100px; background: rgba(27, 63, 139,0.2); border-radius: 50%; filter: blur(20px);"></div>
         <span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; letter-spacing: 1px; margin-bottom: 16px; display: inline-block; border: 1px solid rgba(255,255,255,0.1);">AGOSTO 2026</span>
         <h2 style="font-size: 32px; margin: 0 0 12px 0; color: white; letter-spacing: -0.5px;">O Futuro do Fiscal Já Começou</h2>
         <p style="margin: 0; color: #DAEDF4; font-size: 16px; max-width: 700px; line-height: 1.5;">Em agosto, a SAAM não venderá software. Venderá uma nova forma de pensar o departamento fiscal usando o <strong>Índice de Maturidade Fiscal</strong> como fio condutor.</p>
@@ -7711,7 +7711,7 @@ function renderSeasonBanner() {
   } else if (month === 10 && year === 2026) {
     // NOVEMBRO
     bannerContainer.innerHTML = `
-      <div class="page-header" style="flex-direction: column; align-items: flex-start; background: linear-gradient(135deg, #101B3B 0%, #26428B 100%); padding: 32px; border-radius: 16px; color: white; margin-bottom: 24px; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(38,66,139,0.2); transition: all 0.3s ease;">
+      <div class="page-header" style="flex-direction: column; align-items: flex-start; background: linear-gradient(135deg, #0f1c38 0%, #1b3f8b 100%); padding: 32px; border-radius: 16px; color: white; margin-bottom: 24px; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(27,63,139,0.2); transition: all 0.3s ease;">
         <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
         <div style="position: absolute; bottom: -20px; right: 100px; width: 100px; height: 100px; background: rgba(63,119,193,0.2); border-radius: 50%; filter: blur(20px);"></div>
         <span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; letter-spacing: 1px; margin-bottom: 16px; display: inline-block; border: 1px solid rgba(255,255,255,0.1);">NOVEMBRO 2026</span>
@@ -7722,7 +7722,7 @@ function renderSeasonBanner() {
   } else if (month === 11 && year === 2026) {
     // DEZEMBRO
     bannerContainer.innerHTML = `
-      <div class="page-header" style="flex-direction: column; align-items: flex-start; background: linear-gradient(135deg, #0A1C2D 0%, #033059 100%); padding: 32px; border-radius: 16px; color: white; margin-bottom: 24px; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(10,28,45,0.2); transition: all 0.3s ease;">
+      <div class="page-header" style="flex-direction: column; align-items: flex-start; background: linear-gradient(135deg, #0f1c38 0%, #1b3f8b 100%); padding: 32px; border-radius: 16px; color: white; margin-bottom: 24px; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(10,28,45,0.2); transition: all 0.3s ease;">
         <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
         <div style="position: absolute; bottom: -20px; right: 100px; width: 100px; height: 100px; background: rgba(63,119,193,0.2); border-radius: 50%; filter: blur(20px);"></div>
         <span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; letter-spacing: 1px; margin-bottom: 16px; display: inline-block; border: 1px solid rgba(255,255,255,0.1);">DEZEMBRO 2026</span>
@@ -8417,13 +8417,13 @@ window.renderIdeasStrategy = function() {
   
   const monthColors = {
     0: "#EA580C", // Janeiro 2027 (orange theme)
-    7: "#26428B", // Agosto
+    7: "#1b3f8b", // Agosto
     8: "#059669", // Setembro
     9: "#EA580C", // Outubro
     10: "#1E3A8A", // Novembro
     11: "#BE185D"  // Dezembro
   };
-  const activeColor = monthColors[month] || "#26428B";
+  const activeColor = monthColors[month] || "#1b3f8b";
 
   // Update month pills active state (styled as physical folder tabs inside container)
   const pills = document.querySelectorAll(".ideas-month-pill");
@@ -8525,7 +8525,7 @@ window.renderIdeasStrategy = function() {
           <summary style="padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; list-style: none; outline: none; background: #F8FAFC;">
             <div style="display: flex; align-items: center; gap: 8px;">
               <span style="font-size: 16px;">📘</span>
-              <strong style="font-size: 15px; color: #0A1C2D; font-family: 'Outfit', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Guia de Posicionamento & Marca SAAM (Permanente)</strong>
+              <strong style="font-size: 15px; color: #0f1c38; font-family: 'Outfit', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Guia de Posicionamento & Marca SAAM (Permanente)</strong>
             </div>
             <span style="font-size: 11px; font-weight: 800; color: #64748B; font-family: 'Roboto', sans-serif; text-transform: uppercase;">Clique para expandir</span>
           </summary>
@@ -8547,10 +8547,10 @@ window.renderIdeasStrategy = function() {
         <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 16px; padding: 32px; box-shadow: var(--shadow-sm);">
           <div style="border-bottom: 1px solid var(--hairline); padding-bottom: 18px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
             <div>
-              <h4 style="margin: 0; font-size: 20px; color: #0A1C2D; font-weight: 800; font-family: 'Outfit', sans-serif;">📖 Guia Editorial & Planejamento Estratégico (${strat.name})</h4>
+              <h4 style="margin: 0; font-size: 20px; color: #0f1c38; font-weight: 800; font-family: 'Outfit', sans-serif;">📖 Guia Editorial & Planejamento Estratégico (${strat.name})</h4>
               <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748B; font-family: 'Poppins', sans-serif;">Pilares de narrativa, jornadas semanais e séries específicas para este mês.</p>
             </div>
-            <span style="background: #DAEDF4; color: #26428B; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 800; font-family: 'Roboto', sans-serif;">CAMPANHA ATIVA</span>
+            <span style="background: #DAEDF4; color: #1b3f8b; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 800; font-family: 'Roboto', sans-serif;">CAMPANHA ATIVA</span>
           </div>
           <div style="color: #0F172A; font-family: 'Poppins', sans-serif;" class="playbook-injected-content">
             ${sourceEl.innerHTML}
@@ -8737,7 +8737,7 @@ function renderSugestoes() {
       let typeColor = '#3B82F6';
       let typeBg = '#EFF6FF';
       if(s.tipo === 'Ideia de Post') { typeColor = '#8B5CF6'; typeBg = '#F5F3FF'; }
-      if(s.tipo === 'Informativo Interno') { typeColor = '#26428B'; typeBg = '#E0E7FF'; }
+      if(s.tipo === 'Informativo Interno') { typeColor = '#1b3f8b'; typeBg = '#E0E7FF'; }
       if(s.tipo === 'Marketing Interno') { typeColor = '#4338CA'; typeBg = '#EEF2FF'; }
       if(s.tipo === 'Marketing Externo') { typeColor = '#EC4899'; typeBg = '#FDF2F8'; }
       if(s.tipo === 'Comercial') { typeColor = '#0D9488'; typeBg = '#CCFBF1'; }
@@ -8940,7 +8940,7 @@ window.openCollabModal = function(id) {
   let typeColor = '#3B82F6';
   let typeBg = '#EFF6FF';
   if(sug.tipo === 'Ideia de Post') { typeColor = '#8B5CF6'; typeBg = '#F5F3FF'; }
-  if(sug.tipo === 'Informativo Interno') { typeColor = '#26428B'; typeBg = '#E0E7FF'; }
+  if(sug.tipo === 'Informativo Interno') { typeColor = '#1b3f8b'; typeBg = '#E0E7FF'; }
   if(sug.tipo === 'Marketing Interno') { typeColor = '#4338CA'; typeBg = '#EEF2FF'; }
   if(sug.tipo === 'Marketing Externo') { typeColor = '#EC4899'; typeBg = '#FDF2F8'; }
   if(sug.tipo === 'Comercial') { typeColor = '#0D9488'; typeBg = '#CCFBF1'; }

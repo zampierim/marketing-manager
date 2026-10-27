@@ -6,14 +6,15 @@
   <title>Gestor de Marketing</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Roboto:wght@400;500;700&family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=9">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">  <link rel="stylesheet" href="style.css?v=10">
 </head>
 <body>
 <!-- Menu superior: fica sempre visível e cada item vira uma entrada no histórico do navegador -->
 <header class="topbar">
   <div class="topbar-inner">
-    <button type="button" class="topbar-brand" data-nav="home">Marketing <span>do SAAM</span></button>
+    <button type="button" class="topbar-brand" data-nav="home">
+      <span class="topbar-name">Marketing <span>do SAAM</span></span>
+    </button>
     <nav class="topbar-nav" aria-label="Seções">
       <button type="button" class="topbar-link" data-nav="home">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
@@ -48,12 +49,35 @@
   <!-- Dashboard Inicial -->
   <div id="page-home">
     <div class="hero" id="home-hero">
-      <h1 class="hero-title">Marketing <span class="accent">do SAAM</span></h1>
-      <p class="hero-sub">Planejamento e acompanhamento de tudo o que vai pro ar.</p>
+      <div class="hero-text">
+        <span class="hero-eyebrow">Marketing · SAAM Auditoria</span>
+        <h1 class="hero-title">Marketing <span class="accent">do SAAM</span></h1>
+        <p class="hero-sub">Planejamento e acompanhamento de tudo o que vai pro ar.</p>
+      </div>
+    </div>
+
+    <!-- Card Comunidade SAAM (Banner Destaque) -->
+    <div id="btn-tab-colaboracao" style="background: #eef3ff; border: 1px solid #d6e4fb; border-radius: 16px; padding: 24px 32px; margin-bottom: 24px; width: 100%; box-sizing: border-box; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 16px; transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)'; this.style.borderColor='#1b3f8b'" onmouseout="this.style.transform='none'; this.style.boxShadow='none'; this.style.borderColor='#d6e4fb'">
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <div style="background: #FFFFFF; padding: 12px; border-radius: 12px; color: #1b3f8b; border: 1px solid #d6e4fb;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap;">
+            <h2 style="margin: 0; font-size: 20px; font-weight: 800; color: #0f1c38;">Comunidade SAAM & Colaboração</h2>
+            <span style="background: #FFFFFF; color: #1b3f8b; font-size: 11.5px; font-weight: 700; padding: 2px 10px; border-radius: 12px; border: 1px solid #d6e4fb;">Aberto a todos</span>
+          </div>
+          <p style="margin: 0; color: #6b7a99; font-size: 14px;">Deixe sua ideia de post, sugestão de rotina, marketing ou feedback para a equipe.</p>
+        </div>
+      </div>
+      <div style="color: #1b3f8b; display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 13.5px; white-space: nowrap;">
+        <span>Participar</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </div>
     </div>
 
     <!-- Card claro: Comunicações internas -->
-    <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px 32px; margin-bottom: 24px; box-shadow: var(--shadow-sm); width: 100%; box-sizing: border-box;">
+    <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px 32px; margin-bottom: 32px; box-shadow: var(--shadow-sm); width: 100%; box-sizing: border-box;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h2 style="margin: 0; font-size: 20px; font-weight: 800; color: #0F172A; font-family: 'Manrope', sans-serif;">Comunicações Internas</h2>
         <div style="display: flex; align-items: center; gap: 12px;">
@@ -72,26 +96,6 @@
       </div>
       <div id="comms-list" style="display: flex; flex-direction: column; gap: 12px;">
         <!-- Lista de terças e quintas será injetada aqui -->
-      </div>
-    </div>
-
-    <!-- Card Comunidade SAAM (Banner Destaque) -->
-    <div id="btn-tab-colaboracao" style="background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%); border: 1px solid #334155; border-radius: 16px; padding: 24px 32px; margin-bottom: 32px; box-shadow: var(--shadow-sm); width: 100%; box-sizing: border-box; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)'" onmouseout="this.style.transform='none'; this.style.boxShadow='var(--shadow-sm)'">
-      <div style="display: flex; align-items: center; gap: 16px;">
-        <div style="background: rgba(139, 92, 246, 0.2); padding: 12px; border-radius: 12px; color: #A78BFA;">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        </div>
-        <div>
-          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-            <h2 style="margin: 0; font-size: 20px; font-weight: 800; color: #FFFFFF; font-family: 'Manrope', sans-serif;">Comunidade SAAM & Colaboração</h2>
-            <span style="background: rgba(139, 92, 246, 0.25); color: #DDD6FE; font-size: 11.5px; font-weight: 700; padding: 2px 10px; border-radius: 12px; border: 1px solid rgba(139, 92, 246, 0.4);">Aberto a todos</span>
-          </div>
-          <p style="margin: 0; color: #94A3B8; font-size: 14px;">Deixe sua ideia de post, sugestão de rotina, marketing ou feedback para a equipe.</p>
-        </div>
-      </div>
-      <div style="color: #A78BFA; display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 13.5px;">
-        <span>Participar</span>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
       </div>
     </div>
 
@@ -130,16 +134,16 @@
       </button>
       <button type="button" class="tab-btn" id="btn-tab-excelencia">
         <div class="tab-card-top">
-          <span class="tab-icon" style="background: rgba(38, 66, 139,0.15); color: #26428B;">
+          <span class="tab-icon" style="background: rgba(27, 63, 139,0.15); color: #1b3f8b;">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
           </span>
-          <span class="tab-stat" style="background: rgba(38, 66, 139,0.15); color: #26428B;">Marca & Playbook</span>
+          <span class="tab-stat" style="background: rgba(27, 63, 139,0.15); color: #1b3f8b;">Marca & Playbook</span>
         </div>
         <span class="tab-text">
           <p class="tab-title">Guia do SAAM</p>
           <p class="tab-sub">Nichos, dores, linguagem e as rotinas do SAAM</p>
         </span>
-        <span class="tab-arrow" style="display: flex; justify-content: space-between; align-items: center; width: 100%; color: #26428B;">
+        <span class="tab-arrow" style="display: flex; justify-content: space-between; align-items: center; width: 100%; color: #1b3f8b;">
           <span style="font-size: 16px; opacity: 0.8;" title="Acesso restrito">🔒</span>
           <span style="display: flex; align-items: center; gap: 4px;">Abrir <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></span>
         </span>
@@ -517,7 +521,7 @@
     </button>
     
     <div class="page-header" style="margin-bottom: 24px;">
-      <div class="page-icon" style="background: rgba(38, 66, 139, 0.12); color: #26428B;">
+      <div class="page-icon" style="background: rgba(27, 63, 139, 0.12); color: #1b3f8b;">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
       </div>
       <div>
@@ -545,7 +549,7 @@
 
       <!-- Filtros por Categoria de Nicho -->
       <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="niche-filter-pills">
-        <button type="button" class="niche-filter-btn active" onclick="setNicheFilter('all', this)" style="padding: 7px 14px; border-radius: 20px; border: 1px solid #26428B; background: #26428B; color: #FFF; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.15s;">Todos os Nichos</button>
+        <button type="button" class="niche-filter-btn active" onclick="setNicheFilter('all', this)" style="padding: 7px 14px; border-radius: 20px; border: 1px solid #1b3f8b; background: #1b3f8b; color: #FFF; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.15s;">Todos os Nichos</button>
         <button type="button" class="niche-filter-btn" onclick="setNicheFilter('atacadista', this)" style="padding: 7px 14px; border-radius: 20px; border: 1px solid #CBD5E1; background: #FFF; color: #475569; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.15s;">🏢 Atacadistas & Distribuidores</button>
         <button type="button" class="niche-filter-btn" onclick="setNicheFilter('concessionaria', this)" style="padding: 7px 14px; border-radius: 20px; border: 1px solid #CBD5E1; background: #FFF; color: #475569; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.15s;">🚗 Concessionárias & Veículos</button>
         <button type="button" class="niche-filter-btn" onclick="setNicheFilter('industria', this)" style="padding: 7px 14px; border-radius: 20px; border: 1px solid #CBD5E1; background: #FFF; color: #475569; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.15s;">🏭 Indústrias & Fabricantes</button>
@@ -559,10 +563,10 @@
     <div id="niches-grid" style="display: flex; flex-direction: column; gap: 20px;">
 
       <!-- CARD 1: ATACADISTAS & DISTRIBUIDORES -->
-      <div class="niche-card" data-category="atacadista" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-left: 6px solid #26428B; border-radius: 14px; padding: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.03);">
+      <div class="niche-card" data-category="atacadista" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-left: 6px solid #1b3f8b; border-radius: 14px; padding: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.03);">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 18px; flex-wrap: wrap;">
           <div>
-            <span style="font-size: 11px; font-weight: 800; color: #26428B; background: rgba(38,66,139,0.1); padding: 4px 10px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Nicho de Alto Volume</span>
+            <span style="font-size: 11px; font-weight: 800; color: #1b3f8b; background: rgba(27,63,139,0.1); padding: 4px 10px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Nicho de Alto Volume</span>
             <h3 style="font-size: 20px; font-weight: 800; color: #0F172A; margin: 8px 0 0 0; display: flex; align-items: center; gap: 8px;">
               🏢 Atacadistas & Distribuidores
             </h3>
@@ -1059,7 +1063,7 @@
         }
         .pill-green { background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0; }
         .pill-blue { background: #EFF6FF; color: #2563EB; border: 1px solid #BFDBFE; }
-        .pill-purple { background: #F5F3FF; color: #26428B; border: 1px solid #DDD6FE; }
+        .pill-purple { background: #F5F3FF; color: #1b3f8b; border: 1px solid #DDD6FE; }
         .pill-orange { background: #FFF7ED; color: #EA580C; border: 1px solid #FFEDD5; }
       </style>
 
@@ -1068,24 +1072,24 @@
         
         <!-- Row 1: KPI Dashboard -->
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
-          <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px; box-shadow: var(--shadow-sm); border-left: 5px solid #26428B;">
+          <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px; box-shadow: var(--shadow-sm); border-left: 5px solid #1b3f8b;">
             <span style="font-size: 11px; font-weight: 800; color: #64748B; text-transform: uppercase; font-family: 'Roboto', sans-serif;">CTR Médio (Meta/LinkedIn)</span>
-            <h4 style="margin: 6px 0 0 0; font-size: 26px; color: #0A1C2D; font-weight: 800; font-family: 'Outfit', sans-serif;">2.40%</h4>
+            <h4 style="margin: 6px 0 0 0; font-size: 26px; color: #0f1c38; font-weight: 800; font-family: 'Outfit', sans-serif;">2.40%</h4>
             <span style="font-size: 11px; color: #10B981; font-weight: 700;">▲ 0.4% acima da meta</span>
           </div>
           <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px; box-shadow: var(--shadow-sm); border-left: 5px solid #059669;">
             <span style="font-size: 11px; font-weight: 800; color: #64748B; text-transform: uppercase; font-family: 'Roboto', sans-serif;">Custo por Lead (CPL)</span>
-            <h4 style="margin: 6px 0 0 0; font-size: 26px; color: #0A1C2D; font-weight: 800; font-family: 'Outfit', sans-serif;">R$ 18.50</h4>
+            <h4 style="margin: 6px 0 0 0; font-size: 26px; color: #0f1c38; font-weight: 800; font-family: 'Outfit', sans-serif;">R$ 18.50</h4>
             <span style="font-size: 11px; color: #059669; font-weight: 700;">▼ Redução de 12% este mês</span>
           </div>
           <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px; box-shadow: var(--shadow-sm); border-left: 5px solid #EA580C;">
             <span style="font-size: 11px; font-weight: 800; color: #64748B; text-transform: uppercase; font-family: 'Roboto', sans-serif;">Custo por Clique (CPC)</span>
-            <h4 style="margin: 6px 0 0 0; font-size: 26px; color: #0A1C2D; font-weight: 800; font-family: 'Outfit', sans-serif;">R$ 4.20</h4>
+            <h4 style="margin: 6px 0 0 0; font-size: 26px; color: #0f1c38; font-weight: 800; font-family: 'Outfit', sans-serif;">R$ 4.20</h4>
             <span style="font-size: 11px; color: #64748B; font-weight: 600;">LinkedIn Ads corporativo</span>
           </div>
           <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px; box-shadow: var(--shadow-sm); border-left: 5px solid #3F77C1;">
             <span style="font-size: 11px; font-weight: 800; color: #64748B; text-transform: uppercase; font-family: 'Roboto', sans-serif;">ROAS Estimado</span>
-            <h4 style="margin: 6px 0 0 0; font-size: 26px; color: #0A1C2D; font-weight: 800; font-family: 'Outfit', sans-serif;">3.8x</h4>
+            <h4 style="margin: 6px 0 0 0; font-size: 26px; color: #0f1c38; font-weight: 800; font-family: 'Outfit', sans-serif;">3.8x</h4>
             <span style="font-size: 11px; color: #10B981; font-weight: 700;">▲ Retorno comercial alto</span>
           </div>
         </div>
@@ -1094,21 +1098,21 @@
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
           
           <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px; box-shadow: var(--shadow-sm);">
-            <h3 style="margin: 0 0 16px 0; font-size: 16px; color: #0A1C2D; font-weight: 800; font-family: 'Outfit', sans-serif; border-bottom: 1px solid #F1F5F9; padding-bottom: 10px;">👥 Distribuição de Canais e Orçamento</h3>
+            <h3 style="margin: 0 0 16px 0; font-size: 16px; color: #0f1c38; font-weight: 800; font-family: 'Outfit', sans-serif; border-bottom: 1px solid #F1F5F9; padding-bottom: 10px;">👥 Distribuição de Canais e Orçamento</h3>
             <div style="display: flex; flex-direction: column; gap: 14px;">
               <div>
-                <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; color: #0A1C2D; margin-bottom: 4px; font-family: 'Roboto', sans-serif;">
+                <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; color: #0f1c38; margin-bottom: 4px; font-family: 'Roboto', sans-serif;">
                   <span>Google Search (Fundo de Funil / Busca Intencional)</span>
                   <span>70%</span>
                 </div>
                 <div style="height: 6px; background: #E2E8F0; border-radius: 3px; overflow: hidden;">
-                  <div style="height: 100%; background: #26428B; width: 70%;"></div>
+                  <div style="height: 100%; background: #1b3f8b; width: 70%;"></div>
                 </div>
                 <span style="font-size: 11.5px; color: #64748B; display: block; margin-top: 4px; line-height: 1.4;">Foco: Capturar empresas e profissionais que já buscam ativamente por: Auditoria preventiva de SPED, Plataforma fiscal, Software de auditoria tributária, Correção e validação de arquivos SPED, Automação de processos fiscais, Sistema fiscal integrado ao ERP.</span>
               </div>
               
               <div>
-                <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; color: #0A1C2D; margin-bottom: 4px; font-family: 'Roboto', sans-serif;">
+                <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; color: #0f1c38; margin-bottom: 4px; font-family: 'Roboto', sans-serif;">
                   <span>Meta Ads (Atração, Educação e Remarketing)</span>
                   <span>20%</span>
                 </div>
@@ -1119,7 +1123,7 @@
               </div>
               
               <div>
-                <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; color: #0A1C2D; margin-bottom: 4px; font-family: 'Roboto', sans-serif;">
+                <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; color: #0f1c38; margin-bottom: 4px; font-family: 'Roboto', sans-serif;">
                   <span>LinkedIn Ads (Decisão B2B Enterprise)</span>
                   <span>10%</span>
                 </div>
@@ -1132,10 +1136,10 @@
           </div>
 
           <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px; box-shadow: var(--shadow-sm);">
-            <h3 style="margin: 0 0 16px 0; font-size: 16px; color: #0A1C2D; font-weight: 800; font-family: 'Outfit', sans-serif; border-bottom: 1px solid #F1F5F9; padding-bottom: 10px;">🎯 Públicos Personalizados Recomendados</h3>
+            <h3 style="margin: 0 0 16px 0; font-size: 16px; color: #0f1c38; font-weight: 800; font-family: 'Outfit', sans-serif; border-bottom: 1px solid #F1F5F9; padding-bottom: 10px;">🎯 Públicos Personalizados Recomendados</h3>
             <div style="display: flex; flex-direction: column; gap: 12px;">
               <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 12px; border-radius: 8px;">
-                <strong style="font-size: 13px; color: #26428B; display: block; font-family: 'Roboto', sans-serif;">1. Palavras-Chave de Alta Intenção (Google Search)</strong>
+                <strong style="font-size: 13px; color: #1b3f8b; display: block; font-family: 'Roboto', sans-serif;">1. Palavras-Chave de Alta Intenção (Google Search)</strong>
                 <span style="font-size: 12px; color: #475569; display: block; margin-top: 4px; line-height: 1.4;">Auditoria preventiva de SPED, Plataforma fiscal, Software de auditoria tributária, Correção e validação de arquivos SPED.</span>
               </div>
               <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 12px; border-radius: 8px;">
@@ -1153,26 +1157,26 @@
 
         <!-- Row 3: Banco de Criativos / Anúncios -->
         <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 16px; padding: 28px; box-shadow: var(--shadow-sm); margin-bottom: 12px;">
-          <h3 style="margin: 0 0 6px 0; font-size: 18px; color: #0A1C2D; font-weight: 800; font-family: 'Outfit', sans-serif;">📣 Idéias e Criativos para Anúncios (Funil de Vendas)</h3>
+          <h3 style="margin: 0 0 6px 0; font-size: 18px; color: #0f1c38; font-weight: 800; font-family: 'Outfit', sans-serif;">📣 Idéias e Criativos para Anúncios (Funil de Vendas)</h3>
           <p style="margin: 0 0 20px 0; font-size: 13px; color: #64748B; font-family: 'Poppins', sans-serif;">Estes criativos visam preencher o topo e meio do funil de tráfego, educando e capturando leads qualificados:</p>
           
           <div style="display: flex; flex-direction: column; gap: 14px;">
             
             <!-- Criativo 1 -->
             <details style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px;" class="campaign-accordion">
-              <summary style="padding: 16px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; list-style: none; font-family: 'Outfit', sans-serif; font-weight: 800; color: #0A1C2D;">
+              <summary style="padding: 16px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; list-style: none; font-family: 'Outfit', sans-serif; font-weight: 800; color: #0f1c38;">
                 <div style="display: flex; align-items: center; gap: 8px;">
-                  <span style="background: rgba(38,66,139,0.1); color: #26428B; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 800;">TOPO</span>
+                  <span style="background: rgba(27,63,139,0.1); color: #1b3f8b; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 800;">TOPO</span>
                   <span>1. Vídeo: A Dor do Fechamento Fiscal Manual (Foco Produtividade)</span>
                 </div>
                 <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
               </summary>
               <div style="padding: 20px; border-top: 1px solid #E2E8F0; font-family: 'Poppins', sans-serif;">
-                <strong style="font-size: 12px; color: #26428B; text-transform: uppercase;">Visual & Roteiro Recomendado:</strong>
+                <strong style="font-size: 12px; color: #1b3f8b; text-transform: uppercase;">Visual & Roteiro Recomendado:</strong>
                 <p style="margin: 4px 0 12px 0; font-size: 13px; color: #475569; line-height: 1.5;">O vídeo inicia mostrando uma planilha de Excel travada ou um analista desesperado digitando dados. Em seguida, a transição exibe a tela do SAAM auditando e cruzando 10.000 notas em segundos com cliques simples.</p>
                 
-                <strong style="font-size: 12px; color: #26428B; text-transform: uppercase;">Copy do Anúncio (Legenda):</strong>
-                <div style="background: #FFFFFF; padding: 12px; border-radius: 6px; border-left: 3px solid #26428B; margin-top: 4px; font-size: 13px; color: #033059; font-style: italic; line-height: 1.5;">
+                <strong style="font-size: 12px; color: #1b3f8b; text-transform: uppercase;">Copy do Anúncio (Legenda):</strong>
+                <div style="background: #FFFFFF; padding: 12px; border-radius: 6px; border-left: 3px solid #1b3f8b; margin-top: 4px; font-size: 13px; color: #1b3f8b; font-style: italic; line-height: 1.5;">
                   "Sua equipe perde dias fazendo conferência fiscal de XML e SPED na mão? O erro manual custa caro. Com o SAAM, você faz o cruzamento preventivo de obrigações em segundos e garante conformidade sem estresse. Diga adeus às planilhas lentas. Teste agora gratuitamente!"
                 </div>
                 <strong style="display: block; margin-top: 12px; font-size: 12px; color: #64748B;">CTA Recomendado: Saiba Mais / Teste Grátis</strong>
@@ -1181,7 +1185,7 @@
 
             <!-- Criativo 2 -->
             <details style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px;" class="campaign-accordion">
-              <summary style="padding: 16px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; list-style: none; font-family: 'Outfit', sans-serif; font-weight: 800; color: #0A1C2D;">
+              <summary style="padding: 16px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; list-style: none; font-family: 'Outfit', sans-serif; font-weight: 800; color: #0f1c38;">
                 <div style="display: flex; align-items: center; gap: 8px;">
                   <span style="background: rgba(234,88,12,0.1); color: #EA580C; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 800;">MEIO</span>
                   <span>2. Carrossel: Como a Reforma Tributária afeta o seu ERP? (Foco Técnico)</span>
@@ -1202,7 +1206,7 @@
 
             <!-- Criativo 3 -->
             <details style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px;" class="campaign-accordion">
-              <summary style="padding: 16px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; list-style: none; font-family: 'Outfit', sans-serif; font-weight: 800; color: #0A1C2D;">
+              <summary style="padding: 16px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; list-style: none; font-family: 'Outfit', sans-serif; font-weight: 800; color: #0f1c38;">
                 <div style="display: flex; align-items: center; gap: 8px;">
                   <span style="background: rgba(5,150,105,0.1); color: #059669; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 800;">FUNDO</span>
                   <span>3. Banner: Estudo de Caso de ROI - 85% de tempo economizado (Social Proof)</span>
@@ -1226,7 +1230,7 @@
 
         <!-- BENCHMARKING & COMPETITOR ANALYSIS SECTION -->
         <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 16px; padding: 28px; box-shadow: var(--shadow-sm); margin-top: 24px;">
-          <h3 style="margin: 0 0 6px 0; font-size: 18px; color: #0A1C2D; font-weight: 800; font-family: 'Outfit', sans-serif;">🕵️ Benchmarking & Análise de Concorrência</h3>
+          <h3 style="margin: 0 0 6px 0; font-size: 18px; color: #0f1c38; font-weight: 800; font-family: 'Outfit', sans-serif;">🕵️ Benchmarking & Análise de Concorrência</h3>
           <p style="margin: 0 0 24px 0; font-size: 13.5px; color: #64748B; font-family: 'Poppins', sans-serif;">Mapeamento dos principais concorrentes do mercado e seus posicionamentos públicos. Utilize as áreas de anexo para colar prints de anúncios e feeds de cada concorrente para inspirar novos criativos.</p>
           
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
@@ -1236,14 +1240,14 @@
               <div>
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #F1F5F9; padding-bottom: 12px; margin-bottom: 12px;">
                   <div>
-                    <h4 style="margin: 0; font-size: 16px; color: #0A1C2D; font-weight: 800; font-family: 'Outfit', sans-serif;">1. e-Auditoria</h4>
+                    <h4 style="margin: 0; font-size: 16px; color: #0f1c38; font-weight: 800; font-family: 'Outfit', sans-serif;">1. e-Auditoria</h4>
                     <span style="font-size: 11px; color: #64748B; font-family: 'Poppins', sans-serif;">Escritórios e Consultorias Contábeis</span>
                   </div>
                   <span class="pill-badge" style="background: #FFEBEB; color: #EF4444; border: 1px solid #FCA5A5; font-size: 10px; font-weight: 800;">Muito Alto</span>
                 </div>
                 <div style="font-size: 12.5px; font-family: 'Poppins', sans-serif; color: #475569; display: flex; flex-direction: column; gap: 10px;">
                   <div>
-                    <strong style="color: #0A1C2D; font-family: 'Outfit', sans-serif; display: block; margin-bottom: 2px;">📍 Posicionamento Central</strong>
+                    <strong style="color: #0f1c38; font-family: 'Outfit', sans-serif; display: block; margin-bottom: 2px;">📍 Posicionamento Central</strong>
                     <span style="font-style: italic; color: #64748B;">"Transformar o contador em um profissional mais estratégico, capaz de identificar riscos e oportunidades."</span>
                   </div>
                   <div>
@@ -1268,14 +1272,14 @@
               <div>
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #F1F5F9; padding-bottom: 12px; margin-bottom: 12px;">
                   <div>
-                    <h4 style="margin: 0; font-size: 16px; color: #0A1C2D; font-weight: 800; font-family: 'Outfit', sans-serif;">2. IOB Auditor</h4>
+                    <h4 style="margin: 0; font-size: 16px; color: #0f1c38; font-weight: 800; font-family: 'Outfit', sans-serif;">2. IOB Auditor</h4>
                     <span style="font-size: 11px; color: #64748B; font-family: 'Poppins', sans-serif;">Escritórios e Departamentos Fiscais</span>
                   </div>
                   <span class="pill-badge" style="background: #FFF7ED; color: #EA580C; border: 1px solid #FDBA74; font-size: 10px; font-weight: 800;">Alto</span>
                 </div>
                 <div style="font-size: 12.5px; font-family: 'Poppins', sans-serif; color: #475569; display: flex; flex-direction: column; gap: 10px;">
                   <div>
-                    <strong style="color: #0A1C2D; font-family: 'Outfit', sans-serif; display: block; margin-bottom: 2px;">📍 Posicionamento Central</strong>
+                    <strong style="color: #0f1c38; font-family: 'Outfit', sans-serif; display: block; margin-bottom: 2px;">📍 Posicionamento Central</strong>
                     <span style="font-style: italic; color: #64748B;">"Auditoria total com mais de 5.000 regras para segurança fiscal e proteção jurídica."</span>
                   </div>
                   <div>
@@ -1300,14 +1304,14 @@
               <div>
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #F1F5F9; padding-bottom: 12px; margin-bottom: 12px;">
                   <div>
-                    <h4 style="margin: 0; font-size: 16px; color: #0A1C2D; font-weight: 800; font-family: 'Outfit', sans-serif;">3. Synchro</h4>
+                    <h4 style="margin: 0; font-size: 16px; color: #0f1c38; font-weight: 800; font-family: 'Outfit', sans-serif;">3. Synchro</h4>
                     <span style="font-size: 11px; color: #64748B; font-family: 'Poppins', sans-serif;">Grandes Corporações (Enterprise)</span>
                   </div>
                   <span class="pill-badge" style="background: #EFF6FF; color: #2563EB; border: 1px solid #93C5FD; font-size: 10px; font-weight: 800;">Enterprise</span>
                 </div>
                 <div style="font-size: 12.5px; font-family: 'Poppins', sans-serif; color: #475569; display: flex; flex-direction: column; gap: 10px;">
                   <div>
-                    <strong style="color: #0A1C2D; font-family: 'Outfit', sans-serif; display: block; margin-bottom: 2px;">📍 Posicionamento Central</strong>
+                    <strong style="color: #0f1c38; font-family: 'Outfit', sans-serif; display: block; margin-bottom: 2px;">📍 Posicionamento Central</strong>
                     <span style="font-style: italic; color: #64748B;">"Compliance tributário robusto de ponta a ponta e integração profunda com ERPs."</span>
                   </div>
                   <div>
@@ -1332,14 +1336,14 @@
               <div>
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #F1F5F9; padding-bottom: 12px; margin-bottom: 12px;">
                   <div>
-                    <h4 style="margin: 0; font-size: 16px; color: #0A1C2D; font-weight: 800; font-family: 'Outfit', sans-serif;">4. Sovos Taxverify</h4>
+                    <h4 style="margin: 0; font-size: 16px; color: #0f1c38; font-weight: 800; font-family: 'Outfit', sans-serif;">4. Sovos Taxverify</h4>
                     <span style="font-size: 11px; color: #64748B; font-family: 'Poppins', sans-serif;">CFOs, Diretores e TI (Enterprise)</span>
                   </div>
                   <span class="pill-badge" style="background: #EFF6FF; color: #2563EB; border: 1px solid #93C5FD; font-size: 10px; font-weight: 800;">Enterprise</span>
                 </div>
                 <div style="font-size: 12.5px; font-family: 'Poppins', sans-serif; color: #475569; display: flex; flex-direction: column; gap: 10px;">
                   <div>
-                    <strong style="color: #0A1C2D; font-family: 'Outfit', sans-serif; display: block; margin-bottom: 2px;">📍 Posicionamento Central</strong>
+                    <strong style="color: #0f1c38; font-family: 'Outfit', sans-serif; display: block; margin-bottom: 2px;">📍 Posicionamento Central</strong>
                     <span style="font-style: italic; color: #64748B;">"Auditoria digital baseada em nuvem, controle de riscos e notas de exposição fiscal (A a F)."</span>
                   </div>
                   <div>
@@ -1364,14 +1368,14 @@
               <div>
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #F1F5F9; padding-bottom: 12px; margin-bottom: 12px;">
                   <div>
-                    <h4 style="margin: 0; font-size: 16px; color: #0A1C2D; font-weight: 800; font-family: 'Outfit', sans-serif;">5. ONESOURCE</h4>
+                    <h4 style="margin: 0; font-size: 16px; color: #0f1c38; font-weight: 800; font-family: 'Outfit', sans-serif;">5. ONESOURCE</h4>
                     <span style="font-size: 11px; color: #64748B; font-family: 'Poppins', sans-serif;">Grandes Corporações Globais</span>
                   </div>
                   <span class="pill-badge" style="background: #EFF6FF; color: #2563EB; border: 1px solid #93C5FD; font-size: 10px; font-weight: 800;">Enterprise</span>
                 </div>
                 <div style="font-size: 12.5px; font-family: 'Poppins', sans-serif; color: #475569; display: flex; flex-direction: column; gap: 10px;">
                   <div>
-                    <strong style="color: #0A1C2D; font-family: 'Outfit', sans-serif; display: block; margin-bottom: 2px;">📍 Posicionamento Central</strong>
+                    <strong style="color: #0f1c38; font-family: 'Outfit', sans-serif; display: block; margin-bottom: 2px;">📍 Posicionamento Central</strong>
                     <span style="font-style: italic; color: #64748B;">"Ecossistema global de compliance fiscal, segurança jurídica corporativa e auditoria analítica."</span>
                   </div>
                   <div>
@@ -1396,14 +1400,14 @@
               <div>
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #F1F5F9; padding-bottom: 12px; margin-bottom: 12px;">
                   <div>
-                    <h4 style="margin: 0; font-size: 16px; color: #0A1C2D; font-weight: 800; font-family: 'Outfit', sans-serif;">6. Sittax</h4>
+                    <h4 style="margin: 0; font-size: 16px; color: #0f1c38; font-weight: 800; font-family: 'Outfit', sans-serif;">6. Sittax</h4>
                     <span style="font-size: 11px; color: #64748B; font-family: 'Poppins', sans-serif;">Escritórios Contábeis / PMEs</span>
                   </div>
                   <span class="pill-badge" style="background: #F3F4F6; color: #4B5563; border: 1px solid #D1D5DB; font-size: 10px; font-weight: 800;">Médio/Alto</span>
                 </div>
                 <div style="font-size: 12.5px; font-family: 'Poppins', sans-serif; color: #475569; display: flex; flex-direction: column; gap: 10px;">
                   <div>
-                    <strong style="color: #0A1C2D; font-family: 'Outfit', sans-serif; display: block; margin-bottom: 2px;">📍 Posicionamento Central</strong>
+                    <strong style="color: #0f1c38; font-family: 'Outfit', sans-serif; display: block; margin-bottom: 2px;">📍 Posicionamento Central</strong>
                     <span style="font-style: italic; color: #64748B;">"Plataforma modular para Simples Nacional, redução de apuração manual e aumento de lucros."</span>
                   </div>
                   <div>
@@ -1799,17 +1803,17 @@
       <!-- Hiding monthly playbooks on Campaigns page to centralize them exclusively in Ideas Bank -->
       <div style="display: none;">
         <!-- CARD GUIA: GUIA DE POSICIONAMENTO E MARCA SAAM -->
-        <details open style="background: var(--bg); border: 1px solid var(--hairline); border-radius: 16px; border-left: 6px solid #26428B; margin-bottom: 24px; overflow: hidden; box-shadow: var(--shadow-md);" class="campaign-accordion">
+        <details open style="background: var(--bg); border: 1px solid var(--hairline); border-radius: 16px; border-left: 6px solid #1b3f8b; margin-bottom: 24px; overflow: hidden; box-shadow: var(--shadow-md);" class="campaign-accordion">
         <summary style="padding: 24px 28px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; list-style: none; outline: none; background: #FFFFFF;">
           <div>
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
-              <span class="pill-badge" style="background: rgba(38, 66, 139,0.2); color: #DAEDF4; border: 1px solid #26428B; margin-bottom: 8px;">📘 CARD GUIA MESTRE</span>
+              <span class="pill-badge" style="background: rgba(27, 63, 139,0.2); color: #DAEDF4; border: 1px solid #1b3f8b; margin-bottom: 8px;">📘 CARD GUIA MESTRE</span>
               <span style="font-size: 12px; font-weight: 700; color: var(--ink-soft);">GUIA DE POSICIONAMENTO & MARCA SAAM</span>
             </div>
             <h3 style="color: #0F172A; margin: 0; font-size: 24px; font-weight: 800; font-family: 'Manrope', sans-serif;">A ESSÊNCIA DA SAAM & BIBLIOTECA MESTRE FISCAL</h3>
           </div>
           <div style="display: flex; align-items: center; gap: 14px;">
-            <span style="background: #26428B; color: #FFF; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 800; letter-spacing: 0.5px;">GUIA PERMANENTE DE MARCA</span>
+            <span style="background: #1b3f8b; color: #FFF; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 800; letter-spacing: 0.5px;">GUIA PERMANENTE DE MARCA</span>
             <svg class="chevron" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
         </summary>
@@ -1834,7 +1838,7 @@
           <div style="background: #FFFFFF; border: 1px solid var(--hairline); padding: 24px; border-radius: 16px; margin-bottom: 28px; box-shadow: var(--shadow-sm);">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
               <h4 style="margin: 0; font-size: 18px; font-weight: 800; color: #0F172A;">📖 CAPÍTULO 1 — A Essência da SAAM (11 Pilares de Posicionamento)</h4>
-              <span class="pill-badge" style="background: rgba(38, 66, 139,0.2); color: #DAEDF4; border: 1px solid #26428B; margin-bottom: 8px;">Identidade Inabalável</span>
+              <span class="pill-badge" style="background: rgba(27, 63, 139,0.2); color: #DAEDF4; border: 1px solid #1b3f8b; margin-bottom: 8px;">Identidade Inabalável</span>
             </div>
             
             <div class="playbook-grid-2">
@@ -1915,7 +1919,7 @@
           <div style="background: #FFFFFF; border: 1px solid var(--hairline); padding: 24px; border-radius: 16px; margin-bottom: 10px; box-shadow: var(--shadow-sm);">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
               <h4 style="margin: 0; font-size: 18px; font-weight: 800; color: #0F172A;">📚 A Biblioteca Mestre do Universo Fiscal (10 Áreas de Conhecimento)</h4>
-              <span class="pill-badge" style="background: rgba(38, 66, 139,0.2); color: #DAEDF4; border: 1px solid #26428B; margin-bottom: 8px;">Combustível Permanente de Conteúdo</span>
+              <span class="pill-badge" style="background: rgba(27, 63, 139,0.2); color: #DAEDF4; border: 1px solid #1b3f8b; margin-bottom: 8px;">Combustível Permanente de Conteúdo</span>
             </div>
             
             <div class="playbook-grid-2">
@@ -1926,7 +1930,7 @@
               </div>
 
               <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 14px; border-radius: 10px;">
-                <strong style="color: #26428B; font-size: 13.5px; display: block; margin-bottom: 4px;">2. SPED (Escrituração Digital)</strong>
+                <strong style="color: #1b3f8b; font-size: 13.5px; display: block; margin-bottom: 4px;">2. SPED (Escrituração Digital)</strong>
                 <span style="font-size: 12px; color: #64748B; line-height: 1.4; display: block;">EFD ICMS/IPI, EFD Contribuições, ECD, ECF, PVA, Cruzamentos e Erros Semânticos Recorrentes.</span>
               </div>
 
@@ -1961,7 +1965,7 @@
               </div>
 
               <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 14px; border-radius: 10px;">
-                <strong style="color: #26428B; font-size: 13.5px; display: block; margin-bottom: 4px;">9. Eficiência & Produtividade</strong>
+                <strong style="color: #1b3f8b; font-size: 13.5px; display: block; margin-bottom: 4px;">9. Eficiência & Produtividade</strong>
                 <span style="font-size: 12px; color: #64748B; line-height: 1.4; display: block;">Eliminação de retrabalho, gestão de tempo da equipe, padronização de checklists e fluxos.</span>
               </div>
 
@@ -1981,7 +1985,7 @@
         <summary style="padding: 24px 28px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; list-style: none; outline: none; background: #FFFFFF;">
           <div>
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
-              <span class="pill-badge" style="background: rgba(38, 66, 139,0.2); color: #DAEDF4; border: 1px solid #26428B; margin-bottom: 8px;">🟢 Campanha do Mês (Ativa)</span>
+              <span class="pill-badge" style="background: rgba(27, 63, 139,0.2); color: #DAEDF4; border: 1px solid #1b3f8b; margin-bottom: 8px;">🟢 Campanha do Mês (Ativa)</span>
               <span style="font-size: 12px; font-weight: 700; color: var(--ink-soft);">GUIA EDITORIAL DE MARCA SAAM</span>
             </div>
             <h3 style="color: #0F172A; margin: 0; font-size: 24px; font-weight: 800; font-family: 'Manrope', sans-serif;">AGOSTO 2026: O FUTURO DO FISCAL JÁ COMEÇOU</h3>
@@ -2037,14 +2041,14 @@
           <div style="margin-bottom: 28px;">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
               <h4 style="margin: 0; font-size: 16px; font-weight: 800; color: #0F172A;">🎯 Os 3 Públicos (Cada conteúdo nasce com um destino claro)</h4>
-              <span class="pill-badge" style="background: rgba(38, 66, 139,0.2); color: #DAEDF4; border: 1px solid #26428B; margin-bottom: 8px;">Segmentação Estratégica</span>
+              <span class="pill-badge" style="background: rgba(27, 63, 139,0.2); color: #DAEDF4; border: 1px solid #1b3f8b; margin-bottom: 8px;">Segmentação Estratégica</span>
             </div>
             <div class="playbook-grid-3">
               
               <div class="guia-brand-card">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
                   <strong style="color: #1E40AF; font-size: 14px;">① LEAD FRIO</strong>
-                  <span class="pill-badge" style="background: rgba(38, 66, 139,0.2); color: #DAEDF4; border: 1px solid #26428B; margin-bottom: 8px;">Topo de Funil</span>
+                  <span class="pill-badge" style="background: rgba(27, 63, 139,0.2); color: #DAEDF4; border: 1px solid #1b3f8b; margin-bottom: 8px;">Topo de Funil</span>
                 </div>
                 <p style="font-size: 12px; color: var(--ink-soft); margin: 0 0 10px 0;">Nunca ouviu falar da SAAM. Não compra software, compra <strong>conhecimento</strong>.</p>
                 <div style="background: #F1F5F9; padding: 10px; border-radius: 8px; font-size: 12px; margin-bottom: 8px;">
@@ -2058,7 +2062,7 @@
               <div class="guia-brand-card">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
                   <strong style="color: #5B21B6; font-size: 14px;">② LEAD QUENTE</strong>
-                  <span class="pill-badge" style="background: rgba(38, 66, 139,0.2); color: #DAEDF4; border: 1px solid #26428B; margin-bottom: 8px;">Meio de Funil</span>
+                  <span class="pill-badge" style="background: rgba(27, 63, 139,0.2); color: #DAEDF4; border: 1px solid #1b3f8b; margin-bottom: 8px;">Meio de Funil</span>
                 </div>
                 <p style="font-size: 12px; color: var(--ink-soft); margin: 0 0 10px 0;">Já acompanha a SAAM e pesquisa soluções. Busca <strong>profundidade</strong>.</p>
                 <div style="background: #F5F3FF; padding: 10px; border-radius: 8px; font-size: 12px; margin-bottom: 8px;">
@@ -2066,13 +2070,13 @@
                 </div>
                 <strong style="font-size: 11.5px; color: #334155; display: block; margin-bottom: 4px;">Séries Indicadas:</strong>
                 <span style="font-size: 11.5px; color: #64748B;">Análises, ERP x Auditoria, APIs, Checklists da Reforma, Guias de SPED/XML.</span>
-                <div style="margin-top: 10px; font-size: 11.5px; font-weight: 700; color: #26428B;">Saída esperada: "Eles dominam a técnica!"</div>
+                <div style="margin-top: 10px; font-size: 11.5px; font-weight: 700; color: #1b3f8b;">Saída esperada: "Eles dominam a técnica!"</div>
               </div>
 
               <div class="guia-brand-card">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
                   <strong style="color: #065F46; font-size: 14px;">③ CLIENTE BASE</strong>
-                  <span class="pill-badge" style="background: rgba(38, 66, 139,0.2); color: #DAEDF4; border: 1px solid #26428B; margin-bottom: 8px;">Retenção & Orgulho</span>
+                  <span class="pill-badge" style="background: rgba(27, 63, 139,0.2); color: #DAEDF4; border: 1px solid #1b3f8b; margin-bottom: 8px;">Retenção & Orgulho</span>
                 </div>
                 <p style="font-size: 12px; color: var(--ink-soft); margin: 0 0 10px 0;">O público mais negligenciado. Não quer propaganda, quer <strong>evoluir</strong>.</p>
                 <div style="background: #ECFDF5; padding: 10px; border-radius: 8px; font-size: 12px; margin-bottom: 8px;">
@@ -2090,7 +2094,7 @@
           <div style="background: #FFFFFF; border: 1px solid var(--hairline); padding: 24px; border-radius: 16px; margin-bottom: 28px; box-shadow: var(--shadow-sm);">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
               <h4 style="margin: 0; font-size: 16px; font-weight: 800; color: #0F172A;">🌟 A Propriedade Intelectual Exclusiva: ÍNDICE DE MATURIDADE FISCAL SAAM</h4>
-              <span class="pill-badge" style="background: rgba(38, 66, 139,0.2); color: #DAEDF4; border: 1px solid #26428B; margin-bottom: 8px;">Framework Próprio da Marca</span>
+              <span class="pill-badge" style="background: rgba(27, 63, 139,0.2); color: #DAEDF4; border: 1px solid #1b3f8b; margin-bottom: 8px;">Framework Próprio da Marca</span>
             </div>
             <p style="font-size: 13px; color: var(--ink-soft); margin: 0 0 16px 0;">
               Todo conteúdo de agosto provocará o público com a pergunta: <strong>"Em qual nível de maturidade fiscal sua empresa está hoje?"</strong>
@@ -2169,7 +2173,7 @@
                 <span>Segunda-feira: Notícias e novidades comentadas com visão crítica.</span>
               </div>
               <div style="background: #FFF; border: 1px solid var(--hairline); padding: 12px; border-radius: 8px; font-size: 12px;">
-                <strong style="color: #26428B; display: block; margin-bottom: 2px;">🧩 Fiscal ou Ficção?</strong>
+                <strong style="color: #1b3f8b; display: block; margin-bottom: 2px;">🧩 Fiscal ou Ficção?</strong>
                 <span>Quarta/Sexta: Quebrando os mitos clássicos do mercado fiscal.</span>
               </div>
               <div style="background: #FFF; border: 1px solid var(--hairline); padding: 12px; border-radius: 8px; font-size: 12px;">
@@ -2602,17 +2606,17 @@
         </div>
       </details>
 
-        <details style="background: var(--bg); border: 1px solid var(--hairline); border-radius: 16px; border-left: 6px solid #26428B; margin-bottom: 24px; overflow: hidden; box-shadow: var(--shadow-sm);" class="campaign-accordion" open>
+        <details style="background: var(--bg); border: 1px solid var(--hairline); border-radius: 16px; border-left: 6px solid #1b3f8b; margin-bottom: 24px; overflow: hidden; box-shadow: var(--shadow-sm);" class="campaign-accordion" open>
         <summary style="padding: 24px 28px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; list-style: none; outline: none; background: #FFFFFF;">
           <div>
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
-              <span class="pill-badge" style="background: rgba(38,66,139,0.12); color: #26428B; border: 1px solid #26428B; margin-bottom: 8px;">🔵 Temporada 4</span>
+              <span class="pill-badge" style="background: rgba(27,63,139,0.12); color: #1b3f8b; border: 1px solid #1b3f8b; margin-bottom: 8px;">🔵 Temporada 4</span>
               <span style="font-size: 12px; font-weight: 700; color: var(--ink-soft);">GUIA EDITORIAL DE MARCA SAAM</span>
             </div>
             <h3 style="color: #0F172A; margin: 0; font-size: 24px; font-weight: 800; font-family: 'Outfit', 'Agrandir', sans-serif;">NOVEMBRO 2026: O FISCAL QUE ANTECIPA O FUTURO</h3>
           </div>
           <div style="display: flex; align-items: center; gap: 14px;">
-            <span style="background: #26428B; color: #FFF; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 800; letter-spacing: 0.5px;">PREVENÇÃO & GOVERNANÇA</span>
+            <span style="background: #1b3f8b; color: #FFF; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 800; letter-spacing: 0.5px;">PREVENÇÃO & GOVERNANÇA</span>
             <svg class="chevron" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
         </summary>
@@ -2703,17 +2707,17 @@
           </div>
         </details>
 
-        <details style="background: var(--bg); border: 1px solid var(--hairline); border-radius: 16px; border-left: 6px solid #033059; margin-bottom: 24px; overflow: hidden; box-shadow: var(--shadow-sm);" class="campaign-accordion" open>
+        <details style="background: var(--bg); border: 1px solid var(--hairline); border-radius: 16px; border-left: 6px solid #1b3f8b; margin-bottom: 24px; overflow: hidden; box-shadow: var(--shadow-sm);" class="campaign-accordion" open>
         <summary style="padding: 24px 28px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; list-style: none; outline: none; background: #FFFFFF;">
           <div>
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
-              <span class="pill-badge" style="background: rgba(3,48,89,0.12); color: #033059; border: 1px solid #033059; margin-bottom: 8px;">🔘 Temporada 5</span>
+              <span class="pill-badge" style="background: rgba(3,48,89,0.12); color: #1b3f8b; border: 1px solid #1b3f8b; margin-bottom: 8px;">🔘 Temporada 5</span>
               <span style="font-size: 12px; font-weight: 700; color: var(--ink-soft);">GUIA EDITORIAL DE MARCA SAAM</span>
             </div>
             <h3 style="color: #0F172A; margin: 0; font-size: 24px; font-weight: 800; font-family: 'Outfit', 'Agrandir', sans-serif;">DEZEMBRO 2026: O ANO EM QUE O FISCAL DECIDE O FUTURO</h3>
           </div>
           <div style="display: flex; align-items: center; gap: 14px;">
-            <span style="background: #033059; color: #FFF; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 800; letter-spacing: 0.5px;">RETROSPECTIVA & PLANO 2027</span>
+            <span style="background: #1b3f8b; color: #FFF; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 800; letter-spacing: 0.5px;">RETROSPECTIVA & PLANO 2027</span>
             <svg class="chevron" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
         </summary>
@@ -2835,7 +2839,7 @@
 </div>
 
 
-<script src="app.js?v=99"></script>
+<script src="app.js?v=100"></script>
 <script src="projects.js?v=15"></script>
 <div id="toast-container" class="toast-container"></div>
 </body>

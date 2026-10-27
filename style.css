@@ -11,27 +11,28 @@
   100% { background-position: 200% 0; }
 }
 @keyframes pulseGlow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(38, 66, 139,0.25); }
-  50% { box-shadow: 0 0 0 8px rgba(38, 66, 139,0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(27, 63, 139,0.25); }
+  50% { box-shadow: 0 0 0 8px rgba(27, 63, 139,0); }
 }
 
 :root {
-  --bg: #F8F6F7; /* Branco acinzentado */
-  --bg-subtle: #FFFBF7; /* Branco quente */
-  --panel: #FFFFFF;
-  --ink: #0A1C2D; /* Azul-marinho profundo */
-  --ink-soft: #26428B; /* Azul corporativo */
-  --ink-faint: #3F77C1; /* Azul médio */
-  --hairline: #DAEDF4; /* Azul-claro de apoio */
-  --hairline-soft: #F0F4FA;
+  /* Identidade visual SAAM Auditoria (mesma do informativo mensal) */
+  --bg: #f7f9fc; /* Fundo */
+  --bg-subtle: #f7f9fc;
+  --panel: #FFFFFF; /* Superfície */
+  --ink: #0f1c38; /* Texto principal */
+  --ink-soft: #6b7a99; /* Texto de apoio */
+  --ink-faint: #8a97b3;
+  --hairline: #e2e8f4; /* Bordas */
+  --hairline-soft: #eef3ff;
 
-  /* Primary — Azul corporativo */
-  --primary: #26428B; 
-  --primary-dark: #033059; /* Azul tecnológico */
-  --primary-darker: #101B3B; /* Azul institucional */
-  --primary-soft: #DAEDF4; 
-  --primary-soft-2: #FBECD7; /* Bege suave */
-  --primary-glow: rgba(38,66,139,0.12);
+  /* Primary — Azul institucional SAAM */
+  --primary: #1b3f8b;
+  --primary-dark: #2251b8; /* Hover */
+  --primary-darker: #0f1c38;
+  --primary-soft: #eef3ff;
+  --primary-soft-2: #d6e4fb;
+  --primary-glow: rgba(27,63,139,0.12);
 
   /* Accent colours */
   --emerald: #10B981;
@@ -44,8 +45,8 @@
   --sky-soft: #DAEDF4;
   --orange: #F59E0B;
   --orange-soft: #FFFBEB;
-  --violet: #26428B;
-  --violet-soft: #F5F3FF;
+  --violet: #1b3f8b;
+  --violet-soft: #eef3ff;
   --teal: #14B8A6;
   --teal-soft: #F0FDFA;
 
@@ -55,7 +56,7 @@
   --shadow-md: 0 4px 6px -1px rgba(10,28,45,0.07), 0 2px 4px -2px rgba(10,28,45,0.05);
   --shadow-lg: 0 10px 15px -3px rgba(10,28,45,0.08), 0 4px 6px -4px rgba(10,28,45,0.05);
   --shadow-xl: 0 20px 25px -5px rgba(10,28,45,0.1), 0 8px 10px -6px rgba(10,28,45,0.06);
-  --shadow-glow: 0 0 20px rgba(38,66,139,0.15);
+  --shadow-glow: 0 0 20px rgba(27,63,139,0.15);
 
   --radius-xl: 20px;
   --radius-lg: 16px;
@@ -69,7 +70,7 @@
   --c-aprovado: #10B981;
   --c-agendado: #3F77C1;
   --c-reprovado: #F43F5E;
-  --c-publicado: #26428B;
+  --c-publicado: #1b3f8b;
 
   /* Legacy aliases */
   --blue: var(--primary);
@@ -84,7 +85,7 @@ html, body { margin: 0; padding: 0; }
 body {
   background: var(--bg);
   color: var(--ink);
-  font-family: 'Poppins', 'Inter', -apple-system, sans-serif;
+  font-family: 'Inter', -apple-system, sans-serif;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -101,9 +102,9 @@ img { max-width: 100%; display: block; }
   position: sticky;
   top: 0;
   z-index: 90;
-  background: rgba(248, 246, 247, 0.94);
+  background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid #E2E8F0;
+  border-bottom: 1px solid var(--hairline);
 }
 .topbar-inner {
   max-width: 1440px;
@@ -120,13 +121,10 @@ img { max-width: 100%; display: block; }
   border: none;
   padding: 0;
   cursor: pointer;
-  font-family: 'Outfit', sans-serif;
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--ink);
   white-space: nowrap;
 }
-.topbar-brand span { font-weight: 600; color: #64748B; }
+.topbar-name { font-size: 17px; font-weight: 700; color: var(--ink); }
+.topbar-name span { font-weight: 600; color: var(--primary); }
 .topbar-nav { display: flex; align-items: center; gap: 4px; }
 .topbar-link {
   display: flex;
@@ -144,7 +142,7 @@ img { max-width: 100%; display: block; }
   transition: background 0.15s ease, color 0.15s ease;
 }
 .topbar-link:hover { background: var(--primary-soft); color: var(--ink); }
-.topbar-link.active { background: var(--ink); color: #FFFFFF; }
+.topbar-link.active { background: var(--primary); color: #FFFFFF; }
 .topbar-link svg { flex-shrink: 0; }
 .topbar-sync {
   display: flex;
@@ -185,46 +183,54 @@ img { max-width: 100%; display: block; }
 }
 
 /* ============ Hero Banner ============ */
+/* Topo do Início no padrão do informativo SAAM: fundo claro, título escuro com destaque azul */
 .hero {
   position: relative;
   overflow: hidden;
-  border-radius: 24px;
-  padding: 56px 40px 64px;
-  background: linear-gradient(135deg, #0A1C2D 0%, var(--primary-dark) 50%, var(--primary) 100%);
-  color: #ffffff;
-  margin-bottom: 32px;
-  box-shadow: var(--shadow-xl), 0 0 60px rgba(38,66,139,0.15);
+  border-radius: 16px;
+  padding: 40px;
+  background: var(--panel);
+  border: 1px solid var(--hairline);
+  color: var(--ink);
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
   display: flex;
-  flex-direction: column;
   align-items: center;
-  text-align: center;
+  justify-content: space-between;
+  gap: 32px;
   animation: fadeInUp 0.6s ease-out;
 }
-.hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at 20% 80%, rgba(255,255,255,0.08) 0%, transparent 60%),
-              radial-gradient(ellipse at 80% 20%, rgba(255,255,255,0.06) 0%, transparent 50%);
-  pointer-events: none;
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
 }
 .hero-title {
-  font-family: 'Outfit', 'Agrandir', sans-serif;
   font-weight: 800;
-  font-size: clamp(36px, 5vw, 58px);
-  line-height: 1.08;
-  margin: 0 0 16px;
-  letter-spacing: -0.03em;
-  position: relative;
+  font-size: clamp(32px, 5vw, 52px);
+  line-height: 1.1;
+  margin: 0 0 14px;
+  letter-spacing: -0.02em;
+  color: var(--ink);
 }
-.hero-title .accent { color: #ffffff; }
+.hero-title .accent { color: var(--primary); }
 .hero-sub {
-  color: #ffffff;
-  font-size: 15px;
-  max-width: 520px;
-  line-height: 1.65;
+  color: var(--ink-soft);
+  font-size: 16px;
+  max-width: 560px;
+  line-height: 1.6;
   margin: 0;
-  opacity: 1;
+}
+@media (max-width: 760px) {
+  .hero { padding: 28px 20px; }
 }
 
 /* ============ Home Dashboard Cards ============ */
@@ -264,9 +270,8 @@ img { max-width: 100%; display: block; }
 .tab-btn:hover {
   box-shadow: var(--shadow-lg), var(--shadow-glow);
   transform: translateY(-3px);
-  border-color: var(--primary-soft-2);
-}
-.tab-btn:hover::after { opacity: 1; }
+  border-color: var(--primary);
+}.tab-btn:hover::after { opacity: 1; }
 .tab-btn:active { transform: translateY(-1px); }
 
 .tab-card-top {
@@ -311,7 +316,7 @@ img { max-width: 100%; display: block; }
 
 .tab-btn .tab-text { min-width: 0; position: relative; z-index: 1; }
 .tab-btn .tab-title {
-  font-family: 'Outfit', 'Agrandir', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-weight: 800;
   font-size: 17px;
   color: var(--ink);
@@ -379,7 +384,7 @@ img { max-width: 100%; display: block; }
 .page-icon-blue { background: var(--primary-soft); color: var(--primary); }
 .page-icon-purple { background: var(--violet-soft); color: var(--violet); }
 .page-header h2 {
-  font-family: 'Outfit', 'Agrandir', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-weight: 800;
   font-size: 22px;
   margin: 0;
@@ -431,7 +436,7 @@ img { max-width: 100%; display: block; }
   transition: background 0.15s ease, color 0.15s ease;
 }
 .format-chip:hover { background: #FFFFFF; color: var(--ink); }
-.format-chip.active { background: var(--ink); color: #FFFFFF; }
+.format-chip.active { background: var(--primary); color: #FFFFFF; }
 .format-count {
   min-width: 20px;
   padding: 1px 6px;
@@ -472,7 +477,7 @@ img { max-width: 100%; display: block; }
   transition: background 0.15s ease, color 0.15s ease;
 }
 .btn-guia-tab:hover { background: var(--bg); color: var(--ink); }
-.btn-guia-tab.active { background: var(--ink); color: #FFFFFF; }
+.btn-guia-tab.active { background: var(--primary); color: #FFFFFF; }
 .routines-toolbar {
   display: flex;
   align-items: center;
@@ -515,12 +520,12 @@ img { max-width: 100%; display: block; }
   display: flex;
   align-items: center;
   gap: 8px;
-  box-shadow: 0 2px 8px rgba(38, 66, 139,0.35);
+  box-shadow: 0 2px 8px rgba(27, 63, 139,0.35);
   transition: all 0.2s ease;
 }
 .btn-new:hover {
   background: var(--primary-dark);
-  box-shadow: 0 4px 16px rgba(38, 66, 139,0.4);
+  box-shadow: 0 4px 16px rgba(27, 63, 139,0.4);
   transform: translateY(-1px);
 }
 .btn-ghost {
@@ -556,7 +561,7 @@ img { max-width: 100%; display: block; }
   margin-bottom: 24px;
 }
 .calendar-header h2 {
-  font-family: 'Outfit', 'Agrandir', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 22px;
   font-weight: 800;
   margin: 0;
@@ -746,7 +751,7 @@ img { max-width: 100%; display: block; }
   display: flex;
   align-items: center;
   gap: 5px;
-  font-family: 'Outfit', 'Agrandir', sans-serif;
+  font-family: 'Inter', sans-serif;
   text-shadow: 0 1px 4px rgba(0,0,0,0.4);
   line-height: 1.3;
 }
@@ -821,7 +826,7 @@ img { max-width: 100%; display: block; }
   padding-bottom: 12px;
 }
 .list-view-header h3 {
-  font-family: 'Outfit', 'Agrandir', sans-serif;
+  font-family: 'Inter', sans-serif;
   margin: 0;
   font-size: 18px;
   color: var(--ink);
@@ -970,7 +975,7 @@ img { max-width: 100%; display: block; }
   margin-bottom: 24px;
 }
 .modal h2 {
-  font-family: 'Outfit', 'Agrandir', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-weight: 800;
   margin: 0;
   font-size: 20px;
@@ -1029,7 +1034,7 @@ img { max-width: 100%; display: block; }
   background: var(--primary);
   color: #fff;
   border-color: var(--primary);
-  box-shadow: 0 2px 8px rgba(38, 66, 139,0.3);
+  box-shadow: 0 2px 8px rgba(27, 63, 139,0.3);
 }
 
 /* Status chip variants */
@@ -1056,13 +1061,13 @@ img { max-width: 100%; display: block; }
   font-weight: 700;
   font-size: 14px;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(38, 66, 139,0.3);
+  box-shadow: 0 2px 8px rgba(27, 63, 139,0.3);
   display: flex;
   align-items: center;
   gap: 8px;
   transition: all 0.2s ease;
 }
-.btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(38, 66, 139,0.35); }
+.btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(27, 63, 139,0.35); }
 .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 .btn-cancel {
   background: var(--panel);
@@ -1093,7 +1098,7 @@ img { max-width: 100%; display: block; }
 }
 .ai-results-panel h3 {
   margin-top: 0;
-  font-family: 'Outfit', 'Agrandir', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 18px;
   letter-spacing: -0.01em;
 }
@@ -1110,7 +1115,7 @@ img { max-width: 100%; display: block; }
 .xml-topic:hover { border-color: var(--primary-soft-2); box-shadow: var(--shadow-sm); }
 .xml-topic-title {
   font-weight: 800;
-  font-family: 'Outfit', 'Agrandir', sans-serif;
+  font-family: 'Inter', sans-serif;
   color: var(--primary-dark);
   font-size: 15px;
   margin: 0 0 8px 0;
@@ -1318,7 +1323,7 @@ img { max-width: 100%; display: block; }
 
 /* List Month Headers */
 .list-month-header {
-  font-family: 'Outfit', 'Agrandir', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-weight: 800;
   font-size: 18px;
   color: var(--ink);
@@ -1373,7 +1378,7 @@ select.list-status-select.status-publicado { background: var(--c-publicado); }
   background: var(--primary);
   color: #fff;
   border-color: var(--primary);
-  box-shadow: 0 2px 8px rgba(38, 66, 139,0.25);
+  box-shadow: 0 2px 8px rgba(27, 63, 139,0.25);
 }
 
 /* ============ Toast Notifications ============ */
@@ -1630,19 +1635,11 @@ select.list-status-select.status-publicado { background: var(--c-publicado); }
 ::-webkit-scrollbar-thumb { background: var(--hairline); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--ink-faint); }
 
-/* Brand Guide Font Overrides */
-.tab-stat, 
-.btn-playbook-chap, 
-.btn-guia-tab, 
-.back-btn, 
-.btn-primary, 
-.btn-secondary, 
-.month-label, 
-.post-tag, 
-.field label, 
-.post-card-info span {
-  font-family: 'Roboto', sans-serif !important;
+/* Identidade SAAM: Inter em todo o site, inclusive nos estilos escritos direto no HTML e no JS */
+body * {
+  font-family: 'Inter', -apple-system, sans-serif !important;
 }
+.day-number, .tab-stat { font-variant-numeric: tabular-nums; }
 
 
 /* Status Badge in Lists (Read-Only) */
