@@ -199,17 +199,56 @@ const btnTabExcelencia = document.getElementById("btn-tab-excelencia");
 const btnTabColaboracao = document.getElementById("btn-tab-colaboracao");
 const backBtns = document.querySelectorAll(".back-btn[data-target='home']");
 
+// Cada página tem uma chave na URL (#calendario, #ideias...). A página inicial é a
+// entrada base do histórico, então o Voltar do navegador volta para ela em vez de sair do site.
+const pagesByKey = {
+  home: pageHome,
+  calendario: pageCalendario,
+  projetos: document.getElementById("page-projetos"),
+  rotinas: pageRotinas,
+  ideias: pageIdeias,
+  guia: pageExcelencia,
+  ads: pageCampanhas,
+  comunidade: pageColaboracao,
+  identidade: document.getElementById("page-identidade")
+};
+let skipHistorySync = false;
+let ignoreNextPopState = false;
+
+function pageKeyFromHash() {
+  const key = window.location.hash.slice(1);
+  return pagesByKey[key] ? key : "home";
+}
+
+function syncPageHistory(key) {
+  if (skipHistorySync || pageKeyFromHash() === key) return;
+  const state = window.history.state || {};
+  if (key === "home") {
+    if (state.fromHome) {
+      ignoreNextPopState = true;
+      window.history.back();
+    } else {
+      window.history.replaceState({ page: "home" }, "", window.location.pathname + window.location.search);
+    }
+    return;
+  }
+  if (pageKeyFromHash() === "home") {
+    window.history.pushState({ page: key, fromHome: true }, "", `#${key}`);
+  } else {
+    window.history.replaceState({ ...state, page: key, modal: false }, "", `#${key}`);
+  }
+}
+
 function showPage(pageEl) {
-  pageHome.classList.add("hidden");
-  pageCalendario.classList.add("hidden");
-  pageIdeias.classList.add("hidden");
-  pageRotinas.classList.add("hidden");
-  if(pageCampanhas) pageCampanhas.classList.add("hidden");
-  if(pageExcelencia) pageExcelencia.classList.add("hidden");
-  if(pageColaboracao) pageColaboracao.classList.add("hidden");
-  const pId = document.getElementById("page-identidade");
-  if(pId) pId.classList.add("hidden");
+  const wasHidden = pageEl.classList.contains("hidden");
+  document.querySelectorAll(".app > div[id^='page-']").forEach(p => p.classList.add("hidden"));
   pageEl.classList.remove("hidden");
+  const key = Object.keys(pagesByKey).find(k => pagesByKey[k] === pageEl) || "home";
+  document.querySelectorAll(".topbar-link").forEach(link => {
+    link.classList.toggle("active", link.dataset.nav === key);
+  });
+  syncPageHistory(key);
+  if (wasHidden) window.scrollTo(0, 0);
 }
 
 btnTabCalendario.addEventListener("click", () => {
@@ -347,6 +386,69 @@ if (btnTabExcelencia) {
 backBtns.forEach(btn => {
   btn.addEventListener("click", () => showPage(pageHome));
 });
+
+// Abre a página pelos mesmos botões do menu inicial, que já pedem senha e renderizam o conteúdo.
+const pageOpeners = {
+  home: () => showPage(pageHome),
+  calendario: () => btnTabCalendario.click(),
+  projetos: () => document.getElementById("btn-open-projetos")?.click(),
+  rotinas: () => btnTabRotinas?.click(),
+  ideias: () => btnTabIdeias.click(),
+  guia: () => btnTabExcelencia?.click(),
+  ads: () => btnTabCampanhas?.click(),
+  comunidade: () => btnTabColaboracao?.click(),
+  identidade: () => showPage(pagesByKey.identidade)
+};
+
+function openPageByKey(key) {
+  (pageOpeners[key] || pageOpeners.home)();
+}
+
+document.querySelectorAll("[data-nav]").forEach(btn => {
+  btn.addEventListener("click", () => openPageByKey(btn.dataset.nav));
+});
+
+function initPageNavigation() {
+  const initialKey = pageKeyFromHash();
+  const state = window.history.state;
+  if (initialKey === "home" || !state || state.page !== initialKey || state.modal) {
+    // Link direto para uma página: a inicial fica por baixo para o Voltar cair nela.
+    window.history.replaceState({ page: "home" }, "", window.location.pathname + window.location.search);
+  }
+  skipHistorySync = true;
+  showPage(pageHome);
+  skipHistorySync = false;
+  if (initialKey !== "home") {
+    // Espera o projects.js registrar o botão de Projetos antes de abrir a página.
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", () => openPageByKey(initialKey));
+    } else {
+      openPageByKey(initialKey);
+    }
+  }
+
+  window.addEventListener("popstate", () => {
+    if (ignoreNextPopState) {
+      ignoreNextPopState = false;
+      return;
+    }
+    // Com o formulário aberto, o Voltar só fecha o formulário.
+    const editModal = document.getElementById("edit-modal");
+    if (editModal && !editModal.classList.contains("hidden")) {
+      editModal.classList.add("hidden");
+      return;
+    }
+    document.querySelectorAll(".overlay:not(.hidden)").forEach(overlay => overlay.classList.add("hidden"));
+    openPageByKey(pageKeyFromHash());
+  });
+}
+
+function setSyncStatus(state, label) {
+  const el = document.getElementById("topbar-sync");
+  if (!el) return;
+  el.dataset.state = state;
+  el.textContent = label;
+}
 
 // Mock inicial de posts (Calendário Populado 2026 - O FUTURO DO FISCAL JÁ COMEÇOU)
 let defaultPosts = [];
@@ -593,8 +695,10 @@ function initCloudSync() {
     renderCalendar();
     renderList();
     if (typeof renderInternalComms === 'function') renderInternalComms();
+    setSyncStatus("ok", "Sincronizado na nuvem");
   }, (error) => {
     console.error("Firebase sync error", error);
+    setSyncStatus("error", "Sem conexão com a nuvem");
   });
 }
 
@@ -872,7 +976,43 @@ function uniquePostsById(items) {
   return Array.from(unique.values());
 }
 
-function getFilteredPosts() {
+let activeFormatFilter = "";
+
+// Formato do criativo: "static", "carousel" ou "reels" ("" para datas comemorativas).
+// Posts antigos de Reels foram salvos como imagem estática, só com [REELS] no título.
+function getPostFormat(post) {
+  if (!post || post.commemorative) return "";
+  if (post.mediaType === "reels") return "reels";
+  if (post.mediaType === "carousel" || (Array.isArray(post.carousel) && post.carousel.length > 0)) return "carousel";
+  const title = `${post.title || ""} ${post.tag || ""}`.toUpperCase();
+  if (title.includes("[REELS]")) return "reels";
+  if (title.includes("[CARROSSEL]")) return "carousel";
+  return "static";
+}
+
+function isInCurrentMonth(post) {
+  const d = new Date(post.date + "T00:00:00");
+  return d.getMonth() === currentDate.getMonth() && d.getFullYear() === currentDate.getFullYear();
+}
+
+function updateFormatFilterCounts() {
+  const monthPosts = getFilteredPosts(true).filter(isInCurrentMonth);
+  document.querySelectorAll(".format-count").forEach(el => {
+    const format = el.dataset.countFor;
+    el.textContent = format ? monthPosts.filter(p => getPostFormat(p) === format).length : monthPosts.length;
+  });
+}
+
+document.querySelectorAll(".format-chip").forEach(chip => {
+  chip.addEventListener("click", () => {
+    activeFormatFilter = chip.dataset.format;
+    document.querySelectorAll(".format-chip").forEach(c => c.classList.toggle("active", c === chip));
+    renderCalendar();
+    renderList();
+  });
+});
+
+function getFilteredPosts(ignoreFormat = false) {
   let filtered = uniquePostsById(posts.filter(isEditorial));
   const term = searchInput ? searchInput.value.toLowerCase() : "";
   const destiny = filterDestiny ? filterDestiny.value : "";
@@ -891,6 +1031,9 @@ function getFilteredPosts() {
   }
   if (idea) {
     filtered = filtered.filter(p => p.ideaId == idea);
+  }
+  if (activeFormatFilter && !ignoreFormat) {
+    filtered = filtered.filter(p => getPostFormat(p) === activeFormatFilter);
   }
   return filtered;
 }
@@ -930,6 +1073,7 @@ function renderCalendar() {
   const today = new Date();
   const editorialCount = posts.filter(isEditorial).length;
   document.getElementById("menu-stat-criativos").textContent = `${editorialCount} criativos`;
+  updateFormatFilterCounts();
   
   for (let day = 1; day <= daysInMonth; day++) {
     const dayCell = document.createElement("div");
@@ -1007,32 +1151,17 @@ function createPostCard(post) {
     iconSvg = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>`;
   }
 
-  let destinyBadge = '';
-  const rawDestArr = Array.isArray(post.destinies) ? post.destinies : (post.destiny ? [post.destiny] : []);
-  // Normalize insta-feed / insta-story to single 'instagram'
-  let destinyArr = rawDestArr.map(d => (d === 'insta-feed' || d === 'insta-story') ? 'instagram' : d);
-  destinyArr = Array.from(new Set(destinyArr));
-
-  let primaryDest = post.primaryDestiny || destinyArr[0] || post.destiny || '';
-  if (primaryDest === 'insta-feed' || primaryDest === 'insta-story') primaryDest = 'instagram';
-
-  const destinyColors = {
-    'instagram': { bg: 'linear-gradient(135deg,#F56040,#C13584)', label: 'INSTAGRAM' },
-    'interno': { bg: '#26428B', label: 'INTERNO' },
-    'cliente': { bg: '#059669', label: 'CLIENTE' },
-    'linkedin': { bg: '#0A66C2', label: 'LINKEDIN' },
-    'blog': { bg: '#F59E0B', label: 'BLOG' },
-  };
-
-  if (destinyArr.length > 0) {
-    const badges = destinyArr.map(d => {
-      const cfg = destinyColors[d] || destinyColors['instagram'];
-      const isPrimary = d === primaryDest;
-      const star = isPrimary ? '⭐ ' : '';
-      const bgStyle = cfg.bg.includes('gradient') ? `background:${cfg.bg}` : `background:${cfg.bg}`;
-      return `<span style="display:inline-block;${bgStyle};color:#fff;font-size:8px;font-weight:800;padding:2px 6px;border-radius:8px;letter-spacing:0.04em;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,0.2);${isPrimary ? 'border:1px solid #FCD34D;' : ''}">${star}${cfg.label}</span>`;
-    });
-    destinyBadge = `<div style="position:absolute;top:6px;left:50%;transform:translateX(-50%);z-index:11;display:flex;gap:3px;flex-wrap:wrap;justify-content:center;max-width:95%;">${badges.join('')}</div>`;
+  // Os destinos (Instagram, Interno...) só aparecem ao abrir o criativo; no card fica só o formato.
+  const format = getPostFormat(post);
+  const hasImage = Boolean(getPostImage(post));
+  const isReels = format === 'reels' && hasImage;
+  const cardTitle = (post.title || post.tag || '').replace(/^\s*\[(REELS|CARROSSEL)\]\s*/i, '');
+  let formatBadge = '';
+  if (format === 'reels') {
+    formatBadge = `<span class="card-format-badge" title="Reels"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="7 4 20 12 7 20 7 4"/></svg>Reels</span>`;
+  } else if (format === 'carousel') {
+    const slideCount = (post.carousel ? post.carousel.length : 0) + 1;
+    formatBadge = `<span class="card-format-badge" title="Carrossel com ${slideCount} imagens"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="14" height="14" rx="2"/><path d="M3 17V5a2 2 0 0 1 2-2h12"/></svg>${slideCount}</span>`;
   }
 
   let cardHTML = ``;
@@ -1047,18 +1176,16 @@ function createPostCard(post) {
       </div>
     `;
   } else {
+    // Capa de Reels: aparece inteira no formato 9:16, com a própria imagem desfocada preenchendo as laterais.
     cardHTML = `
-      <div class="post-card-image">
+      <div class="post-card-image${isReels ? ' is-reels' : ''}">
+        ${isReels ? `<img class="reels-backdrop" src="${imgUrl}" alt="" aria-hidden="true">` : ''}
         <img src="${imgUrl}" alt="${post.tag}">
-        ${destinyBadge}
         <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.0) 35%, rgba(0,0,0,0.85) 100%); pointer-events: none; border-radius: 8px;"></div>
-        <h4 style="position: absolute; bottom: 26px; left: 6px; right: 6px; color: #FFF; font-size: 12px; font-weight: 700; text-align: left; margin: 0; z-index: 2; text-shadow: 0 1px 3px rgba(0,0,0,0.9); line-height: 1.25; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">${post.title || post.tag}</h4>
+        <h4 style="position: absolute; bottom: 26px; left: 6px; right: 6px; color: #FFF; font-size: 12px; font-weight: 700; text-align: left; margin: 0; z-index: 2; text-shadow: 0 1px 3px rgba(0,0,0,0.9); line-height: 1.25; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">${cardTitle}</h4>
 
         <div class="status-dot status-${post.status}" title="Clique para avançar status" data-post-id="${post.id}"></div>
-        <div class="post-card-info" style="display: flex; align-items: center; justify-content: space-between; width: 100%; box-sizing: border-box; z-index: 2; position: relative;">
-          <span class="post-tag" style="display: flex; align-items: center; max-width: calc(100% - 24px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${iconSvg}${post.tag}</span>
-          ${(post.carousel && post.carousel.length > 0) ? `<div title="Possui carrossel (${post.carousel.length + 1} imagens no total)" style="background: rgba(0,0,0,0.6); border-radius: 4px; padding: 2px 4px; display: flex; align-items: center; gap: 3px; color: white;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg><span style="font-size:10px; font-weight:bold;">+${post.carousel.length}</span></div>` : ''}
-        </div>
+        ${formatBadge ? `<div class="card-format-row">${formatBadge}</div>` : ''}
       </div>
     `;
   }
@@ -1488,6 +1615,10 @@ function openModal(post = null, prefilledDate = "", prefilledIdeaId = "", prefil
     document.getElementById("post-author").required = !isInternal;
   }
   modal.classList.remove("hidden");
+  // Entrada própria no histórico: o Voltar (inclusive no celular) fecha o formulário sem sair da página.
+  if (!(window.history.state && window.history.state.modal)) {
+    window.history.pushState({ page: pageKeyFromHash(), modal: true }, "", window.location.href);
+  }
 }
 
 function autoSuggestSeries(dateString) {
@@ -1578,6 +1709,10 @@ if (postTopicEl) {
 
 function closeModal() {
   modal.classList.add("hidden");
+  if (window.history.state && window.history.state.modal) {
+    ignoreNextPopState = true;
+    window.history.back();
+  }
 }
 
 btnAdd.addEventListener("click", () => openModal());
@@ -1833,7 +1968,8 @@ document.getElementById("post-image-file").addEventListener("change", async func
   if (file) {
     preview.src = "";
     preview.classList.add("hidden");
-    placeholder.innerHTML = `<span style="font-size:12px;color:#2563EB;font-weight:700;">Processando imagem... ⏳</span>`;
+    const placeholderTitle = document.getElementById("upload-placeholder-title");
+    if (placeholderTitle) placeholderTitle.textContent = "Processando imagem…";
     placeholder.classList.remove("hidden");
 
     try {
@@ -1884,14 +2020,48 @@ document.getElementById("post-image-file").addEventListener("change", async func
       console.warn("Erro ao processar imagem:", err);
       if (typeof showToast === 'function') showToast('Erro ao processar imagem.', 'error');
     }
+    resetUploadPlaceholderTitle();
   } else {
     document.getElementById("post-image-data").value = "";
     preview.src = "";
     preview.classList.add("hidden");
-    placeholder.innerHTML = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Clique para adicionar imagem</span>`;
+    placeholder.classList.remove("hidden");
+    resetUploadPlaceholderTitle();
     if (btnDownload) btnDownload.classList.add("hidden");
   }
 });
+
+function resetUploadPlaceholderTitle() {
+  const title = document.getElementById("upload-placeholder-title");
+  if (!title) return;
+  const isReels = document.getElementById("image-upload-box")?.classList.contains("is-reels");
+  title.textContent = isReels ? "Arraste a capa do Reels para cá" : "Arraste a imagem para cá";
+}
+
+// No formato Reels a mesma imagem, desfocada, preenche as laterais da moldura 9:16.
+const uploadPreviewEl = document.getElementById("upload-preview");
+const uploadBackdropEl = document.getElementById("upload-preview-backdrop");
+if (uploadPreviewEl && uploadBackdropEl) {
+  new MutationObserver(() => {
+    uploadBackdropEl.src = uploadPreviewEl.getAttribute("src") || "";
+  }).observe(uploadPreviewEl, { attributes: true, attributeFilter: ["src"] });
+}
+
+// Destaca a área de upload enquanto um arquivo é arrastado por cima dela.
+document.querySelectorAll(".image-upload-box").forEach(box => {
+  const hasFiles = e => e.dataTransfer && Array.from(e.dataTransfer.types).includes("Files");
+  ["dragenter", "dragover"].forEach(type => box.addEventListener(type, e => {
+    if (hasFiles(e)) box.classList.add("is-dragover");
+  }));
+  ["dragleave", "drop"].forEach(type => box.addEventListener(type, () => box.classList.remove("is-dragover")));
+});
+
+// Soltar um arquivo fora da área de upload não deve abrir a imagem e tirar a pessoa do site.
+["dragover", "drop"].forEach(type => window.addEventListener(type, e => {
+  const isFileDrag = e.dataTransfer && Array.from(e.dataTransfer.types).includes("Files");
+  const isFileInput = e.target instanceof HTMLInputElement && e.target.type === "file";
+  if (isFileDrag && !isFileInput) e.preventDefault();
+}));
 
 // ─── Google Drive & Web Image URL Resolver ────────────────────────────────────
 function convertGoogleDriveUrl(url) {
@@ -2655,7 +2825,7 @@ renderList();
 initCloudSync();
 initSugestoesSync();
 // renderIdeasList removida daqui
-showPage(pageHome);
+initPageNavigation();
 
 
 // --- NOVA ESTRUTURA DE IDEIAS ---
@@ -8869,8 +9039,7 @@ window.carouselActiveIndex = 0;
 const carouselImageCache = {};
 
 window.loadCarouselForPost = async function(post) {
-  const hasCarousel = Boolean(post && Array.isArray(post.carousel) && post.carousel.length > 0);
-  const mediaType = post?.mediaType === 'carousel' || hasCarousel ? 'carousel' : 'static';
+  const mediaType = getPostFormat(post) || 'static';
   const mediaTypeSelect = document.getElementById('post-media-type');
   if (mediaTypeSelect) mediaTypeSelect.value = mediaType;
 
@@ -8880,6 +9049,7 @@ window.loadCarouselForPost = async function(post) {
   } else {
     window.currentCarousel = [];
   }
+  window.carouselActiveIndex = 0;
   document.getElementById("post-carousel-data").value = JSON.stringify(window.currentCarousel);
   window.setPostMediaType(mediaType, false);
   await Promise.all(window.currentCarousel.map(async imageRef => {
@@ -8903,8 +9073,14 @@ window.setPostMediaType = function(mediaType, transferImage = true) {
   const carouselField = document.getElementById('field-carousel');
   const select = document.getElementById('post-media-type');
   const isCarousel = mediaType === 'carousel';
-  if (select) select.value = isCarousel ? 'carousel' : 'static';
-  if (staticField) staticField.style.display = isCarousel ? 'none' : 'block';
+  const isReels = mediaType === 'reels';
+  if (select) select.value = isCarousel || isReels ? mediaType : 'static';
+  if (staticField) {
+    staticField.style.display = isCarousel ? 'none' : 'block';
+    staticField.classList.toggle('is-reels-field', isReels);
+  }
+  document.getElementById('image-upload-box')?.classList.toggle('is-reels', isReels);
+  resetUploadPlaceholderTitle();
   if (carouselField) carouselField.style.display = isCarousel ? 'block' : 'none';
 
   if (transferImage && isCarousel && window.currentCarousel.length === 0) {
@@ -8928,6 +9104,13 @@ window.setPostMediaType = function(mediaType, transferImage = true) {
   window.renderCarouselUI();
 };
 
+function resolveCarouselImage(imageRef) {
+  if (typeof imageRef === 'string' && imageRef.startsWith('firestore-carousel://')) {
+    return carouselImageCache[imageRef.slice('firestore-carousel://'.length)] || '';
+  }
+  return imageRef;
+}
+
 window.renderCarouselUI = function() {
   const track = document.getElementById("carousel-track");
   const dataInput = document.getElementById("post-carousel-data");
@@ -8937,21 +9120,22 @@ window.renderCarouselUI = function() {
   wrapper?.querySelectorAll('.carousel-nav, .carousel-counter').forEach(el => el.remove());
 
   dataInput.value = JSON.stringify(window.currentCarousel);
+  const total = window.currentCarousel.length;
+  window.carouselActiveIndex = Math.max(0, Math.min(window.carouselActiveIndex, total - 1));
 
-  // Clear existing items except the empty hint
-  track.innerHTML = "";
-
-  if (window.currentCarousel.length === 0) {
-    track.innerHTML = `
-      <div id="carousel-empty-hint" style="color: #94A3B8; font-size: 13px; font-style: italic; padding: 20px; text-align: center; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1.5px dashed #CBD5E1; border-radius: 10px; min-height: 100px;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><circle cx="8.5" cy="15" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-        Clique em "Imagem" para montar o carrossel
-      </div>
-    `;
-    return;
+  const countLabel = document.getElementById("carousel-count-label");
+  if (countLabel) countLabel.textContent = total ? `(${total})` : "";
+  const reorderHint = document.getElementById("carousel-reorder-hint");
+  if (reorderHint) reorderHint.style.display = total > 1 ? "" : "none";
+  document.getElementById("carousel-dropzone")?.classList.toggle("is-compact", total > 0);
+  const dropzoneTitle = document.getElementById("carousel-dropzone-title");
+  if (dropzoneTitle) {
+    dropzoneTitle.textContent = total ? "Arraste mais imagens ou clique para adicionar" : "Arraste as imagens do carrossel para cá";
   }
 
-  window.currentCarousel.forEach((imgUrl, index) => {
+  // Pré-visualização grande: um slide por vez, com setas e contador.
+  track.innerHTML = "";
+  window.currentCarousel.forEach((imgRef, index) => {
     const item = document.createElement("div");
     item.className = "carousel-slide";
     item.style.position = "relative";
@@ -8963,105 +9147,135 @@ window.renderCarouselUI = function() {
     item.style.overflow = "hidden";
     item.style.border = "1px solid #CBD5E1";
     item.style.scrollSnapAlign = "start";
-    
-    // Add number indicator
-    const numberBadge = document.createElement("div");
-    numberBadge.textContent = (index + 1);
-    numberBadge.style.position = "absolute";
-    numberBadge.style.top = "4px";
-    numberBadge.style.left = "4px";
-    numberBadge.style.background = "rgba(15, 23, 42, 0.7)";
-    numberBadge.style.color = "#FFF";
-    numberBadge.style.fontSize = "10px";
-    numberBadge.style.fontWeight = "bold";
-    numberBadge.style.width = "18px";
-    numberBadge.style.height = "18px";
-    numberBadge.style.borderRadius = "50%";
-    numberBadge.style.display = "flex";
-    numberBadge.style.alignItems = "center";
-    numberBadge.style.justifyContent = "center";
-    numberBadge.style.zIndex = "2";
 
     const img = document.createElement("img");
-    const imageId = typeof imgUrl === 'string' && imgUrl.startsWith('firestore-carousel://')
-      ? imgUrl.slice('firestore-carousel://'.length)
-      : '';
-    img.src = imageId ? (carouselImageCache[imageId] || '') : imgUrl;
+    img.src = resolveCarouselImage(imgRef);
+    img.alt = `Imagem ${index + 1} do carrossel`;
     img.style.width = "100%";
     img.style.height = "auto";
     img.style.objectFit = "initial";
     img.style.display = "block";
-
-    const removeBtn = document.createElement("button");
-    removeBtn.type = "button";
-    removeBtn.innerHTML = "×";
-    removeBtn.style.position = "absolute";
-    removeBtn.style.top = "4px";
-    removeBtn.style.right = "4px";
-    removeBtn.style.background = "rgba(239, 68, 68, 0.9)";
-    removeBtn.style.color = "white";
-    removeBtn.style.border = "none";
-    removeBtn.style.borderRadius = "50%";
-    removeBtn.style.width = "20px";
-    removeBtn.style.height = "20px";
-    removeBtn.style.display = "flex";
-    removeBtn.style.alignItems = "center";
-    removeBtn.style.justifyContent = "center";
-    removeBtn.style.cursor = "pointer";
-    removeBtn.style.fontSize = "14px";
-    removeBtn.style.lineHeight = "1";
-    removeBtn.onclick = (e) => {
-      e.stopPropagation();
-      window.removeCarouselImage(index);
-    };
+    img.style.cursor = "zoom-in";
+    img.onclick = () => window.openLightbox(img.src);
 
     item.appendChild(img);
-    item.appendChild(numberBadge);
-    item.appendChild(removeBtn);
     track.appendChild(item);
   });
 
-  if (wrapper && window.currentCarousel.length > 0) {
+  renderCarouselThumbs();
+
+  if (wrapper && total > 0) {
     const previous = document.createElement('button');
     previous.type = 'button';
     previous.className = 'carousel-nav carousel-nav-prev';
     previous.setAttribute('aria-label', 'Imagem anterior');
     previous.innerHTML = '&#10094;';
-    previous.onclick = () => window.scrollCarousel(-1);
+    previous.onclick = () => window.goToCarouselSlide(window.carouselActiveIndex - 1);
 
     const next = document.createElement('button');
     next.type = 'button';
     next.className = 'carousel-nav carousel-nav-next';
     next.setAttribute('aria-label', 'Próxima imagem');
     next.innerHTML = '&#10095;';
-    next.onclick = () => window.scrollCarousel(1);
+    next.onclick = () => window.goToCarouselSlide(window.carouselActiveIndex + 1);
 
     const counter = document.createElement('div');
     counter.className = 'carousel-counter';
-    counter.textContent = `1 / ${window.currentCarousel.length}`;
     wrapper.append(previous, next, counter);
 
-    const updatePosition = () => {
-      const slideWidth = track.clientWidth || 1;
-      window.carouselActiveIndex = Math.max(0, Math.min(window.currentCarousel.length - 1, Math.round(track.scrollLeft / slideWidth)));
-      counter.textContent = `${window.carouselActiveIndex + 1} / ${window.currentCarousel.length}`;
-      previous.disabled = window.carouselActiveIndex === 0;
-      next.disabled = window.carouselActiveIndex === window.currentCarousel.length - 1;
+    const showActive = (activeIndex) => {
+      counter.textContent = `${activeIndex + 1} / ${total}`;
+      previous.disabled = activeIndex === 0;
+      next.disabled = activeIndex === total - 1;
+      document.querySelectorAll('.carousel-thumb').forEach((thumb, i) => {
+        thumb.classList.toggle('active', i === activeIndex);
+      });
     };
-    track.onscroll = updatePosition;
-    requestAnimationFrame(updatePosition);
+    const activeIndex = window.carouselActiveIndex;
+    showActive(activeIndex);
+    track.onscroll = () => {
+      const slideWidth = track.clientWidth || 1;
+      window.carouselActiveIndex = Math.max(0, Math.min(total - 1, Math.round(track.scrollLeft / slideWidth)));
+      showActive(window.carouselActiveIndex);
+    };
+    requestAnimationFrame(() => {
+      track.scrollLeft = activeIndex * track.clientWidth;
+    });
   }
 };
 
-window.scrollCarousel = function(direction) {
-  const track = document.getElementById('carousel-track');
-  if (!track) return;
-  track.scrollBy({ left: direction * track.clientWidth, behavior: 'smooth' });
-};
+// Miniaturas embaixo da pré-visualização: clique para ver, arraste para mudar a ordem.
+let carouselDragIndex = null;
 
-window.addCarouselImage = function() {
-  const input = document.getElementById("carousel-file-input");
-  if(input) input.click();
+function renderCarouselThumbs() {
+  const thumbs = document.getElementById("carousel-thumbs");
+  if (!thumbs) return;
+  thumbs.innerHTML = "";
+
+  window.currentCarousel.forEach((imgRef, index) => {
+    const thumb = document.createElement("div");
+    thumb.className = "carousel-thumb" + (index === window.carouselActiveIndex ? " active" : "");
+    thumb.draggable = true;
+    thumb.title = `Imagem ${index + 1}: clique para ver, arraste para mudar a ordem`;
+
+    const img = document.createElement("img");
+    img.src = resolveCarouselImage(imgRef);
+    img.alt = "";
+
+    const number = document.createElement("span");
+    number.className = "carousel-thumb-number";
+    number.textContent = index + 1;
+
+    const removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.className = "carousel-thumb-remove";
+    removeBtn.setAttribute("aria-label", `Remover imagem ${index + 1}`);
+    removeBtn.textContent = "×";
+    removeBtn.onclick = (e) => {
+      e.stopPropagation();
+      window.removeCarouselImage(index);
+    };
+
+    thumb.append(img, number, removeBtn);
+    thumb.addEventListener("click", () => window.goToCarouselSlide(index));
+    thumb.addEventListener("dragstart", (e) => {
+      carouselDragIndex = index;
+      thumb.classList.add("is-dragging");
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", String(index));
+    });
+    thumb.addEventListener("dragend", () => {
+      carouselDragIndex = null;
+      thumbs.querySelectorAll(".is-dragging, .is-drop-target").forEach(t => t.classList.remove("is-dragging", "is-drop-target"));
+    });
+    thumb.addEventListener("dragover", (e) => {
+      if (carouselDragIndex === null) return;
+      e.preventDefault();
+      thumb.classList.add("is-drop-target");
+    });
+    thumb.addEventListener("dragleave", () => thumb.classList.remove("is-drop-target"));
+    thumb.addEventListener("drop", (e) => {
+      if (carouselDragIndex === null) return;
+      e.preventDefault();
+      const [moved] = window.currentCarousel.splice(carouselDragIndex, 1);
+      window.currentCarousel.splice(index, 0, moved);
+      carouselDragIndex = null;
+      window.carouselActiveIndex = index;
+      window.renderCarouselUI();
+    });
+    thumbs.appendChild(thumb);
+  });
+}
+
+window.goToCarouselSlide = function(index) {
+  const track = document.getElementById('carousel-track');
+  const total = window.currentCarousel.length;
+  if (!track || total === 0) return;
+  window.carouselActiveIndex = Math.max(0, Math.min(total - 1, index));
+  track.scrollTo({ left: window.carouselActiveIndex * track.clientWidth, behavior: 'smooth' });
+  document.querySelectorAll('.carousel-thumb').forEach((thumb, i) => {
+    thumb.classList.toggle('active', i === window.carouselActiveIndex);
+  });
 };
 
 window.removeCarouselImage = function(index) {
@@ -9074,12 +9288,74 @@ window.addCarouselUrl = function() {
   const url = urlInput.value.trim();
   if (url) {
     window.currentCarousel.push(convertGoogleDriveUrl(url));
+    window.carouselActiveIndex = window.currentCarousel.length - 1;
     urlInput.value = "";
     window.renderCarouselUI();
   }
 };
 
-// Event listener for carousel file input
+function prepareCarouselImage(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = event => {
+      const sourceImage = new Image();
+      sourceImage.onload = () => {
+        const MAX_SIZE = 1080;
+        let width = sourceImage.width;
+        let height = sourceImage.height;
+        const scale = Math.min(1, MAX_SIZE / Math.max(width, height));
+        width = Math.max(1, Math.round(width * scale));
+        height = Math.max(1, Math.round(height * scale));
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext('2d').drawImage(sourceImage, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.76));
+      };
+      sourceImage.onerror = reject;
+      sourceImage.src = event.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// Adiciona várias imagens de uma vez (seleção ou arrastar e soltar), na ordem em que foram escolhidas.
+window.addCarouselFiles = async function(fileList) {
+  const allFiles = Array.from(fileList || []);
+  const files = allFiles.filter(file => file.type.startsWith('image/'));
+  if (files.length < allFiles.length && typeof showToast === 'function') {
+    showToast('Só imagens entram no carrossel (PNG, JPG, WEBP ou GIF).', 'error');
+  }
+  if (files.length === 0) return;
+
+  const dropzoneTitle = document.getElementById("carousel-dropzone-title");
+  if (dropzoneTitle) dropzoneTitle.textContent = files.length > 1 ? `Preparando ${files.length} imagens…` : "Preparando imagem…";
+
+  // O lote inteiro fica registrado até as imagens entrarem na lista, para o
+  // Salvar esperar por ele e nenhuma imagem ficar de fora.
+  const batch = (async () => {
+    const results = await Promise.allSettled(files.map(prepareCarouselImage));
+    const ready = results.filter(r => r.status === 'fulfilled').map(r => r.value);
+    if (ready.length < files.length) {
+      console.error('Erro ao preparar imagem do carrossel:', results.filter(r => r.status === 'rejected').map(r => r.reason));
+      if (typeof showToast === 'function') showToast('Uma das imagens não pôde ser processada.', 'error');
+    }
+    if (ready.length > 0) {
+      window.carouselActiveIndex = window.currentCarousel.length;
+      window.currentCarousel.push(...ready);
+    }
+    window.renderCarouselUI();
+  })();
+
+  window.carouselFileJobs.push(batch);
+  try {
+    await batch;
+  } finally {
+    window.carouselFileJobs = window.carouselFileJobs.filter(job => job !== batch);
+  }
+};
+
 document.addEventListener("DOMContentLoaded", () => {
   const mediaTypeSelect = document.getElementById('post-media-type');
   if (mediaTypeSelect) {
@@ -9089,51 +9365,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const carouselInput = document.getElementById("carousel-file-input");
-  if(carouselInput) {
+  if (carouselInput) {
     carouselInput.addEventListener("change", async (e) => {
-      const files = e.target.files;
-      if (!files || files.length === 0) return;
-
-      const jobs = Array.from(files).map(file => new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = event => {
-          const sourceImage = new Image();
-          sourceImage.onload = () => {
-            const MAX_SIZE = 1080;
-            let width = sourceImage.width;
-            let height = sourceImage.height;
-            const scale = Math.min(1, MAX_SIZE / Math.max(width, height));
-            width = Math.max(1, Math.round(width * scale));
-            height = Math.max(1, Math.round(height * scale));
-            const canvas = document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
-            canvas.getContext('2d').drawImage(sourceImage, 0, 0, width, height);
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.76);
-            window.currentCarousel.push(dataUrl);
-            window.renderCarouselUI();
-            resolve(dataUrl);
-          };
-          sourceImage.onerror = reject;
-          sourceImage.src = event.target.result;
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      }));
-
-      // Acumula todos os lotes ainda em processamento. Assim, se o usuário
-      // adicionar mais imagens antes do primeiro lote terminar, nenhuma fica
-      // fora do salvamento.
-      window.carouselFileJobs.push(...jobs);
-      try {
-        await Promise.all(jobs);
-      } catch (error) {
-        console.error('Erro ao preparar imagem do carrossel:', error);
-        if (typeof showToast === 'function') showToast('Uma das imagens não pôde ser processada.', 'error');
-      } finally {
-        window.carouselFileJobs = window.carouselFileJobs.filter(job => !jobs.includes(job));
-      }
-
+      await window.addCarouselFiles(e.target.files);
       carouselInput.value = "";
     });
   }

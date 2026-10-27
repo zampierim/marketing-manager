@@ -7,9 +7,50 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Roboto:wght@400;500;700&family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=6">
+  <link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
+<!-- Menu superior: fica sempre visível e cada item vira uma entrada no histórico do navegador -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <button type="button" class="topbar-brand" data-nav="home">Marketing <span>do SAAM</span></button>
+    <nav class="topbar-nav" aria-label="Seções">
+      <button type="button" class="topbar-link" data-nav="home">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+        Início
+      </button>
+      <button type="button" class="topbar-link" data-nav="calendario">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
+        Calendário
+      </button>
+      <button type="button" class="topbar-link" data-nav="projetos">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18"/></svg>
+        Projetos
+      </button>
+      <button type="button" class="topbar-link" data-nav="rotinas">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l2 2 4-4M3 7l2 2 4-4M13 6h8M13 12h8M13 18h8"/></svg>
+        Rotinas
+      </button>
+      <button type="button" class="topbar-link" data-nav="ideias">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1V17h6v-.2c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2z"/></svg>
+        Ideias
+      </button>
+      <button type="button" class="topbar-link" data-nav="guia">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2zM22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></svg>
+        Guia
+      </button>
+      <button type="button" class="topbar-link" data-nav="ads">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        Ads
+      </button>
+      <button type="button" class="topbar-link" data-nav="comunidade">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Comunidade
+      </button>
+    </nav>
+    <span class="topbar-sync" id="topbar-sync" data-state="loading">Conectando à nuvem…</span>
+  </div>
+</header>
 <div class="app">
 
   <!-- Dashboard Inicial -->
@@ -271,7 +312,26 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A1B5" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.6" y2="16.6"/></svg>
         <input type="text" id="search" placeholder="Buscar por título ou série…" style="width: 100%; border: none; outline: none; background: transparent; font-size: 14px;" />
       </div>
-      
+
+      <!-- Filtro por formato do conteúdo (as contagens são do mês exibido) -->
+      <div class="format-filter" id="format-filter" role="group" aria-label="Filtrar por formato">
+        <button type="button" class="format-chip active" data-format="">
+          Todos <span class="format-count" data-count-for="">0</span>
+        </button>
+        <button type="button" class="format-chip" data-format="static">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          Estático <span class="format-count" data-count-for="static">0</span>
+        </button>
+        <button type="button" class="format-chip" data-format="carousel">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="14" height="14" rx="2"/><path d="M3 17V5a2 2 0 0 1 2-2h12"/></svg>
+          Carrossel <span class="format-count" data-count-for="carousel">0</span>
+        </button>
+        <button type="button" class="format-chip" data-format="reels">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="3"/><polygon points="10 9 15 12 10 15 10 9" fill="currentColor"/></svg>
+          Reels <span class="format-count" data-count-for="reels">0</span>
+        </button>
+      </div>
+
       <select id="filter-destiny" style="padding: 10px 12px; border-radius: 8px; border: 1px solid var(--hairline); background: #fff; font-size: 14px; min-width: 150px; color: var(--ink-soft); outline: none;">
         <option value="">Todos os Destinos</option>
         <option value="instagram">Instagram</option>
@@ -1469,24 +1529,29 @@
         <label>Formato da mídia</label>
         <select id="post-media-type" style="width: 100%; padding: 10px 12px; margin-bottom: 12px; border-radius: 8px; border: 1px solid #CBD5E1; background: #fff; font-size: 13px; font-weight: 700; color: #0F172A;">
           <option value="static">Imagem estática</option>
-          <option value="carousel">Carrossel de imagens</option>
+          <option value="reels">Capa de Reels</option>
+          <option value="carousel">Carrossel</option>
         </select>
         <div id="field-static-image">
         <div class="image-upload-box" id="image-upload-box">
           <input type="file" id="post-image-file" accept="image/*" class="hidden-file-input">
           <input type="hidden" id="post-image-data">
-          
+
           <div class="upload-placeholder" id="upload-placeholder">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-            <span>+ Clique para enviar imagem</span>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.9A7 7 0 1 1 15.7 8h1.8a4.5 4.5 0 0 1 2.5 8.2"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>
+            <strong id="upload-placeholder-title">Arraste a imagem para cá</strong>
+            <span>ou clique para escolher no computador</span>
+            <small>PNG, JPG, WEBP ou GIF</small>
           </div>
-          
+
           <img src="" id="upload-preview" class="hidden">
+          <img src="" id="upload-preview-backdrop" class="upload-preview-backdrop" alt="" aria-hidden="true">
           
           <a id="btn-download-image" class="hidden" href="#" download="imagem-post.png" onclick="event.stopPropagation();" style="position: absolute; top: 12px; right: 12px; background: rgba(255, 255, 255, 0.95); border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0,0,0,0.15); z-index: 10; cursor: pointer; color: #3B82F6; text-decoration: none; transition: transform 0.2s ease;" title="Baixar Imagem" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
           </a>
         </div>
+        <small class="reels-fit-hint" id="reels-fit-hint">A capa é encaixada automaticamente no formato do Reels (9:16), sem cortar a imagem.</small>
         <div style="margin-top: 8px; display: flex; align-items: center; gap: 8px;">
           <input type="url" id="post-image-url" placeholder="Ou cole o link do Google Drive / Canva / Web aqui..." style="flex: 1; padding: 9px 12px; border-radius: 6px; border: 1px solid #CBD5E1; font-size: 12.5px; box-sizing: border-box; outline: none;">
           <button type="button" id="btn-apply-image-url" style="padding: 9px 16px; font-size: 12px; font-weight: 700; background: #2563EB; color: #FFF; border-radius: 6px; white-space: nowrap; border: none; cursor: pointer; transition: background 0.2s;">Usar Link</button>
@@ -1497,28 +1562,28 @@
 
       <!-- CARROSSEL DE IMAGENS -->
       <div class="field" id="field-carousel" style="display: none;">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-          <label style="margin-bottom: 0;">
-            🎠 Imagens do carrossel
-            <span style="font-weight: 400; font-size: 11px; color: #94A3B8; margin-left: 4px;">(role para o lado para ver todos)</span>
-          </label>
-          <button type="button" id="btn-add-carousel-img" onclick="window.addCarouselImage()" style="padding: 6px 14px; background: #2563EB; color: #fff; border: none; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: background 0.2s;" onmouseover="this.style.background='#1D4ED8'" onmouseout="this.style.background='#2563EB'">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Imagem
-          </button>
+        <div class="carousel-field-head">
+          <label style="margin-bottom: 0;">Imagens do carrossel <span id="carousel-count-label" class="carousel-count-label"></span></label>
+          <span class="carousel-reorder-hint" id="carousel-reorder-hint">Arraste as miniaturas para mudar a ordem</span>
         </div>
 
-        <!-- Carrossel rolável horizontalmente -->
+        <!-- Pré-visualização grande do slide selecionado (aparece quando há imagens) -->
         <div id="carousel-track-wrapper" style="position: relative;">
-          <div id="carousel-track" style="display: flex; gap: 0; overflow-x: auto; padding: 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none; min-height: 130px; align-items: flex-start;">
-            <!-- Imagens renderizadas via JS -->
-            <div id="carousel-empty-hint" style="color: #94A3B8; font-size: 13px; font-style: italic; padding: 20px; text-align: center; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1.5px dashed #CBD5E1; border-radius: 10px; min-height: 100px;">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><circle cx="8.5" cy="15" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-              Clique em "Imagem" para montar o carrossel
-            </div>
+          <div id="carousel-track"></div>
+        </div>
+
+        <!-- Miniaturas: clique para ver, arraste para reordenar -->
+        <div id="carousel-thumbs" class="carousel-thumbs"></div>
+
+        <!-- Área para soltar várias imagens de uma vez -->
+        <div class="image-upload-box carousel-dropzone" id="carousel-dropzone">
+          <input type="file" id="carousel-file-input" accept="image/*" multiple class="hidden-file-input">
+          <div class="upload-placeholder">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="14" height="14" rx="2"/><path d="M3 17V5a2 2 0 0 1 2-2h12"/><path d="M14 11v6M11 14h6"/></svg>
+            <strong id="carousel-dropzone-title">Arraste as imagens do carrossel para cá</strong>
+            <span>ou clique para escolher — dá para selecionar várias de uma vez</span>
+            <small>PNG, JPG, WEBP ou GIF</small>
           </div>
-          <!-- Input file oculto para carousel -->
-          <input type="file" id="carousel-file-input" accept="image/*" multiple style="display:none">
         </div>
 
         <!-- Área para adicionar via link URL -->
@@ -2837,8 +2902,8 @@
 </div>
 
 
-<script src="app.js?v=95"></script>
-<script src="projects.js?v=14"></script>
+<script src="app.js?v=96"></script>
+<script src="projects.js?v=15"></script>
 <div id="toast-container" class="toast-container"></div>
 </body>
 </html>

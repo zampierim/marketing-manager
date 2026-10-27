@@ -9,8 +9,12 @@ document.addEventListener("DOMContentLoaded", () => {
   if (btnOpenProjetos) {
     btnOpenProjetos.addEventListener("click", () => {
       const openPage = () => {
-        document.querySelectorAll(".app > div[id^='page-']").forEach(p => p.classList.add("hidden"));
-        if (pageProjetos) pageProjetos.classList.remove("hidden");
+        if (typeof showPage === "function") {
+          showPage(pageProjetos);
+        } else {
+          document.querySelectorAll(".app > div[id^='page-']").forEach(p => p.classList.add("hidden"));
+          if (pageProjetos) pageProjetos.classList.remove("hidden");
+        }
         renderProjects();
         renderProcesses();
       };
