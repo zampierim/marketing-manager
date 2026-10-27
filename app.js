@@ -1155,6 +1155,10 @@ function createPostCard(post) {
   const format = getPostFormat(post);
   const hasImage = Boolean(getPostImage(post));
   const isReels = format === 'reels' && hasImage;
+  // A célula do calendário tem o mesmo formato 3:4 do card de enquadramento do formulário.
+  const showWholeCover = isReels && post.coverFit === 'contain';
+  const coverPosition = `${post.coverPositionX ?? 50}% ${post.coverPositionY ?? 50}%`;
+  const coverStyle = isReels ? ` style="object-position: ${coverPosition};"` : '';
   const cardTitle = (post.title || post.tag || '').replace(/^\s*\[(REELS|CARROSSEL)\]\s*/i, '');
   let formatBadge = '';
   if (format === 'reels') {
@@ -1176,11 +1180,11 @@ function createPostCard(post) {
       </div>
     `;
   } else {
-    // Capa de Reels: aparece inteira no formato 9:16, com a própria imagem desfocada preenchendo as laterais.
+    // Capa de Reels: segue o enquadramento escolhido no formulário (preencher ou mostrar inteira + posição).
     cardHTML = `
-      <div class="post-card-image${isReels ? ' is-reels' : ''}">
-        ${isReels ? `<img class="reels-backdrop" src="${imgUrl}" alt="" aria-hidden="true">` : ''}
-        <img src="${imgUrl}" alt="${post.tag}">
+      <div class="post-card-image${showWholeCover ? ' is-contain' : ''}">
+        ${showWholeCover ? `<img class="reels-backdrop" src="${imgUrl}" alt="" aria-hidden="true"${coverStyle}>` : ''}
+        <img src="${imgUrl}" alt="${post.tag}"${coverStyle}>
         <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.0) 35%, rgba(0,0,0,0.85) 100%); pointer-events: none; border-radius: 8px;"></div>
         <h4 style="position: absolute; bottom: 26px; left: 6px; right: 6px; color: #FFF; font-size: 12px; font-weight: 700; text-align: left; margin: 0; z-index: 2; text-shadow: 0 1px 3px rgba(0,0,0,0.9); line-height: 1.25; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">${cardTitle}</h4>
 
@@ -1566,11 +1570,13 @@ function openModal(post = null, prefilledDate = "", prefilledIdeaId = "", prefil
     document.getElementById("post-author").required = !isInternal;
 
     if(window.loadCarouselForPost) window.loadCarouselForPost(post);
+    loadReelsFraming(post);
   } else {
     document.getElementById("modal-title").textContent = "Novo Criativo";
     setModalLockState(false);
     document.getElementById("post-id").value = "";
     if(window.loadCarouselForPost) window.loadCarouselForPost(null);
+    loadReelsFraming(null);
     document.getElementById("post-image-data").value = "";
     document.getElementById("post-image-file").value = "";
     const inputImageUrl = document.getElementById("post-image-url");
@@ -1829,6 +1835,9 @@ form.addEventListener("submit", async (e) => {
     topic: topicEl ? topicEl.value : "",
     mediaType: document.getElementById("post-media-type")?.value || "static",
     image: document.getElementById("post-image-data").value,
+    coverFit: document.getElementById("post-cover-fit").value === "contain" ? "contain" : "cover",
+    coverPositionX: Number(document.getElementById("post-cover-x").value),
+    coverPositionY: Number(document.getElementById("post-cover-y").value),
     briefing: document.getElementById("post-briefing") ? document.getElementById("post-briefing").value : "",
     caption: document.getElementById("post-caption").value,
     destiny: primaryDestiny, // backward compat — primary destiny
@@ -2038,14 +2047,44 @@ function resetUploadPlaceholderTitle() {
   title.textContent = isReels ? "Arraste a capa do Reels para cá" : "Arraste a imagem para cá";
 }
 
-// No formato Reels a mesma imagem, desfocada, preenche as laterais da moldura 9:16.
+// No formato Reels, "Mostrar imagem inteira" usa a mesma imagem desfocada para preencher as sobras do card.
+// O painel de enquadramento só aparece quando já existe uma capa.
 const uploadPreviewEl = document.getElementById("upload-preview");
 const uploadBackdropEl = document.getElementById("upload-preview-backdrop");
 if (uploadPreviewEl && uploadBackdropEl) {
   new MutationObserver(() => {
     uploadBackdropEl.src = uploadPreviewEl.getAttribute("src") || "";
-  }).observe(uploadPreviewEl, { attributes: true, attributeFilter: ["src"] });
+    const hasCover = Boolean(uploadPreviewEl.getAttribute("src")) && !uploadPreviewEl.classList.contains("hidden");
+    document.getElementById("field-static-image")?.classList.toggle("has-cover", hasCover);
+  }).observe(uploadPreviewEl, { attributes: true, attributeFilter: ["src", "class"] });
 }
+
+// Enquadramento da capa do Reels: preencher ou mostrar inteira, e a posição da imagem no card.
+function applyReelsFraming() {
+  const fit = document.getElementById("post-cover-fit").value === "contain" ? "contain" : "cover";
+  const position = `${document.getElementById("post-cover-x").value}% ${document.getElementById("post-cover-y").value}%`;
+  document.getElementById("image-upload-box")?.classList.toggle("fit-contain", fit === "contain");
+  if (uploadPreviewEl) uploadPreviewEl.style.objectPosition = position;
+  if (uploadBackdropEl) uploadBackdropEl.style.objectPosition = position;
+  document.querySelectorAll(".reels-fit-btn").forEach(btn => btn.classList.toggle("active", btn.dataset.fit === fit));
+}
+
+function loadReelsFraming(post) {
+  document.getElementById("post-cover-fit").value = post && post.coverFit === "contain" ? "contain" : "cover";
+  document.getElementById("post-cover-x").value = post && post.coverPositionX != null ? post.coverPositionX : 50;
+  document.getElementById("post-cover-y").value = post && post.coverPositionY != null ? post.coverPositionY : 50;
+  applyReelsFraming();
+}
+
+document.querySelectorAll(".reels-fit-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.getElementById("post-cover-fit").value = btn.dataset.fit;
+    applyReelsFraming();
+  });
+});
+["post-cover-x", "post-cover-y"].forEach(id => {
+  document.getElementById(id)?.addEventListener("input", applyReelsFraming);
+});
 
 // Destaca a área de upload enquanto um arquivo é arrastado por cima dela.
 document.querySelectorAll(".image-upload-box").forEach(box => {

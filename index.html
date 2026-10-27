@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Roboto:wght@400;500;700&family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=7">
+  <link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
 <!-- Menu superior: fica sempre visível e cada item vira uma entrada no histórico do navegador -->
@@ -1551,7 +1551,21 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
           </a>
         </div>
-        <small class="reels-fit-hint" id="reels-fit-hint">A capa é encaixada automaticamente no formato do Reels (9:16), sem cortar a imagem.</small>
+        <!-- Enquadramento da capa do Reels: o card do calendário mostra exatamente este recorte -->
+        <div class="reels-framing" id="reels-framing">
+          <span class="reels-framing-title">Enquadramento da capa</span>
+          <input type="hidden" id="post-cover-fit" value="cover">
+          <div class="reels-fit-options">
+            <button type="button" class="reels-fit-btn active" data-fit="cover">Preencher o card</button>
+            <button type="button" class="reels-fit-btn" data-fit="contain">Mostrar imagem inteira</button>
+          </div>
+          <label class="reels-range">Posição horizontal
+            <input type="range" id="post-cover-x" min="0" max="100" value="50">
+          </label>
+          <label class="reels-range">Posição vertical
+            <input type="range" id="post-cover-y" min="0" max="100" value="50">
+          </label>
+        </div>
         <div style="margin-top: 8px; display: flex; align-items: center; gap: 8px;">
           <input type="url" id="post-image-url" placeholder="Ou cole o link do Google Drive / Canva / Web aqui..." style="flex: 1; padding: 9px 12px; border-radius: 6px; border: 1px solid #CBD5E1; font-size: 12.5px; box-sizing: border-box; outline: none;">
           <button type="button" id="btn-apply-image-url" style="padding: 9px 16px; font-size: 12px; font-weight: 700; background: #2563EB; color: #FFF; border-radius: 6px; white-space: nowrap; border: none; cursor: pointer; transition: background 0.2s;">Usar Link</button>
@@ -2902,7 +2916,7 @@
 </div>
 
 
-<script src="app.js?v=96"></script>
+<script src="app.js?v=97"></script>
 <script src="projects.js?v=15"></script>
 <div id="toast-container" class="toast-container"></div>
 </body>

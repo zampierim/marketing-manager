@@ -652,9 +652,9 @@ img { max-width: 100%; display: block; }
 }
 .calendar-day:hover .post-card-image img { transform: scale(1.05); }
 
-/* Capa de Reels: imagem inteira em 9:16, laterais preenchidas pela própria capa desfocada */
-.post-card-image.is-reels { background: #0F172A; }
-.post-card-image.is-reels img:not(.reels-backdrop) {
+/* Capa de Reels em "Mostrar imagem inteira": sobras preenchidas pela própria capa desfocada */
+.post-card-image.is-contain { background: #0F172A; }
+.post-card-image.is-contain img:not(.reels-backdrop) {
   position: absolute;
   inset: 0;
   object-fit: contain;
@@ -1136,12 +1136,13 @@ img { max-width: 100%; display: block; }
   background: var(--primary-soft);
 }
 
-/* Capa de Reels: moldura 9:16 com a capa inteira e a própria imagem desfocada nas laterais */
+/* Capa de Reels: card 3:4 (o mesmo formato da célula do calendário), com enquadramento ajustável */
 .image-upload-box.is-reels {
-  width: min(100%, 270px);
-  aspect-ratio: 9 / 16;
+  width: min(100%, 360px);
+  aspect-ratio: 3 / 4;
   min-height: 0;
   margin: 0 auto;
+  border-radius: 16px;
   background: #0F172A;
 }
 .image-upload-box.is-reels .upload-placeholder { color: #CBD5E1; }
@@ -1151,10 +1152,11 @@ img { max-width: 100%; display: block; }
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
 }
+.image-upload-box.is-reels.fit-contain #upload-preview { object-fit: contain; }
 .image-upload-box img.upload-preview-backdrop { display: none; }
-.image-upload-box.is-reels #upload-preview:not(.hidden) ~ img.upload-preview-backdrop {
+.image-upload-box.is-reels.fit-contain #upload-preview:not(.hidden) ~ img.upload-preview-backdrop {
   display: block;
   position: absolute;
   inset: 0;
@@ -1165,8 +1167,40 @@ img { max-width: 100%; display: block; }
   transform: scale(1.25);
   z-index: 0;
 }
-.reels-fit-hint { display: none; margin-top: 8px; text-align: center; font-size: 11px; color: #64748B; }
-.is-reels-field .reels-fit-hint { display: block; }
+
+.reels-framing {
+  display: none;
+  margin-top: 12px;
+  padding: 16px;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  background: var(--bg);
+}
+.is-reels-field.has-cover .reels-framing { display: block; }
+.is-reels-field.has-cover .image-upload-box.is-reels { border-color: transparent; box-shadow: var(--shadow-sm); }
+.reels-framing-title { display: block; margin-bottom: 12px; font-size: 13px; font-weight: 600; color: var(--ink); }
+.reels-fit-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.reels-fit-btn {
+  padding: 9px 10px;
+  border: 1px solid #CBD5E1;
+  border-radius: 12px;
+  background: #FFFFFF;
+  color: #64748B;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.reels-fit-btn.active { border-color: var(--primary); background: var(--primary-soft); color: var(--ink); }
+.field .reels-range {
+  display: block;
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #526173;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.reels-range input[type="range"] { display: block; width: 100%; margin-top: 6px; accent-color: var(--primary); }
 
 /* Carrossel: pré-visualização, miniaturas e área para soltar imagens */
 .carousel-field-head {
