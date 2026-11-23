@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=14">
+  <link rel="stylesheet" href="style.css?v=15">
 </head>
 <body>
 <!-- Menu superior: fica sempre visível e cada item vira uma entrada no histórico do navegador -->
@@ -1128,6 +1128,10 @@
         <div class="carousel-field-head">
           <label style="margin-bottom: 0;">Imagens do carrossel <span id="carousel-count-label" class="carousel-count-label"></span></label>
           <span class="carousel-reorder-hint" id="carousel-reorder-hint">Arraste as miniaturas para mudar a ordem</span>
+          <button type="button" class="carousel-download-all" id="carousel-download-all" onclick="window.downloadAllCarousel()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Baixar todas
+          </button>
         </div>
 
         <!-- Pré-visualização grande do slide selecionado (aparece quando há imagens) -->
@@ -2450,9 +2454,10 @@
 </div>
 
 
-<script src="app.js?v=103"></script>
+<script src="app.js?v=104"></script>
 <script src="projects.js?v=15"></script>
 <script src="ads.js?v=1"></script>
+<script src="image-files.js?v=2"></script>
 <div id="toast-container" class="toast-container"></div>
 </body>
 </html>

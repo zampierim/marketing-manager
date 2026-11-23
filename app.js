@@ -80,14 +80,18 @@ function setModalLockState(isLocked) {
 window.setModalLockState = setModalLockState;
 
 
-window.openLightbox = function(src) {
+// onDownload (opcional): baixa o arquivo original em vez da imagem mostrada.
+window.openLightbox = function(src, onDownload) {
   if (!src) return;
   const lb = document.getElementById("image-lightbox");
   const img = document.getElementById("lightbox-img");
   const dl = document.getElementById("lightbox-download");
   if (lb && img) {
     img.src = src;
-    if (dl) dl.href = src;
+    if (dl) {
+      dl.href = src;
+      dl.onclick = onDownload ? (e) => { e.preventDefault(); onDownload(); } : null;
+    }
     lb.classList.remove("hidden");
   }
 };
@@ -1751,8 +1755,12 @@ if(btnDelete) {
     if(idVal) {
       if(confirm("Tem certeza que deseja excluir esta publicação?")) {
         const idInt = parseInt(idVal);
+        const deletedPost = posts.find(p => p.id === idInt);
         posts = posts.filter(p => p.id !== idInt);
         deletePostFromCloud(idInt);
+        if (deletedPost && window.ImageFiles) {
+          window.ImageFiles.removeUnused([deletedPost.imageFile, ...(deletedPost.carouselFiles || [])], []);
+        }
         closeModal();
         renderCalendar();
         renderList();
@@ -1840,6 +1848,20 @@ form.addEventListener("submit", async (e) => {
       newPost.carousel = [];
       document.getElementById("post-carousel-data").value = '[]';
     }
+
+    // Originais em alta qualidade, guardados à parte só para download (image-files.js).
+    // Cada item é um File ainda não enviado ou o id de um original já salvo.
+    const saveOriginal = (item) => (item instanceof Blob ? window.ImageFiles.save(item, idInt) : Promise.resolve(item || null));
+    if (newPost.mediaType === 'carousel') {
+      const files = window.currentCarouselFiles || [];
+      newPost.carouselFiles = await Promise.all((window.currentCarousel || []).map((_, index) => saveOriginal(files[index])));
+      window.currentCarouselFiles = [...newPost.carouselFiles];
+      newPost.imageFile = newPost.carouselFiles[0] || null;
+    } else {
+      newPost.carouselFiles = [];
+      newPost.imageFile = await saveOriginal(window.staticOriginal);
+      window.staticOriginal = newPost.imageFile;
+    }
   } catch (error) {
     console.error("Erro ao enviar imagens do carrossel:", error);
     if (typeof showToast === 'function') {
@@ -1870,6 +1892,14 @@ form.addEventListener("submit", async (e) => {
     }
     isSavingPost = false;
     return;
+  }
+
+  // Originais trocados ou removidos deixam de ocupar espaço no banco.
+  if (window.ImageFiles) {
+    window.ImageFiles.removeUnused(
+      [originalPost.imageFile, ...(originalPost.carouselFiles || [])],
+      [newPost.imageFile, ...(newPost.carouselFiles || [])]
+    );
   }
 
   // O snapshot do Firebase pode chegar antes desta linha. Sempre faz upsert
@@ -1957,6 +1987,9 @@ document.getElementById("post-image-file").addEventListener("change", async func
         btnDownload.classList.remove("hidden");
       }
 
+      // A versão leve acima é a do calendário; o arquivo original vai para o download em alta.
+      window.staticOriginal = file;
+
       if (typeof showToast === 'function') showToast('✅ Imagem pronta! Clique em Salvar.', 'success');
 
     } catch (err) {
@@ -1966,12 +1999,25 @@ document.getElementById("post-image-file").addEventListener("change", async func
     resetUploadPlaceholderTitle();
   } else {
     document.getElementById("post-image-data").value = "";
+    window.staticOriginal = null;
     preview.src = "";
     preview.classList.add("hidden");
     placeholder.classList.remove("hidden");
     resetUploadPlaceholderTitle();
     if (btnDownload) btnDownload.classList.add("hidden");
   }
+});
+
+// Baixar do formulário entrega o arquivo original (ou a imagem salva, em posts antigos).
+document.getElementById("btn-download-image")?.addEventListener("click", (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  const original = window.staticOriginal;
+  const fallbackUrl = document.getElementById("post-image-data").value;
+  window.ImageFiles.download(
+    original instanceof Blob ? original : { fileId: typeof original === "string" ? original : null, fallbackUrl },
+    "imagem-post.jpg"
+  );
 });
 
 function resetUploadPlaceholderTitle() {
@@ -2068,8 +2114,9 @@ if (btnApplyImageUrl && inputImageUrl) {
     const rawUrl = inputImageUrl.value.trim();
     if (!rawUrl) return;
     const finalUrl = convertGoogleDriveUrl(rawUrl);
-    
+
     document.getElementById("post-image-data").value = finalUrl;
+    window.staticOriginal = null; // com link, o original é o próprio arquivo no Drive/Canva
     const preview = document.getElementById("upload-preview");
     const placeholder = document.getElementById("upload-placeholder");
     const btnDownload = document.getElementById("btn-download-image");
@@ -8998,6 +9045,10 @@ window.closeCollabModal = function() {
 
 // --- CAROUSEL LOGIC ---
 window.currentCarousel = [];
+// Original em alta de cada slide, na mesma ordem de currentCarousel: File ainda não enviado,
+// id de um original já salvo (image-files.js) ou null quando não há original.
+window.currentCarouselFiles = [];
+window.staticOriginal = null; // o mesmo, para a imagem estática / capa de Reels
 window.carouselFileJobs = [];
 window.carouselActiveIndex = 0;
 const carouselImageCache = {};
@@ -9006,12 +9057,19 @@ window.loadCarouselForPost = async function(post) {
   const mediaType = getPostFormat(post) || 'static';
   const mediaTypeSelect = document.getElementById('post-media-type');
   if (mediaTypeSelect) mediaTypeSelect.value = mediaType;
+  window.staticOriginal = post ? (post.imageFile || null) : null;
 
   if (post && mediaType === 'carousel') {
     const mainImage = getPostImage(post);
-    window.currentCarousel = [mainImage, ...(post.carousel || [])].filter(Boolean);
+    const files = post.carouselFiles || [];
+    const slides = [mainImage, ...(post.carousel || [])]
+      .map((image, index) => ({ image, file: files[index] || null }))
+      .filter(slide => Boolean(slide.image));
+    window.currentCarousel = slides.map(slide => slide.image);
+    window.currentCarouselFiles = slides.map(slide => slide.file);
   } else {
     window.currentCarousel = [];
+    window.currentCarouselFiles = [];
   }
   window.carouselActiveIndex = 0;
   document.getElementById("post-carousel-data").value = JSON.stringify(window.currentCarousel);
@@ -9049,11 +9107,15 @@ window.setPostMediaType = function(mediaType, transferImage = true) {
 
   if (transferImage && isCarousel && window.currentCarousel.length === 0) {
     const mainImage = document.getElementById('post-image-data')?.value;
-    if (mainImage) window.currentCarousel.push(mainImage);
+    if (mainImage) {
+      window.currentCarousel.push(mainImage);
+      window.currentCarouselFiles = [window.staticOriginal || null];
+    }
   }
 
   if (transferImage && !isCarousel && window.currentCarousel.length > 0) {
     const firstImage = window.currentCarousel[0];
+    window.staticOriginal = (window.currentCarouselFiles || [])[0] || null;
     const imageData = document.getElementById('post-image-data');
     const preview = document.getElementById('upload-preview');
     const placeholder = document.getElementById('upload-placeholder');
@@ -9081,7 +9143,7 @@ window.renderCarouselUI = function() {
   if (!track || !dataInput) return;
 
   const wrapper = document.getElementById("carousel-track-wrapper");
-  wrapper?.querySelectorAll('.carousel-nav, .carousel-counter').forEach(el => el.remove());
+  wrapper?.querySelectorAll('.carousel-nav, .carousel-counter, .carousel-download').forEach(el => el.remove());
 
   dataInput.value = JSON.stringify(window.currentCarousel);
   const total = window.currentCarousel.length;
@@ -9091,6 +9153,8 @@ window.renderCarouselUI = function() {
   if (countLabel) countLabel.textContent = total ? `(${total})` : "";
   const reorderHint = document.getElementById("carousel-reorder-hint");
   if (reorderHint) reorderHint.style.display = total > 1 ? "" : "none";
+  const downloadAll = document.getElementById("carousel-download-all");
+  if (downloadAll) downloadAll.style.display = total > 0 ? "" : "none";
   document.getElementById("carousel-dropzone")?.classList.toggle("is-compact", total > 0);
   const dropzoneTitle = document.getElementById("carousel-dropzone-title");
   if (dropzoneTitle) {
@@ -9120,7 +9184,7 @@ window.renderCarouselUI = function() {
     img.style.objectFit = "initial";
     img.style.display = "block";
     img.style.cursor = "zoom-in";
-    img.onclick = () => window.openLightbox(img.src);
+    img.onclick = () => window.openLightbox(img.src, () => window.downloadCarouselSlide(index));
 
     item.appendChild(img);
     track.appendChild(item);
@@ -9145,7 +9209,14 @@ window.renderCarouselUI = function() {
 
     const counter = document.createElement('div');
     counter.className = 'carousel-counter';
-    wrapper.append(previous, next, counter);
+
+    const download = document.createElement('button');
+    download.type = 'button';
+    download.className = 'carousel-download';
+    download.title = 'Baixar esta imagem em alta qualidade';
+    download.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Baixar';
+    download.onclick = () => window.downloadCarouselSlide(window.carouselActiveIndex);
+    wrapper.append(previous, next, counter, download);
 
     const showActive = (activeIndex) => {
       counter.textContent = `${activeIndex + 1} / ${total}`;
@@ -9223,6 +9294,8 @@ function renderCarouselThumbs() {
       e.preventDefault();
       const [moved] = window.currentCarousel.splice(carouselDragIndex, 1);
       window.currentCarousel.splice(index, 0, moved);
+      const [movedFile] = window.currentCarouselFiles.splice(carouselDragIndex, 1);
+      window.currentCarouselFiles.splice(index, 0, movedFile ?? null);
       carouselDragIndex = null;
       window.carouselActiveIndex = index;
       window.renderCarouselUI();
@@ -9244,7 +9317,26 @@ window.goToCarouselSlide = function(index) {
 
 window.removeCarouselImage = function(index) {
   window.currentCarousel.splice(index, 1);
+  window.currentCarouselFiles.splice(index, 1);
   window.renderCarouselUI();
+};
+
+// Baixa o original em alta de um slide (ou a versão salva, em carrosséis antigos).
+window.downloadCarouselSlide = function(index) {
+  const original = window.currentCarouselFiles[index];
+  const fallbackUrl = resolveCarouselImage(window.currentCarousel[index]);
+  return window.ImageFiles.download(
+    original instanceof Blob ? original : { fileId: typeof original === 'string' ? original : null, fallbackUrl },
+    `carrossel-${index + 1}.jpg`
+  );
+};
+
+window.downloadAllCarousel = async function() {
+  for (let index = 0; index < window.currentCarousel.length; index++) {
+    await window.downloadCarouselSlide(index);
+    // Pequena pausa para o navegador aceitar vários downloads seguidos.
+    await new Promise(resolve => setTimeout(resolve, 500));
+  }
 };
 
 window.addCarouselUrl = function() {
@@ -9252,6 +9344,7 @@ window.addCarouselUrl = function() {
   const url = urlInput.value.trim();
   if (url) {
     window.currentCarousel.push(convertGoogleDriveUrl(url));
+    window.currentCarouselFiles.push(null); // com link, o original é o próprio arquivo de origem
     window.carouselActiveIndex = window.currentCarousel.length - 1;
     urlInput.value = "";
     window.renderCarouselUI();
@@ -9300,14 +9393,18 @@ window.addCarouselFiles = async function(fileList) {
   // Salvar esperar por ele e nenhuma imagem ficar de fora.
   const batch = (async () => {
     const results = await Promise.allSettled(files.map(prepareCarouselImage));
-    const ready = results.filter(r => r.status === 'fulfilled').map(r => r.value);
+    // A versão leve vai para a pré-visualização; o arquivo original fica guardado para o download em alta.
+    const ready = results
+      .map((result, index) => ({ result, file: files[index] }))
+      .filter(item => item.result.status === 'fulfilled');
     if (ready.length < files.length) {
       console.error('Erro ao preparar imagem do carrossel:', results.filter(r => r.status === 'rejected').map(r => r.reason));
       if (typeof showToast === 'function') showToast('Uma das imagens não pôde ser processada.', 'error');
     }
     if (ready.length > 0) {
       window.carouselActiveIndex = window.currentCarousel.length;
-      window.currentCarousel.push(...ready);
+      window.currentCarousel.push(...ready.map(item => item.result.value));
+      window.currentCarouselFiles.push(...ready.map(item => item.file));
     }
     window.renderCarouselUI();
   })();
