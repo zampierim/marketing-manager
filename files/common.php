@@ -1,6 +1,6 @@
 <?php
 // Imagens originais dos criativos, guardadas na hospedagem da Hostinger.
-// Os arquivos ficam numa pasta FORA da pasta pública do subdomínio (marketing-uploads),
+// Os arquivos ficam numa pasta FORA do public_html (marketing-uploads, ao lado dele),
 // então não dá para abrir nem listar pelo navegador: só saem pelo download.php.
 
 const MAX_BYTES = 40 * 1024 * 1024; // 40 MB por imagem
@@ -21,8 +21,14 @@ const FILE_ID_PATTERN = '#^\d{4}/\d{2}/[a-f0-9]{24}\.(png|jpg|webp|gif)$#';
 
 function storage_dir(): string
 {
-    // Pasta irmã da pasta pública do subdomínio.
-    $dir = dirname(__DIR__, 2) . '/marketing-uploads';
+    // O subdomínio fica em public_html/marketing, dentro do site principal: sobe até o
+    // public_html e guarda ao lado dele, fora de qualquer endereço público.
+    $probe = __DIR__;
+    while (basename($probe) !== 'public_html' && dirname($probe) !== $probe) {
+        $probe = dirname($probe);
+    }
+    $root = basename($probe) === 'public_html' ? dirname($probe) : dirname(__DIR__, 2);
+    $dir = $root . '/marketing-uploads';
     if (!is_dir($dir)) {
         mkdir($dir, 0750, true);
     }
